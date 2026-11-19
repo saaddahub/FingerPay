@@ -40,6 +40,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Build shared contracts
+        run: pnpm --filter @fingerpay/contracts build
+
       - name: Typecheck
         run: pnpm typecheck
 

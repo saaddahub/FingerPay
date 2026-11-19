@@ -33,7 +33,7 @@ export const auditEventRowSchema = z.strictObject({
   action: z.string(),
   entity: z.string(),
   entityId: z.string(),
-  details: z.record(z.unknown()),
+  details: z.record(z.string(), z.unknown()),
   prevHash: z.string(),
   rowHash: z.string(),
 });

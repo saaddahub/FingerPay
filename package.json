@@ -21,6 +21,11 @@
     "db:bootstrap:supabase": "corepack pnpm --filter @fingerpay/backend db:bootstrap:supabase",
     "seed:demo": "corepack pnpm --filter @fingerpay/backend seed:demo"
   },
+  "pnpm": {
+    "overrides": {
+      "next>postcss": "^8.5.33"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "@fingerpay/tsconfig": "workspace:*",
