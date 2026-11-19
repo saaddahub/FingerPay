@@ -1,0 +1,10 @@
+{
+  "name": "@fingerpay/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "files": ["base.json", "node.json"],
+  "exports": {
+    "./base.json": "./base.json",
+    "./node.json": "./node.json"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "fingerpay",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "corepack pnpm --parallel --filter @fingerpay/backend --filter @fingerpay/frontend dev",
+    "build": "corepack pnpm -r build",
+    "typecheck": "corepack pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "corepack pnpm -r test",
+    "test:security": "corepack pnpm --filter @fingerpay/backend test:security",
+    "test:integration": "corepack pnpm --filter @fingerpay/backend test:integration",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "corepack pnpm --filter @fingerpay/backend db:migrate",
+    "db:status": "corepack pnpm --filter @fingerpay/backend db:status",
+    "seed:demo": "corepack pnpm --filter @fingerpay/backend seed:demo"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@fingerpay/tsconfig": "workspace:*",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0"
+  }
+}
