@@ -13,12 +13,29 @@ export interface DbHandle {
   close: () => Promise<void>;
 }
 
+/**
+ * Enables TLS for remote managed Postgres hosts (such as Supabase) while keeping
+ * loopback dev connections plaintext.
+ */
+export function resolvePgSsl(connectionString: string): pg.ConnectionConfig['ssl'] {
+  const isLocal =
+    connectionString.includes('127.0.0.1') ||
+    connectionString.includes('localhost') ||
+    connectionString.includes('::1');
+  if (isLocal && !connectionString.includes('sslmode=require')) {
+    return undefined;
+  }
+  return { rejectUnauthorized: false };
+}
+
 export function createDb(opts: CreateDbOptions): DbHandle {
+  const ssl = resolvePgSsl(opts.connectionString);
   const pool = new pg.Pool({
     connectionString: opts.connectionString,
+    ...(ssl ? { ssl } : {}),
     max: opts.maxConnections ?? 20,
     idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 5_000,
+    connectionTimeoutMillis: 8_000,
     application_name: 'fingerpay-backend',
   });
 

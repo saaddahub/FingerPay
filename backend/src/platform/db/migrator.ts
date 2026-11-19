@@ -2,6 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import { resolvePgSsl } from './kysely.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_MIGRATIONS_DIR = resolve(__dirname, '../../../db/migrations');
@@ -64,7 +65,11 @@ export async function runMigrationsUp(
   migrationsDir: string = DEFAULT_MIGRATIONS_DIR,
 ): Promise<string[]> {
   const files = await loadMigrationFiles(migrationsDir);
-  const client = new pg.Client({ connectionString: ownerConnectionString });
+  const ssl = resolvePgSsl(ownerConnectionString);
+  const client = new pg.Client({
+    connectionString: ownerConnectionString,
+    ...(ssl ? { ssl } : {}),
+  });
   await client.connect();
   const appliedNow: string[] = [];
   try {
@@ -101,7 +106,11 @@ export async function runMigrationDown(
 ): Promise<string | null> {
   const files = await loadMigrationFiles(migrationsDir);
   const byVersion = new Map(files.map((f) => [f.version, f]));
-  const client = new pg.Client({ connectionString: ownerConnectionString });
+  const ssl = resolvePgSsl(ownerConnectionString);
+  const client = new pg.Client({
+    connectionString: ownerConnectionString,
+    ...(ssl ? { ssl } : {}),
+  });
   await client.connect();
   try {
     await ensureMigrationsTable(client);

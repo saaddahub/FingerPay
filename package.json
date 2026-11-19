@@ -18,6 +18,7 @@
     "db:down": "docker compose down",
     "db:migrate": "corepack pnpm --filter @fingerpay/backend db:migrate",
     "db:status": "corepack pnpm --filter @fingerpay/backend db:status",
+    "db:bootstrap:supabase": "corepack pnpm --filter @fingerpay/backend db:bootstrap:supabase",
     "seed:demo": "corepack pnpm --filter @fingerpay/backend seed:demo"
   },
   "devDependencies": {

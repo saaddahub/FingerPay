@@ -12,6 +12,7 @@
     "db:migrate": "tsx src/scripts/migrate.ts up",
     "db:rollback": "tsx src/scripts/migrate.ts down",
     "db:status": "tsx src/scripts/migrate.ts status",
+    "db:bootstrap:supabase": "tsx src/scripts/bootstrap-supabase.ts",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --dir test/unit",
