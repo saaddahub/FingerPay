@@ -110,7 +110,7 @@ try {
     // post_journal is idempotent on its key + payload, so re-running returns the original journals.
     const journal = (kind: string, key: string, memo: string, to: string, amount: string) =>
       tx`select fp.post_journal(${kind}, ${key}, 'seed', ${memo},
-        ${JSON.stringify([{ account_id: equity, amount: "-" + amount }, { account_id: to, amount }])}::jsonb)`;
+        ${tx.json([{ account_id: equity, amount: "-" + amount }, { account_id: to, amount }])})`;
     await journal("POOL_FUNDING", "seed:marketing-pool", "Marketing pool funding (simulation)", await account("MARKETING_POOL"), "100000.00");
     await journal("OPENING_BALANCE", "seed:rasheed-opening", "Opening balance (simulation)", await account("MERCHANT"), "18450.00");
     await tx`insert into fp.merchant_monthly_stats(merchant_id, month, tx_count)
