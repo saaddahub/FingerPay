@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FingerPay: pay with your thumb (design comp v1)</title>
+<meta name="description" content="Design comp for the FingerPay landing page. Not production code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Martian+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+<!--
+  DESIGN COMP, not app code. Built because the Figma MCP Starter-plan limit was reached.
+  Values map to the Astryx "fingerpay" theme at build time (TYPE-AND-COLOR.md §3); raw values live here only.
+  Art: public/art/*.webp. Copy: docs/design/CONTENT.md (eyebrows dropped: impeccable craft floor bans them).
+-->
+<style>
+:root{
+  --paper:#EFE9DE; --surface:#F6F2EB; --popover:#FAF7F3;
+  --ink:#1C1C1F; --ink-2:#4C4741; --ink-3:#615B54; --rule:rgb(28 28 31 / .14);
+  --accent:#295E90; --settled:#1B683E; --declined:#5E5A55; --turmeric:#E2A93B; --turmeric-text:#81561E;
+  --chai:#C9A27A; --kraft:#D8BF98;
+  --display:"League Gothic", "Big Shoulders Display", sans-serif;
+  --text:"Switzer", system-ui, sans-serif;
+  --mono:"Martian Mono", ui-monospace, monospace;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px; --s10:128px;
+  --cut: drop-shadow(0 1px 1.5px rgb(28 28 31 / .22)) drop-shadow(0 12px 18px rgb(76 71 65 / .20));
+  --ease-out: cubic-bezier(.23,1,.32,1);
+  --gutter: clamp(16px, 4vw, 32px);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .1 0 0 0 0 .09 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{background:var(--paper) var(--grain);color:var(--ink);font:400 1.0625rem/1.6 var(--text);overflow-x:hidden}
+::selection{background:var(--ink);color:var(--paper)}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.22em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1440px;margin:0 auto;padding:0 var(--gutter)}
+.skip{position:absolute;left:var(--s4);top:-60px;background:var(--ink);color:var(--paper);padding:var(--s2) var(--s4);z-index:20}
+.skip:focus{top:var(--s2)}
+h1,h2,.display{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.005em;line-height:.9;text-wrap:balance}
+h2{font-size:clamp(3rem,6.2vw,5.75rem)}
+h3{font:600 1.0625rem/1.35 var(--text)}
+p{text-wrap:pretty;max-width:62ch}
+.lead{font-size:1.25rem;line-height:1.5;color:var(--ink)}
+.meta{font-size:.875rem;color:var(--ink-3)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cutout{filter:var(--cut)}
+section{position:relative}
+
+/* torn paper, edges drawn by script below (seeded so they never move) */
+.torn{background:var(--popover) var(--grain);filter:drop-shadow(0 1px 1px rgb(28 28 31 / .18)) drop-shadow(0 6px 10px rgb(76 71 65 / .14))}
+.torn.kraft{background-color:var(--kraft)}
+.torn.ink{background-color:var(--ink);color:var(--paper)}
+.label{display:inline-block;font:600 .8125rem/1 var(--text);letter-spacing:.06em;text-transform:uppercase;padding:var(--s2) var(--s4) var(--s2) var(--s3)}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:10;background:rgb(239 233 222 / .86);backdrop-filter:blur(10px) saturate(140%);border-bottom:1px solid transparent}
+.nav .wrap{display:flex;align-items:center;gap:var(--s6);height:56px}
+.brand{display:flex;align-items:center;gap:var(--s2);text-decoration:none}
+.brand svg{width:26px;height:26px;color:var(--ink)}
+.brand img{height:20px;width:auto}
+.nav ul{display:flex;gap:var(--s5);list-style:none;padding:0;margin-left:auto;font-size:.9375rem;font-weight:500}
+.nav ul a{text-decoration:none;padding:var(--s3) 0}
+.nav ul a:hover{text-decoration:underline}
+.tag{font-size:.8125rem;color:var(--ink-2);text-decoration:none;border:1px solid var(--rule);border-radius:999px;padding:var(--s1) var(--s3)}
+.pause{font:500 .8125rem/1 var(--text);background:none;border:0;color:var(--ink-2);display:flex;align-items:center;gap:var(--s2);cursor:pointer;min-height:44px}
+.pause svg{width:14px;height:14px}
+
+/* HERO */
+.hero{padding-top:var(--s7)}
+.hero-head{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:end;position:relative;z-index:3}
+.hero-head{align-items:start}
+.hero h1{grid-column:1 / -1;grid-row:1;font-size:clamp(4rem,8.4vw,7.5rem);line-height:.86}
+.hero h1 .indent{display:block}
+.hero-copy{grid-column:9 / span 4;grid-row:1;padding-top:var(--s2)}
+.hero-copy .lead{font-size:1.125rem}
+.hero-copy .lead{margin-bottom:var(--s4)}
+.links{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);font-weight:500;margin-bottom:var(--s4)}
+.scene{position:relative;height:clamp(500px,38vw,560px);margin-top:var(--s4);z-index:2}
+.scene .wash{position:absolute;left:12%;right:2%;top:0;height:70%;object-fit:cover;opacity:.5;transform:rotate(-1.2deg);mix-blend-mode:multiply}
+.scene .grocer{position:absolute;height:88%;left:56%;bottom:14%;z-index:1}
+.scene .shelf{position:absolute;height:58%;left:72%;bottom:24%;z-index:0;opacity:.95}
+.counter{position:absolute;left:8%;right:0;bottom:4%;height:22%;z-index:3}
+.counter::after{content:"";position:absolute;inset:18% 0 auto 0;height:1px;background:rgb(28 28 31 / .16)}
+.scene .phone{position:absolute;height:64%;left:44%;bottom:20%;z-index:4}
+.phone-screen{position:absolute;left:34.8%;top:7.9%;width:31.4%;height:32.2%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:6% 7%;font:500 clamp(9px,.82vw,12px)/1.25 var(--mono);color:var(--ink);overflow:hidden;background:#E9E8E2}
+.phone-wrap{position:absolute}
+.phone-wrap img{height:100%;width:auto}
+.scanner-wrap{position:absolute;left:31%;bottom:21%;z-index:4;display:flex;flex-direction:column;align-items:center}
+.scanner{width:clamp(96px,8.4vw,124px);aspect-ratio:4/5;border-radius:14px;background:#2C2A27;position:relative;
+  box-shadow:0 0 0 5px var(--popover),0 1px 2px 5px rgb(28 28 31 / .18),0 14px 22px 4px rgb(76 71 65 / .22);
+  background-image:var(--grain)}
+.scanner::before{content:"";position:absolute;left:30%;right:30%;top:22%;bottom:26%;border-radius:50%;background:radial-gradient(60% 50% at 40% 35%,#5d6168,#22252a 70%);box-shadow:inset 0 0 0 2px rgb(255 255 255 / .12);transition:filter .4s var(--ease-out),background .4s}
+.scanner::after{content:"";position:absolute;left:50%;bottom:-38px;width:6px;height:38px;margin-left:-3px;background:#2C2A27}
+.scanner.glow::before{background:radial-gradient(60% 50% at 45% 40%,#FFF8E8,#F3E3BE 55%,#9a8f78);filter:brightness(1.08)}
+.hold{position:absolute;inset:0;border:0;background:none;border-radius:14px;cursor:none;touch-action:none;-webkit-touch-callout:none;user-select:none}
+.hold:focus-visible{outline:2px solid var(--accent);outline-offset:9px}
+.ring{position:absolute;left:50%;top:44%;width:96px;height:96px;margin:-48px 0 0 -48px;pointer-events:none;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring .track{stroke:rgb(250 247 243 / .25)}
+.ring .fill{stroke:var(--popover);stroke-dasharray:289;stroke-dashoffset:289}
+.thumb-cursor{position:fixed;width:44px;height:58px;border-radius:50%;border:2px solid var(--ink);pointer-events:none;z-index:30;opacity:0;transform:translate(-50%,-50%);transition:opacity .15s}
+.bubble{position:absolute;left:calc(31% + 8px);bottom:calc(21% + 196px);z-index:7;width:200px;padding:var(--s4) var(--s5) var(--s5);font:500 1rem/1.3 var(--text);text-align:center}
+.bubble svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bubble span{position:relative}
+.scene .lady{position:absolute;height:88%;left:11%;bottom:0;z-index:6}
+.checks{position:absolute;left:66%;bottom:30%;z-index:7;width:clamp(230px,19vw,280px);padding:var(--s4) var(--s5) var(--s5);transform:rotate(1.4deg);opacity:0;translate:0 12px;transition:opacity .25s var(--ease-out),translate .35s var(--ease-out)}
+.checks.on{opacity:1;translate:0 0}
+.checks .checks-title{font:600 .75rem/1 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin-bottom:var(--s3)}
+.checks ol{list-style:none;padding:0;display:grid;gap:6px;font-size:.875rem}
+.checks li{display:flex;gap:var(--s2);align-items:center;color:var(--ink-3)}
+.checks li svg{width:16px;height:16px;flex:none;stroke:var(--ink-3);opacity:.35}
+.checks li.ok{color:var(--ink)}
+.checks li.ok svg{stroke:var(--settled);opacity:1}
+.status{position:absolute;left:31%;right:var(--gutter);bottom:5%;z-index:8;font-size:.9375rem;display:flex;gap:var(--s4);align-items:center;padding:0;max-width:none;margin:0}
+.status .note{color:var(--ink-2);font-size:.875rem}
+.textbtn{font:500 .9375rem/1 var(--text);background:none;border:0;padding:var(--s3) 0;color:var(--ink);text-decoration:underline;text-underline-offset:.22em;cursor:pointer}
+.result{font:600 .9375rem/1.3 var(--mono)}
+
+/* SECTION rhythm */
+.sec{padding:var(--s10) 0}
+.sec-head{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);margin-bottom:var(--s8)}
+
+/* PROBLEM */
+.problem h2{grid-column:1 / span 9}
+.prob-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:start}
+.prob{display:grid;gap:var(--s4);position:relative}
+.prob .label{position:relative;z-index:2;margin-bottom:calc(var(--s2) * -1)}
+.prob p{color:var(--ink-2)}
+.prob.a{grid-column:1 / span 5;grid-template-columns:auto 1fr;align-items:end;column-gap:var(--s6)}
+.prob.a img{height:520px;width:auto;grid-row:span 3}
+.prob.b{grid-column:7 / span 3;margin-top:var(--s9)}
+.prob.b img{height:340px;width:auto}
+.prob.c{grid-column:10 / span 3;margin-top:var(--s5)}
+.prob.c img{height:400px;width:auto}
+.strip{margin-top:var(--s9);display:flex;align-items:center;gap:var(--s5);padding:var(--s5) var(--s6);width:fit-content;transform:rotate(-.6deg)}
+.strip p{font:400 clamp(1.5rem,2.6vw,2.25rem)/1.05 var(--display);text-transform:uppercase;letter-spacing:.01em;max-width:none}
+
+/* HOW: staircase */
+.how h2{grid-column:1 / span 7}
+.how .sec-head p{grid-column:9 / span 4;align-self:end;color:var(--ink-2)}
+.stairs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s5);align-items:start}
+.step{display:grid;gap:var(--s4);padding-top:var(--s5);border-top:1px solid var(--ink)}
+.step:nth-child(2){margin-top:var(--s8)}
+.step:nth-child(3){margin-top:var(--s10)}
+.step:nth-child(4){margin-top:calc(var(--s10) + var(--s8))}
+.step .num{font:400 5.5rem/.8 var(--display);color:var(--ink)}
+.step p{color:var(--ink-2);font-size:1rem}
+.artifact{height:200px;display:flex;align-items:center;justify-content:flex-start}
+.keypad{width:170px;padding:var(--s4);background:var(--popover);border-radius:20px;box-shadow:0 0 0 1px var(--rule),0 10px 24px rgb(76 71 65 / .14)}
+.keypad .amt{font:500 1.75rem/1 var(--mono);text-align:right;margin-bottom:var(--s3)}
+.keypad .amt small{font-size:.8125rem;color:var(--ink-3);margin-right:4px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:var(--s2)}
+.keys span{font:500 .8125rem/26px var(--mono);text-align:center;background:var(--surface);border-radius:6px}
+.charge{font:600 .8125rem/34px var(--text);text-align:center;color:var(--popover);background:var(--accent);border-radius:8px}
+.mini-scan{width:96px;aspect-ratio:4/5;border-radius:12px;background:#2C2A27;position:relative;box-shadow:0 0 0 4px var(--popover),0 12px 20px 4px rgb(76 71 65 / .2)}
+.mini-scan::before{content:"";position:absolute;left:30%;right:30%;top:22%;bottom:26%;border-radius:50%;background:radial-gradient(60% 50% at 45% 40%,#FFF8E8,#F3E3BE 55%,#9a8f78)}
+.mini-thumb{width:58px;height:74px;border-radius:46% 46% 40% 40%;background:#E8C9A8;position:absolute;left:21px;top:-26px;box-shadow:inset -6px -8px 0 rgb(120 80 50 / .12),0 6px 10px rgb(28 28 31 / .18);border:1.5px solid #3b2a20}
+.mini-list{display:grid;gap:5px;font-size:.8125rem}
+.mini-list span{display:flex;gap:6px;align-items:center}
+.mini-list svg{width:14px;height:14px;stroke:var(--settled)}
+.banner{width:210px;padding:var(--s4);border-radius:14px;background:var(--settled);color:var(--popover);font:600 .875rem/1.3 var(--mono)}
+.banner small{display:block;font:500 .75rem/1.5 var(--mono);opacity:.9;margin-top:var(--s2)}
+.fineprint{margin-top:var(--s7);max-width:58ch}
+
+/* SHOPS */
+.shops-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:center}
+.shops-stage{grid-column:1 / span 6;position:relative;height:640px}
+.shops-stage .shelf{position:absolute;left:0;top:20px;height:520px;width:auto}
+.shops-stage .grocer{position:absolute;left:52%;bottom:0;height:600px;width:auto;z-index:2}
+.terminal{position:absolute;left:20%;top:70px;z-index:3;width:270px;padding:var(--s5) var(--s4) var(--s4);border-radius:34px;background:var(--ink);box-shadow:0 1px 2px rgb(28 28 31 / .3),0 24px 40px rgb(76 71 65 / .3);transform:rotate(-3deg)}
+.terminal .scr{background:var(--popover);border-radius:22px;padding:var(--s4)}
+.scr .top{display:flex;justify-content:space-between;font:600 .75rem/1 var(--text);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s3)}
+.scr .net{font:500 1.75rem/1 var(--mono);margin-bottom:2px}
+.scr .net small{font-size:.55em}
+.scr .netl{font-size:.75rem;color:var(--ink-3);margin-bottom:var(--s4)}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px var(--s2);padding:var(--s3) 0;border-top:1px solid var(--rule);font-size:.8125rem}
+.row b{font-weight:500}
+.row .amt{font:500 .8125rem/1.4 var(--mono);text-align:right}
+.row .st{font-size:.75rem;color:var(--settled);display:flex;gap:4px;align-items:center}
+.row .st.no{color:var(--declined)}
+.row .st svg{width:12px;height:12px}
+.row .time{font-size:.75rem;color:var(--ink-3);text-align:right}
+.shops-copy{grid-column:8 / span 5}
+.shops-copy h2{margin-bottom:var(--s5)}
+.points{list-style:none;padding:0;margin-top:var(--s6);display:grid;gap:0}
+.points li{padding:var(--s4) 0;border-top:1px solid var(--rule);display:grid;grid-template-columns:200px 1fr;gap:var(--s4)}
+.points li p{color:var(--ink-2);font-size:1rem}
+
+/* SAFETY: ink band */
+.band{background:var(--ink) var(--grain);color:var(--paper)}
+.band p{color:#D9D2C6}
+.safety .sec-head h2{grid-column:1 / span 7;color:var(--paper)}
+.safety .sec-head .lead{grid-column:9 / span 4;align-self:end;color:var(--paper)}
+.safe-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5)}
+.lock-stage{grid-column:1 / span 5;grid-row:span 3;position:sticky;top:72px;height:620px;align-self:start}
+.lock-stage .lady{position:absolute;left:4%;bottom:0;height:560px;width:auto}
+.said{position:absolute;left:46%;top:30px;width:150px;height:96px;display:grid;place-items:center;font:600 1.75rem/1 var(--mono);color:var(--ink)}
+.said svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.said span{position:relative}
+.reply{position:absolute;left:40%;top:170px;width:260px;padding:var(--s5);color:var(--ink);transform:rotate(2deg)}
+.reply .label{padding:0;margin-bottom:var(--s2);color:var(--ink-3);font-size:.6875rem}
+.reply p{font:500 .875rem/1.45 var(--mono);color:var(--ink)}
+.protect{grid-column:7 / span 6;list-style:none;padding:0}
+.protect li{display:grid;grid-template-columns:220px 1fr;gap:var(--s5);padding:var(--s5) 0;border-top:1px solid rgb(239 233 222 / .2)}
+.protect h3{color:var(--paper);font-size:1.125rem}
+.protect p{font-size:1rem}
+.protect .why{margin-top:var(--s2);font-size:.875rem;color:#B9B1A5}
+.also{grid-column:7 / span 6;margin-top:var(--s5);font-size:.9375rem}
+.launch{grid-column:7 / span 6;margin-top:var(--s6);padding:var(--s5);border:1px solid rgb(239 233 222 / .28);border-radius:4px}
+.launch h3{color:var(--paper);margin-bottom:var(--s2)}
+.launch ul{padding-left:1.1em;color:#D9D2C6;font-size:.9375rem;display:grid;gap:var(--s2)}
+
+/* PHONES */
+.phones-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:end}
+.phones-copy{grid-column:1 / span 5;padding-bottom:var(--s8)}
+.phones-copy h2{margin-bottom:var(--s5)}
+.phones-copy p+p{margin-top:var(--s4)}
+.phones-stage{grid-column:6 / span 7;position:relative;height:700px}
+.phones-stage .wash{position:absolute;left:0;right:0;top:80px;height:420px;object-fit:cover;opacity:.42;transform:rotate(1.6deg) scaleX(-1);mix-blend-mode:multiply}
+.phones-stage .student{position:absolute;left:8%;bottom:0;height:640px;width:auto;z-index:2}
+.phones-stage .phone-wrap{left:50%;bottom:40px;height:500px;z-index:3;transform:rotate(4deg)}
+.phones-stage .phone-screen{font-size:10.5px;line-height:1.35;justify-content:flex-start;padding:7% 7%}
+.sms{position:absolute;left:58%;top:0;z-index:5;width:300px;padding:var(--s5);transform:rotate(2.2deg)}
+.sms .label{padding:0;margin-bottom:var(--s2);color:var(--ink-3);font-size:.6875rem}
+.sms p{font:500 .875rem/1.5 var(--mono)}
+
+/* NUMBERS: the PKR 180 receipt */
+.nums-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:start}
+.nums-copy{grid-column:1 / span 4;position:sticky;top:120px}
+.nums-copy h2{margin-bottom:var(--s5)}
+.receipt{grid-column:6 / span 6;padding:var(--s7) var(--s7) var(--s8);transform:rotate(-1deg);font-family:var(--mono)}
+.receipt .head{text-align:center;padding-bottom:var(--s5);border-bottom:1.5px dashed rgb(28 28 31 / .35);margin-bottom:var(--s3)}
+.receipt .head svg{width:34px;height:34px;margin:0 auto var(--s2)}
+.receipt .head b{display:block;font:400 1.75rem/1 var(--display);letter-spacing:.06em}
+.receipt .head span{font-size:.75rem;color:var(--ink-3)}
+.line{display:grid;grid-template-columns:1fr auto;gap:var(--s1) var(--s5);padding:var(--s4) 0;border-bottom:1px dotted rgb(28 28 31 / .3)}
+.line .k{font:500 .9375rem/1.35 var(--text)}
+.line .v{font:600 clamp(1.25rem,2vw,1.75rem)/1 var(--mono);text-align:right;white-space:nowrap}
+.line .c{grid-column:1 / -1;font:400 .8125rem/1.5 var(--text);color:var(--ink-3)}
+.receipt .total{display:flex;justify-content:space-between;align-items:baseline;padding-top:var(--s5);font-weight:600}
+.receipt .total .v{font-size:2.25rem}
+.receipt .foot{margin-top:var(--s5);text-align:center;font-size:.75rem;color:var(--ink-3)}
+
+/* FOOTER */
+.footer{padding:var(--s10) 0 var(--s7);overflow:hidden}
+.foot-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s5);align-items:end}
+.signoff{grid-column:1 / span 7;font-size:clamp(3.5rem,8vw,7.5rem);color:var(--paper);line-height:.86}
+.foot-art{grid-column:9 / span 4;position:relative;height:420px}
+.foot-art img{position:absolute;right:10%;bottom:-64px;height:470px;width:auto}
+.foot-text{grid-column:1 / span 7;margin-top:var(--s7);display:grid;gap:var(--s4);font-size:.9375rem}
+.foot-text .disc{color:var(--paper);font-size:1rem}
+.foot-base{grid-column:1 / -1;margin-top:var(--s8);padding-top:var(--s5);border-top:1px solid rgb(239 233 222 / .2);display:flex;justify-content:space-between;align-items:center;font-size:.8125rem;color:#B9B1A5}
+.foot-base .brand svg{color:var(--paper)}
+.foot-base .brand img{filter:invert(94%) sepia(6%) saturate(300%) hue-rotate(350deg)}
+
+/* paused / reduced motion */
+.paused *{animation-play-state:paused!important}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .checks,.scanner::before{transition:opacity .2s linear!important;translate:none!important}
+}
+
+/* TABLET + PHONE */
+@media (max-width: 1080px){
+  .nav ul{display:none}
+  .tag{margin-left:auto}
+  .hero h1{grid-column:1 / -1}
+  .hero-copy{grid-column:1 / span 9}
+  .scene{margin-top:0}
+  .prob.a{grid-column:1 / -1}
+  .prob.b{grid-column:1 / span 6;margin-top:var(--s7)}
+  .prob.c{grid-column:7 / span 6;margin-top:var(--s7)}
+  .stairs{grid-template-columns:repeat(2,1fr)}
+  .step:nth-child(n){margin-top:0}
+  .step:nth-child(even){margin-top:var(--s8)}
+  .shops-stage,.shops-copy,.lock-stage,.protect,.also,.launch,.phones-copy,.phones-stage,.nums-copy,.receipt{grid-column:1 / -1}
+  .nums-copy{position:static}
+  .safety .sec-head h2,.safety .sec-head .lead,.how h2,.how .sec-head p,.problem h2{grid-column:1 / -1}
+}
+@media (max-width: 720px){
+  body{font-size:1rem}
+  .tag{display:none}
+  .pause{margin-left:auto}
+  .hero{padding-top:var(--s5)}
+  .hero h1{font-size:clamp(3.5rem,17vw,5rem)}
+  .hero h1 .indent{padding-left:0}
+  .hero-copy{grid-column:1 / -1}
+  .scene{height:500px;margin:var(--s5) calc(var(--gutter) * -1) 0}
+  .scene .wash{left:0;right:0}
+  .scene .shelf{display:none}
+  .scene .lady{left:-14%;height:80%}
+  .scene .grocer{left:64%;height:76%}
+  .scene .phone{left:52%;height:44%}
+  .scanner-wrap{left:24%}
+  .scene .phone{left:57%}
+  .scene{margin-bottom:72px}
+  .status{left:var(--gutter);bottom:-76px}
+  .scene .lady{bottom:5%}
+  .bubble{left:4%;bottom:auto;top:8px;width:170px;font-size:.9375rem}
+  .checks{left:auto;right:var(--gutter);bottom:auto;top:6px;width:200px}
+  .status{flex-wrap:wrap;gap:var(--s2) var(--s4)}
+  .counter{left:0}
+  .sec{padding:var(--s9) 0}
+  .sec-head{margin-bottom:var(--s7)}
+  .prob.a{grid-template-columns:1fr}
+  .prob.a img,.prob.b img,.prob.c img{height:300px}
+  .prob.b,.prob.c{grid-column:1 / -1}
+  .stairs{grid-template-columns:1fr}
+  .step:nth-child(n){margin-top:0}
+  .shops-stage{height:520px}
+  .shops-stage .shelf{height:380px}
+  .shops-stage .grocer{height:440px;left:60%}
+  .terminal{left:4%;width:250px}
+  .points li,.protect li{grid-template-columns:1fr;gap:var(--s1)}
+  .lock-stage{height:520px}
+  .lock-stage .lady{height:460px;left:-6%}
+  .said{left:52%}
+  .reply{left:34%;top:150px;width:230px}
+  .phones-stage{height:560px}
+  .phones-stage .student{height:500px;left:-4%}
+  .phones-stage .phone-wrap{left:48%;height:430px}
+  .phones-stage .phone-screen{font-size:9px}
+  .sms{left:auto;right:0;width:240px}
+  .receipt{padding:var(--s6) var(--s5) var(--s7);transform:none}
+  .signoff{grid-column:1 / -1}
+  .foot-art{display:none}
+  .foot-text{grid-column:1 / -1}
+  .foot-base{flex-direction:column;align-items:flex-start;gap:var(--s3)}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="dash" viewBox="0 0 16 16"><path d="M4 8h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="mark" viewBox="-214.13 -252.5 428.26 404.5"><g fill="none" stroke="currentColor" stroke-width="33"><path d="M-59 125V0A59 59 0 0 1 59 0V73"/><path d="M-118 86V0A118 118 0 0 1 118 0V152"/><path d="M-177 47V0A177 177 0 0 1 177 0V99"/><path d="M-200.14 -125.06A236 236 0 0 1 200.14 -125.06"/><path d="M0 -7V139"/></g></symbol>
+</svg>
+<a class="skip" href="#content">Skip to content</a>
+<div class="thumb-cursor" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#hero" aria-label="FingerPay, back to top"><svg aria-hidden="true"><use href="#mark"/></svg><img src="../../../public/brand/fingerpay-wordmark.svg" alt=""></a>
+    <nav aria-label="Main navigation"><ul>
+      <li><a href="#how">How it works</a></li><li><a href="#shops">For shops</a></li><li><a href="#safety">Safety</a></li><li><a href="#phones">Every phone</a></li><li><a href="#numbers">Numbers</a></li>
+    </ul></nav>
+    <a class="tag" href="#disclaimer">Student prototype · integrations simulated</a>
+    <button class="pause" type="button" aria-pressed="false"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2v10M10 2v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Pause animations</span></button>
+  </div>
+</header>
+
+<main id="content" tabindex="-1">
+<!-- HERO -->
+<section class="hero" id="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <div class="hero-head">
+      <h1 id="hero-title">Your thumb is <span class="indent">the whole wallet.</span></h1>
+      <div class="hero-copy">
+        <p class="lead">At a kiryana counter, a shopper pays with one thumb tap: no phone, card, PIN or cash. The shop's own screen confirms the sale in under 3 seconds, and the shopper gets an SMS receipt.</p>
+        <p class="links"><a href="#how">See how it works</a><a href="#safety">See how it stays safe</a></p>
+        <p class="meta">Student prototype. Bank, identity and payment integrations are simulated.</p>
+      </div>
+    </div>
+  </div>
+  <div class="scene" role="group" aria-label="Demo sale: PKR 180 at Rasheed's counter">
+    <img class="wash" src="../../../public/art/wash.webp" alt="">
+    <img class="shelf cutout" src="../../../public/art/shelf.webp" alt="">
+    <img class="grocer cutout" src="../../../public/art/grocer-wait.webp" alt="Rasheed waits behind his counter.">
+    <div class="counter torn kraft" data-torn="top"></div>
+    <div class="phone-wrap phone" aria-live="polite">
+      <img class="cutout" src="../../../public/art/phone-stand.webp" alt="">
+      <div class="phone-screen" id="phoneScreen"><span style="color:var(--ink-3)">PKR</span><span style="font-size:1.6em">180</span><span style="color:var(--ink-3);margin-top:6px">Ready</span></div>
+    </div>
+    <div class="bubble" aria-hidden="true">
+      <svg viewBox="0 0 200 90" preserveAspectRatio="none"><path d="M18 8 C70 2 140 1 186 9 C197 14 198 52 189 62 C160 70 128 69 92 70 L40 98 L56 71 C40 72 26 70 12 63 C3 52 4 16 18 8Z" fill="#FAF7F3" stroke="#1C1C1F" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      <span>Hold a thumb here</span>
+    </div>
+    <div class="scanner-wrap">
+      <div class="scanner" id="scanner">
+        <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="46"/><circle class="fill" id="ringFill" cx="50" cy="50" r="46"/></svg>
+        <button class="hold" id="hold" type="button" aria-label="Pay PKR 180 with a thumb tap" aria-describedby="holdHelp"></button>
+      </div>
+    </div>
+    <img class="lady cutout" src="../../../public/art/lady-tap.webp" alt="Ayesha reaches her thumb toward the scanner. She holds no wallet, phone or cash.">
+    <div class="checks torn" id="checks" aria-hidden="true">
+      <p class="checks-title">Risk Engine checks</p>
+      <ol>
+        <li><svg><use href="#check"/></svg>Terminal signature</li>
+        <li><svg><use href="#check"/></svg>Fresh one-time nonce</li>
+        <li><svg><use href="#check"/></svg>Thumb lookup (keyed code)</li>
+        <li><svg><use href="#check"/></svg>Thumb Lock is off</li>
+        <li><svg><use href="#check"/></svg>Within PKR 5,000 limit</li>
+        <li><svg><use href="#check"/></svg>Balance covers PKR 180</li>
+      </ol>
+    </div>
+    <div class="status">
+      <span id="holdHelp" class="note">Press and hold the scanner, or</span>
+      <button class="textbtn" id="tapPay" type="button">Pay without holding</button>
+      <span role="status" class="result" id="result"></span>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="sec problem" id="problem" aria-labelledby="problem-title">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="problem-title">Every way to pay asks for something the shopper doesn't have.</h2></div>
+    <div class="prob-grid">
+      <article class="prob a">
+        <img class="cutout" src="../../../public/art/grocer-lean.webp" alt="Rasheed looks down at an empty hand. There is no change in the drawer.">
+        <span class="label torn" data-torn="lr">No change</span>
+        <p>A PKR 1,000 note empties the drawer, and cash at the till invites theft.</p>
+      </article>
+      <article class="prob b">
+        <img class="cutout" src="../../../public/art/student.webp" alt="A shopper holds out a phone with a transfer screenshot.">
+        <span class="label torn" data-torn="lr">Can't trust the screenshot</span>
+        <p>A transfer screenshot proves nothing: it can be edited. The shopkeeper checks them all again at night.</p>
+      </article>
+      <article class="prob c">
+        <img class="cutout" src="../../../public/art/lady-idle.webp" alt="A shopper with a basket and no smartphone.">
+        <span class="label torn" data-torn="lr">No smartphone, no card</span>
+        <p>QR and wallet apps need a smartphone, mobile data and a PIN. A shopper with a keypad phone is left out.</p>
+      </article>
+    </div>
+    <div class="strip torn ink" data-torn="lr"><p>Card machines need a card, and charge the shop 2.0–2.5% a sale.</p></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="sec how" id="how" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="how-title">One sale, under 3 seconds.</h2><p>Four steps between the cashier typing PKR 180 and the shopper walking out with bread.</p></div>
+    <ol class="stairs" style="list-style:none;padding:0">
+      <li class="step">
+        <span class="num" aria-hidden="true">1</span>
+        <div class="artifact"><div class="keypad" aria-hidden="true"><div class="amt"><small>PKR</small>180</div><div class="keys"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div><div class="charge">Charge PKR 180</div></div></div>
+        <h3>The cashier enters the amount</h3>
+        <p>Rasheed types PKR 180 on the FingerPay terminal and taps Charge.</p>
+      </li>
+      <li class="step">
+        <span class="num" aria-hidden="true">2</span>
+        <div class="artifact"><div class="mini-scan" aria-hidden="true"><span class="mini-thumb"></span></div></div>
+        <h3>The shopper taps a thumb</h3>
+        <p>No smartphone, mobile data, QR code, card or PIN. Just a thumb on the scanner.</p>
+      </li>
+      <li class="step">
+        <span class="num" aria-hidden="true">3</span>
+        <div class="artifact"><div class="mini-list" aria-hidden="true"><span><svg><use href="#check"/></svg>Keyed code finds the account</span><span><svg><use href="#check"/></svg>Thumb Lock is off</span><span><svg><use href="#check"/></svg>Within the thumb-pay limit</span><span><svg><use href="#check"/></svg>Balance covers it</span><span><svg><use href="#check"/></svg>Settles over Raast (simulated)</span></div></div>
+        <h3>The Risk Engine checks and settles</h3>
+        <p>The scan becomes a keyed code that finds the shopper's account. The Risk Engine checks Thumb Lock, the thumb-pay limit and the balance, then the payment settles over Raast (simulated).</p>
+      </li>
+      <li class="step">
+        <span class="num" aria-hidden="true">4</span>
+        <div class="artifact"><div class="banner" aria-hidden="true">PAYMENT SUCCESSFUL — PKR 180 RECEIVED<small>Net PKR 179.19 · Fee PKR 0.81</small></div></div>
+        <h3>Both sides know at once</h3>
+        <p>The shop's screen says PAYMENT SUCCESSFUL — PKR 180 RECEIVED. PKR 179.19 reaches the shop after a PKR 0.81 fee, and the shopper's receipt arrives by SMS.</p>
+      </li>
+    </ol>
+    <p class="meta fineprint">Simulated here: the prototype stands in for the thumb scan with a one-time token. Real scanners need template matching and liveness detection.</p>
+  </div>
+</section>
+
+<!-- SHOPS -->
+<section class="sec shops" id="shops" aria-labelledby="shops-title">
+  <div class="wrap shops-grid">
+    <div class="shops-stage">
+      <img class="shelf cutout" src="../../../public/art/shelf.webp" alt="">
+      <img class="grocer cutout" src="../../../public/art/grocer-stand.webp" alt="">
+      <div class="terminal" role="img" aria-label="Today's ledger on the FingerPay terminal: Ayesha K., PKR 180.00, settled. Bilal H., PKR 180.00, settled. A PKR 500.00 sale declined, with no name shown.">
+        <div class="scr">
+          <div class="top"><span>Today</span><span>Rasheed Kiryana</span></div>
+          <div class="net mono">358<small>.38</small></div>
+          <div class="netl">PKR settled to Allied Bank (simulated)</div>
+          <div class="row"><b>Ayesha K.</b><span class="amt">180.00</span><span class="st"><svg><use href="#check" stroke="currentColor"/></svg>Settled</span><span class="time">7:42 pm</span></div>
+          <div class="row"><b>Bilal H.</b><span class="amt">180.00</span><span class="st"><svg><use href="#check" stroke="currentColor"/></svg>Settled</span><span class="time">7:49 pm</span></div>
+          <div class="row"><b style="color:var(--ink-3)">Not shown</b><span class="amt">500.00</span><span class="st no"><svg><use href="#dash"/></svg>Declined · PKR 0 fee</span><span class="time">7:51 pm</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="shops-copy">
+      <h2 id="shops-title">The proof is on the shop's own screen.</h2>
+      <p class="lead">The FingerPay terminal is the only FingerPay app, and it belongs to the shop. Shoppers never install anything. It runs in a browser today; an Android app comes next.</p>
+      <ul class="points">
+        <li><h3>One line, no doubt</h3><p>Each result is one plain line, such as PAYMENT SUCCESSFUL — PKR 180 RECEIVED. There's no screenshot to inspect.</p></li>
+        <li><h3>Today's ledger</h3><p>Every sale with its time, amount, fee, net and Raast reference (simulated). Shoppers appear as a first name and initial, and only on settled sales.</p></li>
+        <li><h3>Fix a mistake the same day</h3><p>Typed PKR 1,800 instead of 180? The owner voids the sale with a reason. The shopper gets the money back and an SMS.</p></li>
+        <li><h3>Export the day</h3><p>The owner downloads the day's settlement as a CSV for the accountant.</p></li>
+        <li><h3>Private by design</h3><p>The shop never sees a shopper's balance, CNIC or phone number. On a decline, the screen says why and never who.</p></li>
+        <li><h3>Offline is clear</h3><p>If the internet drops, the screen says TAKE CASH. Nothing is queued, so nothing gets charged later by surprise.</p></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SAFETY -->
+<section class="sec safety band" id="safety" aria-labelledby="safety-title">
+  <div class="wrap">
+    <div class="sec-head"><h2 id="safety-title">Lock your thumb with one word.</h2><p class="lead">A thumb can't be changed like a PIN. So FingerPay assumes one will be copied someday, and limits what a copy can do.</p></div>
+    <div class="safe-grid">
+      <div class="lock-stage" role="img" aria-label="Ayesha texts LOCK. The reply: Thumb payments are now LOCKED. Visit any Allied Bank branch with your CNIC to unlock.">
+        <img class="lady cutout" src="../../../public/art/lady-idle.webp" alt="">
+        <div class="said"><svg viewBox="0 0 150 96" preserveAspectRatio="none"><path d="M14 10 C50 3 104 2 138 10 C148 16 148 58 138 66 C112 72 82 71 62 72 L34 94 L42 71 C28 70 16 68 10 62 C2 50 3 18 14 10Z" fill="#FAF7F3" stroke="#1C1C1F" stroke-width="1.8"/></svg><span>LOCK</span></div>
+        <div class="reply torn" data-torn="tb"><span class="label">Simulated SMS</span><p>Thumb payments are now LOCKED. Visit any Allied Bank branch with your CNIC to unlock.</p></div>
+      </div>
+      <ul class="protect">
+        <li><h3>No fingerprint images</h3><p>No fingerprint image is stored, sent or logged. The database keeps only a keyed code (an HMAC), made with a key that never enters the database. A copy of the database alone holds no usable thumbs and no readable CNICs.</p></li>
+        <li><h3>Thumb Lock by SMS</h3><div><p>Reply LOCK to any FingerPay SMS and thumb payments stop. Only a bank branch can unlock them, with the shopper's CNIC.</p><p class="why">Why: in India, fraudsters have lifted thumbprints from public property records, cast them in silicone and emptied bank accounts. The defence police there recommend most is a biometric lock the owner controls. Sources: Deccan Herald, Gujarat Cyber Crime, Scroll.</p></div></li>
+        <li><h3>An alert on every attempt</h3><p>The shopper gets an SMS for every payment, every declined attempt with their thumb, and any try on a locked thumb. Misuse shows up the same day, not on next month's statement.</p></li>
+        <li><h3>Retries never charge twice</h3><p>Each sale is one charge on the server. If the network stutters and the terminal asks again, the server replays the first receipt instead of charging again. Paying the same shop the same amount again within 15 seconds is blocked.</p></li>
+        <li><h3>Limits</h3><p>A thumb pays at most PKR 5,000 a tap on a salary account and PKR 2,000 on a student account, with daily caps of PKR 15,000 and PKR 5,000. Each sale allows 3 tries, and 10 unknown thumbs in 10 minutes pauses the terminal.</p></li>
+      </ul>
+      <p class="also">A declined sale costs PKR 0. Every refund needs two different bank staff. Every change is written to a tamper-evident audit log.</p>
+      <div class="launch">
+        <h3>What a real launch still needs</h3>
+        <ul><li>A certified scanner with liveness detection, tested to ISO/IEC 30107-3, with a false-match rate of 1 in 10,000 or better.</li><li>Above about 1,000 shoppers, matching by thumb alone gets less reliable. Production adds a second check that stays phone-free: the last 4 digits of a CNIC or phone typed at the till, or a second finger.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHONES -->
+<section class="sec phones" id="phones" aria-labelledby="phones-title">
+  <div class="wrap phones-grid">
+    <div class="phones-copy">
+      <h2 id="phones-title">No app, no data plan, no smartphone.</h2>
+      <p class="lead">Paying needs no phone at all. Everything after the sale comes by plain SMS, on any basic phone with SMS: no smartphone, no data plan.</p>
+      <p>The receipt, decline alerts, Thumb Lock and disputes all arrive as text. To lock thumb payments, reply LOCK. To question a payment, reply DISPUTE to its receipt.</p>
+    </div>
+    <div class="phones-stage">
+      <img class="wash" src="../../../public/art/wash.webp" alt="">
+      <img class="student cutout" src="../../../public/art/student.webp" alt="Bilal reads an SMS receipt on his old keypad phone.">
+      <div class="phone-wrap">
+        <img class="cutout" src="../../../public/art/phone-stand.webp" alt="">
+        <div class="phone-screen" aria-hidden="true"><span style="color:var(--ink-3)">1 new</span><span>message</span></div>
+      </div>
+      <div class="sms torn" data-torn="tb"><span class="label">Simulated SMS</span><p>Allied Bank FingerPay: PKR 180.00 paid at Rasheed Kiryana Store via Raast Ref #RAAST-PK-…. Cashback Earned: PKR 3.60. Not you? Reply DISPUTE. Reply LOCK to block thumb payments.</p></div>
+          </div>
+  </div>
+</section>
+
+<!-- NUMBERS -->
+<section class="sec numbers" id="numbers" aria-labelledby="numbers-title">
+  <div class="wrap nums-grid">
+    <div class="nums-copy">
+      <h2 id="numbers-title">The numbers behind one thumb tap.</h2>
+      <p>Every figure comes from the prototype's spec, with its condition attached. Nothing here is a customer count or a market size.</p>
+    </div>
+    <div class="receipt torn" data-torn="tb">
+      <div class="head"><svg aria-hidden="true"><use href="#mark"/></svg><b>FingerPay</b><span>Cash memo · Rasheed Kiryana Store · demo sale</span></div>
+      <div class="line"><span class="k">Thumb to confirmation</span><span class="v">&lt; 3 s</span><span class="c">The shop's screen confirms before the shopper turns to leave.</span></div>
+      <div class="line"><span class="k">Fingerprint images stored</span><span class="v">0</span><span class="c">Only a keyed code is kept, with a key the database never holds.</span></div>
+      <div class="line"><span class="k">Fee on sales above PKR 100</span><span class="v">0.45%</span><span class="c">Capped at PKR 25. Sales of PKR 100 or less are free.</span></div>
+      <div class="line"><span class="k">Cheaper than a card machine</span><span class="v">4.4–5.6×</span><span class="c">Compared with a 2.0–2.5% card fee.</span></div>
+      <div class="line"><span class="k">Charged on a decline</span><span class="v">PKR 0</span><span class="c">No fee, ever, when a payment doesn't go through.</span></div>
+      <div class="line"><span class="k">Most a thumb pays per tap</span><span class="v">5,000 / 2,000</span><span class="c">PKR, salary / student accounts, with daily caps too.</span></div>
+      <div class="total"><span class="k">What the shop gets from PKR 180</span><span class="v mono">179.19</span></div>
+      <p class="foot">Fee PKR 0.81 · computed in the database, half-up</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer band" id="disclaimer">
+  <div class="wrap foot-grid">
+    <p class="signoff display">Shutter down. Nothing left to check.</p>
+    <div class="foot-art" aria-hidden="true"><img class="cutout" src="../../../public/art/grocer-stand.webp" alt=""></div>
+    <div class="foot-text">
+      <p class="disc">FingerPay is a student prototype. Allied Bank, NADRA and SBP Raast are proposed partners; all bank, identity and payment integrations shown are simulated. No real money or real biometric data is processed.</p>
+      <p>Rasheed Ahmed, Ayesha Khan and Bilal Hussain are fictional demo personas.</p>
+      <p><b style="color:var(--paper);font-weight:600">Real in this prototype:</b> the double-entry ledger, the Risk Engine's rules, encryption, request signing and the tamper-evident audit log, checked by automated database tests. <b style="color:var(--paper);font-weight:600">Simulated:</b> the thumb scanner, NADRA, Allied Bank accounts, Raast settlement and SMS delivery.</p>
+    </div>
+    <div class="foot-base">
+      <span class="brand"><svg aria-hidden="true" style="width:22px;height:22px"><use href="#mark"/></svg><img src="../../../public/brand/fingerpay-wordmark.svg" alt="FingerPay" style="height:17px"></span>
+      <span>Making payments with one tap.</span>
+      <span>© 2026 Team FingerPay</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Torn edges: seeded jagged clip-paths so they never jitter between loads.
+(function(){
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const edge = (from, to, fixed, axis, depth, n) => { const pts=[]; for (let i=0;i<=n;i++){ const t=from+(to-from)*i/n; const d=fixed+(rnd()*depth)*(fixed>50?-1:1); pts.push(axis==='x'?`${t}% ${d}%`:`${d}% ${t}%`);} return pts; };
+  document.querySelectorAll('.torn').forEach(el => {
+    const m = el.dataset.torn || 'all', D = 3.2, N = 28;
+    const top = /all|top|tb/.test(m) ? edge(0,100,0,'x',D,N) : ['0% 0%','100% 0%'];
+    const right = /all|lr/.test(m) ? edge(0,100,100,'y',D*1.6,10) : ['100% 0%','100% 100%'];
+    const bottom = /all|tb/.test(m) ? edge(100,0,100,'x',D,N) : ['100% 100%','0% 100%'];
+    const left = /all|lr/.test(m) ? edge(100,0,0,'y',D*1.6,10) : ['0% 100%','0% 0%'];
+    el.style.clipPath = `polygon(${[...top,...right,...bottom,...left].join(',')})`;
+  });
+})();
+
+// Hold-to-pay demo (signature interaction). Timings from WEBSITE.md §3; illustrated, not measured.
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hold = document.getElementById('hold'), ring = document.getElementById('ringFill'), scanner = document.getElementById('scanner');
+  const checks = document.getElementById('checks'), items = [...checks.querySelectorAll('li')];
+  const screen = document.getElementById('phoneScreen'), result = document.getElementById('result');
+  const idleScreen = screen.innerHTML, HOLD_MS = reduce ? 1 : 600, C = 289;
+  let t0 = 0, raf = 0, busy = false, done = false, timers = [];
+  const setRing = p => ring.style.strokeDashoffset = C * (1 - p);
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  function reset(msg){ clear(); cancelAnimationFrame(raf); busy=false; done=false; setRing(0); scanner.classList.remove('glow'); checks.classList.remove('on'); items.forEach(li=>li.classList.remove('ok')); screen.innerHTML = idleScreen; result.textContent = msg || ''; }
+  function settle(){
+    busy = true; done = true; setRing(1); scanner.classList.add('glow'); checks.classList.add('on');
+    screen.innerHTML = '<span style="color:var(--ink-3)">Checking…</span>';
+    items.forEach((li,i) => timers.push(setTimeout(() => li.classList.add('ok'), reduce ? 0 : 150*(i+1))));
+    timers.push(setTimeout(() => {
+      screen.innerHTML = '<svg width="18" height="18" style="stroke:#1B683E"><use href="#check"/></svg><span style="font-size:1.35em;margin-top:2px">PKR 180</span><span style="color:#1B683E;font-weight:600;font-size:.78em">RECEIVED</span>';
+      result.innerHTML = 'PAYMENT SUCCESSFUL — PKR 180 RECEIVED. <button class="textbtn" type="button" id="again">Pay again</button>';
+      document.getElementById('again').onclick = () => { reset(); hold.focus(); };
+      scanner.classList.remove('glow'); busy = false;
+    }, reduce ? 200 : 1500));
+  }
+  function tick(){ const p = Math.min(1,(performance.now()-t0)/HOLD_MS); setRing(p); if (p>=1) return settle(); raf = requestAnimationFrame(tick); }
+  function down(e){ if (busy || done) return; if (e.type==='pointerdown') hold.setPointerCapture(e.pointerId); result.textContent='Checking…'; t0=performance.now(); raf=requestAnimationFrame(tick); }
+  function up(){ if (done || busy) return; cancelAnimationFrame(raf); reset('Hold a little longer. Scanners need a steady thumb.'); }
+  hold.addEventListener('pointerdown', down); hold.addEventListener('pointerup', up); hold.addEventListener('pointercancel', up);
+  hold.addEventListener('keydown', e => { if ((e.key===' '||e.key==='Enter') && !e.repeat){ e.preventDefault(); down(e);} });
+  hold.addEventListener('keyup', e => { if (e.key===' '||e.key==='Enter') up(); });
+  hold.addEventListener('contextmenu', e => e.preventDefault());
+  document.getElementById('tapPay').onclick = () => { if (!busy) { reset(); settle(); } };
+  // thumb-sized cursor over the scanner
+  const cur = document.querySelector('.thumb-cursor');
+  hold.addEventListener('pointermove', e => { if (e.pointerType!=='mouse') return; cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px'; cur.style.opacity=1; });
+  hold.addEventListener('pointerleave', () => cur.style.opacity=0);
+  // one sensor glow at 1.2 s to say "this is pressable" (no loop)
+  if (!reduce) setTimeout(() => { if (!busy && !done) { scanner.classList.add('glow'); setTimeout(()=>{ if(!done) scanner.classList.remove('glow'); }, 500);} }, 1200);
+})();
+
+// Global pause control
+document.querySelector('.pause').addEventListener('click', e => {
+  const b = e.currentTarget, on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', on); document.documentElement.classList.toggle('paused', on);
+  b.querySelector('span').textContent = on ? 'Play animations' : 'Pause animations';
+});
+</script>
+</body>
+</html>

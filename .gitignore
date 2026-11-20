@@ -1,30 +1,23 @@
-# dependencies
 node_modules/
-.pnpm-store/
-
-# builds
-dist/
 .next/
 out/
-*.tsbuildinfo
 coverage/
+.vercel/
 
-# env & secrets: never commit
+# Secrets: never commit. Templates (*.example) are fine.
 .env
-.env.*
-!.env.example
-.demo-credentials.local.md
+.env*.local
 *.pem
 *.key
+.demo-credentials*.md
 
-# os / editors
-.DS_Store
-Thumbs.db
-.vscode/*
-!.vscode/extensions.json
-.idea/
+# Generated
+*.tsbuildinfo
+next-env.d.ts
 
-# logs
-*.log
-npm-debug.log*
-pnpm-debug.log*
+# Raw generated art (optimised cut-outs ship from public/ instead)
+/images/
+/brand/art/
+
+# Vendored AI-agent skills (installed tooling, not FingerPay code)
+/.agents/

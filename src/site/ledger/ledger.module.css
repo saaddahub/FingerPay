@@ -1,0 +1,87 @@
+/* The fine print (PAGE.md §7): Apple's spec sheet meets Adam Perlis's stats rows. */
+.ledger {
+  padding-block: var(--s-10) var(--s-11);
+  row-gap: var(--s-5);
+}
+.title {
+  grid-column: 1 / span 7;
+}
+.lead {
+  grid-column: 1 / span 5;
+  max-width: 40ch;
+}
+.rows {
+  grid-column: 1 / -1;
+  margin-top: var(--s-8);
+}
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  align-items: baseline;
+  padding-block: var(--s-5);
+}
+.rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--hairline);
+  background: var(--rule);
+  transform-origin: left center;
+}
+.label {
+  grid-column: 1 / span 5;
+  color: var(--ink-2);
+}
+.valueCell {
+  grid-column: 6 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-2);
+  text-align: right;
+}
+.value {
+  font-size: var(--t-title);
+  line-height: 1.08;
+  letter-spacing: var(--track-title);
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: "opsz" 32;
+  color: var(--ink);
+}
+.note {
+  color: var(--ink-2);
+  font-weight: 400;
+  max-width: 28ch;
+}
+
+.rows[data-live] .row:not([data-shown]) .rule {
+  transform: scaleX(0);
+}
+.rows[data-live] .row:not([data-shown]) .label,
+.rows[data-live] .row:not([data-shown]) .value,
+.rows[data-live] .row .note {
+  opacity: 0;
+}
+
+@media (max-width: 767px) {
+  .ledger {
+    padding-block: var(--s-9);
+  }
+  .title,
+  .lead {
+    grid-column: 1 / -1;
+  }
+  .row {
+    grid-template-columns: 1fr;
+    row-gap: var(--s-2);
+  }
+  .label,
+  .valueCell {
+    grid-column: 1;
+  }
+  .valueCell {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

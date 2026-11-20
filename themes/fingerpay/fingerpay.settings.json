@@ -1,0 +1,350 @@
+{
+  "name": "fingerpay",
+  "like": "neutral",
+  "mode": "both",
+  "settings": [
+    {
+      "thing": "accent",
+      "value": "#295E90",
+      "source": "dial"
+    },
+    {
+      "thing": "neutral",
+      "value": "#655F59",
+      "source": "dial"
+    },
+    {
+      "thing": "success",
+      "value": "#1B683E",
+      "source": "dial"
+    },
+    {
+      "thing": "warning",
+      "value": "#E2A93B",
+      "source": "dial"
+    },
+    {
+      "thing": "danger",
+      "value": "#AF2934",
+      "source": "dial"
+    },
+    {
+      "thing": "info",
+      "value": "#655F59",
+      "source": "dial"
+    },
+    {
+      "thing": "vibrancy",
+      "value": "40",
+      "source": "dial"
+    },
+    {
+      "thing": "headings",
+      "value": "tight",
+      "source": "dial",
+      "axis": "tracking"
+    },
+    {
+      "thing": "type",
+      "value": "standard",
+      "source": "dial"
+    },
+    {
+      "thing": "text-size",
+      "value": "16",
+      "source": "dial"
+    },
+    {
+      "thing": "--color-background-body",
+      "value": "#EFE9DE",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-surface",
+      "value": "#F6F2EB",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-card",
+      "value": "#F6F2EB",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-popover",
+      "value": "#FAF7F3",
+      "source": "token",
+      "mode": "light",
+      "note": "no part of this Core reads --color-background-popover, and no token it feeds is read, so it changes nothing you see now; it is set as asked because a dial writes it too"
+    },
+    {
+      "thing": "--color-text-primary",
+      "value": "#1C1C1F",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-secondary",
+      "value": "#4C4741",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-disabled",
+      "value": "#9D9790",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-background-inverted",
+      "value": "#1C1C1F",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-accent",
+      "value": "#295E90",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-accent",
+      "value": "#265B8D",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-on-accent",
+      "value": "#FAF7F3",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-success",
+      "value": "#1B683E",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-success",
+      "value": "#1B683E",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-on-success",
+      "value": "#FAF7F3",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-warning",
+      "value": "#E2A93B",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-warning",
+      "value": "#81561E",
+      "source": "token",
+      "mode": "light",
+      "note": "no part reads --color-text-warning itself, but --color-icon-warning, --color-border-warning are built from it, so the change shows wherever those are used"
+    },
+    {
+      "thing": "--color-on-warning",
+      "value": "#1C1C1F",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-error",
+      "value": "#AF2934",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-text-error",
+      "value": "#A82C34",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-on-error",
+      "value": "#FAF7F3",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-border",
+      "value": "rgba(28, 28, 31, 0.08)",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-border-emphasized",
+      "value": "rgba(28, 28, 31, 0.54)",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--color-accent-muted",
+      "value": "rgba(41, 94, 144, 0.22)",
+      "source": "token",
+      "mode": "light"
+    },
+    {
+      "thing": "--focus-outline-width",
+      "value": "2px",
+      "source": "token"
+    },
+    {
+      "thing": "--focus-outline-offset",
+      "value": "3px",
+      "source": "token"
+    },
+    {
+      "thing": "font",
+      "value": "\"Bricolage Grotesque Variable\", \"Instrument Sans Variable\", -apple-system, sans-serif",
+      "source": "dial",
+      "on": "heading"
+    },
+    {
+      "thing": "font",
+      "value": "\"Instrument Sans Variable\", -apple-system, \"Segoe UI\", Roboto, sans-serif",
+      "source": "dial",
+      "on": "body"
+    },
+    {
+      "thing": "font",
+      "value": "\"JetBrains Mono Variable\", ui-monospace, \"SF Mono\", Consolas, monospace",
+      "source": "dial",
+      "on": "code"
+    },
+    {
+      "thing": "--color-background-body",
+      "value": "#0E0E11",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-surface",
+      "value": "#17171A",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-card",
+      "value": "#17171A",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-popover",
+      "value": "#202023",
+      "source": "token",
+      "mode": "dark",
+      "note": "no part of this Core reads --color-background-popover, and no token it feeds is read, so it changes nothing you see now; it is set as asked because a dial writes it too"
+    },
+    {
+      "thing": "--color-text-primary",
+      "value": "#ECECEF",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-secondary",
+      "value": "#BDBDC1",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-disabled",
+      "value": "#68686D",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-background-inverted",
+      "value": "#ECECEF",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-accent",
+      "value": "#77AADB",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-accent",
+      "value": "#88B6E2",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-on-accent",
+      "value": "#0E0E11",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-success",
+      "value": "#55C483",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-success",
+      "value": "#72D699",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-on-success",
+      "value": "#0E0E11",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-warning",
+      "value": "#EBBD57",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-text-warning",
+      "value": "#EAC578",
+      "source": "token",
+      "mode": "dark",
+      "note": "no part reads --color-text-warning itself, but --color-icon-warning, --color-border-warning are built from it, so the change shows wherever those are used"
+    },
+    {
+      "thing": "--color-on-warning",
+      "value": "#0E0E11",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-border",
+      "value": "rgba(236, 236, 239, 0.08)",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-border-emphasized",
+      "value": "rgba(236, 236, 239, 0.40)",
+      "source": "token",
+      "mode": "dark"
+    },
+    {
+      "thing": "--color-accent-muted",
+      "value": "rgba(119, 170, 219, 0.32)",
+      "source": "token",
+      "mode": "dark"
+    }
+  ],
+  "palette": "73f262a1d6b4893f42c8ae0eddac6739bd31eb0c1cbb663a757b153cb2e93cba",
+  "lifted": []
+}

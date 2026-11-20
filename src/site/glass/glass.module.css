@@ -1,0 +1,97 @@
+/* Glass (SYSTEM.md §6). Light on paper, dark on ink; the nav swaps when <html data-nav="ink">. */
+.glass {
+  --ox: 0px;
+  --oy: 0px;
+  --press: 1;
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-light-blur);
+  -webkit-backdrop-filter: var(--glass-light-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--fg);
+  transform: translate3d(var(--ox), var(--oy), 0) scale(var(--press));
+  transition: --glass-bg var(--d-base) var(--ease-out), --fg var(--d-base) var(--ease-out), box-shadow var(--d-base) var(--ease-out);
+}
+.glass::before,
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* Specular highlight: follows the same spring as the magnetic pull */
+.glass::before {
+  background: radial-gradient(8.75rem circle at var(--mx) var(--my), var(--specular), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  mix-blend-mode: soft-light;
+}
+.glass[data-hover]::before {
+  opacity: 1;
+  transition-duration: var(--d-fast);
+}
+/* Rim: a 1 px gradient border made with a mask */
+.glass::after {
+  padding: var(--hairline);
+  background: var(--rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* Inner parallax: content slides a further 0.4 × the pull inside the glass (MOTION.md §3.2) */
+.inner {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  transform: translate3d(calc(var(--ox) * 0.4), calc(var(--oy) * 0.4), 0);
+}
+
+:global(html[data-nav="ink"]) .glass,
+.dark {
+  --glass-bg: var(--glass-dark-bg);
+  --glass-shadow: var(--glass-dark-shadow);
+  --fg: var(--night-text);
+  --fg-2: var(--night-2);
+  --specular: rgba(255, 255, 255, 0.18);
+  --rim: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.08));
+  backdrop-filter: var(--glass-dark-blur);
+  -webkit-backdrop-filter: var(--glass-dark-blur);
+}
+
+/* Reduced motion: press tints instead of scaling */
+.glass[data-pressed] {
+  background: color-mix(in srgb, var(--glass-bg), var(--fg) 6%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    --glass-bg: var(--paper-2);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 0 0 var(--hairline) var(--rule);
+  }
+  :global(html[data-nav="ink"]) .glass,
+  .dark {
+    --glass-bg: var(--solid-dark);
+    box-shadow: 0 0 0 var(--hairline) var(--night-rule);
+  }
+  .glass::before,
+  .glass::after {
+    display: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass {
+    --glass-bg: var(--paper);
+    box-shadow: 0 0 0 calc(var(--hairline) * 1.5) var(--ink);
+  }
+  :global(html[data-nav="ink"]) .glass,
+  .dark {
+    --glass-bg: var(--ink);
+    box-shadow: 0 0 0 calc(var(--hairline) * 1.5) var(--night-text);
+  }
+}

@@ -1,56 +1,43 @@
-name: CI
-
+name: ci
 on:
   push:
-    branches: [main]
   pull_request:
-
 permissions:
   contents: read
 
 jobs:
-  verify:
+  checks:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }  # gitleaks scans the full history
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:unit
+      - run: npm run test:db
+      - run: npm run build
+      - run: npx astryx doctor --built .
+      - run: npm audit --omit=dev --audit-level=high
+      - run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.28.0 git /repo --config /repo/.gitleaks.toml --redact --no-banner
 
-      - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Dependency audit (production)
-        run: pnpm audit --prod --audit-level=high
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Build shared contracts
-        run: pnpm --filter @fingerpay/contracts build
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Unit tests (contracts + backend)
-        run: pnpm test
-
-      - name: Security hardening tests
-        run: pnpm test:security
-
-      - name: Integration tests (Testcontainers Postgres 17)
-        run: pnpm test:integration
+  integration:
+    needs: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npx supabase start
+      - run: npm run dev:setup
+      - name: seed twice (must be repeatable)
+        run: npm run seed:demo && npm run seed:demo
+      - run: npm run build
+      - name: start the app
+        run: |
+          npm start &
+          for i in $(seq 1 60); do curl -fs http://127.0.0.1:3000/api/v1/system/health && exit 0; sleep 1; done; exit 1
+      - run: npm run test:http

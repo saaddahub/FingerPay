@@ -1,0 +1,46 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "concept",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\saads\\AppData\\Local\\Temp\\claude\\60428b391c1af5bc\\5d927818-529f-4ced-a4aa-a7a637188f36\\scratchpad\\serve-concept.mjs"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "comps",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4180",
+        "--bind",
+        "127.0.0.1"
+      ],
+      "port": 4180
+    },
+    {
+      "name": "prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start",
+        "--",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
+    }
+  ]
+}

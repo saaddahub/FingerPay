@@ -1,0 +1,17 @@
+title = "FingerPay"
+
+[extend]
+useDefault = true
+
+# Gitignored local-only files (they are meant to hold secrets) and generated output.
+[allowlist]
+description = "local secrets files, dependencies and build output"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)\.next/''',
+  '''(^|/)\.git/''',
+  '''(^|/)supabase/\.temp/''',
+  '''(^|/)\.env[^/]*\.local$''',
+  '''(^|/)\.demo-credentials[^/]*\.md$''',
+  '''(^|/)tsconfig\.tsbuildinfo$''',
+]

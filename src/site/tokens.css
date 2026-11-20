@@ -1,0 +1,116 @@
+/* FingerPay v4 "Paper & Ink" tokens. The only file on the landing page allowed to hold raw values.
+   Source: docs/design/SYSTEM.md §1–6 and docs/design/MOTION.md §1.1. */
+@import "@fontsource-variable/inter/opsz.css";
+@import "@fontsource-variable/geist-mono/wght.css";
+
+@property --fg { syntax: "<color>"; inherits: true; initial-value: #0a0a0b; }
+@property --fg-2 { syntax: "<color>"; inherits: true; initial-value: #6e6e73; }
+@property --glass-bg { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, 0.62); }
+
+:root {
+  /* Colour */
+  --paper: #ffffff;
+  --paper-2: #f5f5f7;
+  --ink: #0a0a0b;
+  --ink-2: #6e6e73;
+  --ink-3: #a1a1a6;
+  --rule: rgba(10, 10, 11, 0.1);
+  --night-text: #f5f5f7;
+  --night-2: #8e8e93;
+  --night-rule: rgba(245, 245, 247, 0.12);
+  --settle: #0a7f4b;
+  --settle-night: #3ddc97;
+
+  --fg: var(--ink);
+  --fg-2: var(--ink-2);
+  --rule-current: var(--rule);
+
+  /* Type */
+  --font-sans: "Inter Variable", "Inter Fallback", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --t-hero: clamp(3.25rem, 7.4vw, 8.5rem);
+  --t-mega: clamp(4rem, 12.5vw, 12.5rem);
+  --t-display: clamp(2.5rem, 6vw, 6rem);
+  --t-title: clamp(1.5rem, 2.6vw, 2.5rem);
+  --t-lead: clamp(1.125rem, 1.35vw, 1.375rem);
+  --t-body: 1rem;
+  --t-caption: 0.8125rem;
+  --t-mono: 0.9375rem;
+  --t-mono-s: 0.6875rem;
+  --track-mega: -0.045em;
+  --track-display: -0.04em;
+  --track-title: -0.03em;
+  --track-lead: -0.014em;
+  --track-body: -0.011em;
+
+  /* Grid and space */
+  --page-x: clamp(1rem, 4vw, 3rem);
+  --gutter: clamp(1rem, 1.6vw, 1.5rem);
+  --content-max: 100rem;
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 8rem;
+  --s-11: 12rem;
+  --hairline: 1px;
+  --focus-ring: 2px;
+
+  /* Radii */
+  --r-pill: 999px;
+  --r-bubble: 1.25rem;
+  --r-bubble-tail: 0.375rem;
+  --r-card: 1.5rem;
+
+  /* Glass (SYSTEM.md §6; the dark values are the client's portfolio nav, unchanged) */
+  --glass-light-bg: rgba(255, 255, 255, 0.62);
+  --glass-light-blur: blur(20px) saturate(180%);
+  --glass-light-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 0 1px rgba(10, 10, 11, 0.06), 0 10px 30px rgba(10, 10, 11, 0.08), 0 1px 2px rgba(10, 10, 11, 0.06);
+  --glass-dark-bg: rgba(22, 22, 24, 0.6);
+  --glass-dark-blur: blur(16px) saturate(160%);
+  --glass-dark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.5);
+  --glass-bg: var(--glass-light-bg);
+  --glass-shadow: var(--glass-light-shadow);
+  --specular: rgba(255, 255, 255, 0.75);
+  --rim: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.35));
+  --solid-dark: #161618;
+
+  /* Phone placeholder (BUILD.md §5: 1290 × 2796 frame) */
+  --phone-ratio: 0.4614;
+
+  /* Motion (MOTION.md §1.1) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --d-press: 100ms;
+  --d-fast: 200ms;
+  --d-base: 450ms;
+  --d-slow: 800ms;
+
+  /* Layout */
+  --nav-h: 2.5rem;
+  --tap: 2.75rem;
+}
+
+[data-ground="ink"] {
+  --fg: var(--night-text);
+  --fg-2: var(--night-2);
+  --rule-current: var(--night-rule);
+}
+
+/* Metric-matched fallback so the Inter swap doesn't shift layout (BUILD.md §7). */
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22.4%;
+  line-gap-override: 0%;
+}

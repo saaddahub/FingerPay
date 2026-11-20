@@ -1,0 +1,707 @@
+/* The Inside stage: hero + dive + three words + slit, one sticky frame (PAGE.md §3–5, MOTION.md §2, §5.3). */
+.stage {
+  --p-len: 520vh;
+  --q-len: 90svh;
+  --phone-h: min(64svh, 37.5rem);
+  --phone-w: calc(var(--phone-h) * var(--phone-ratio));
+  position: relative;
+  height: calc(100svh + var(--p-len) + var(--q-len));
+}
+
+.skipInline {
+  position: absolute;
+  top: calc(100svh - var(--s-9));
+  left: var(--page-x);
+  z-index: 20;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.skipInline:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.frame {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--paper);
+  isolation: isolate;
+}
+.frame[data-ground="ink"] {
+  background: var(--ink);
+}
+
+/* Layer 1: the app frame (placeholder phone until the client's frame arrives, BUILD.md §5) */
+.plateLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.plate {
+  position: relative;
+  width: var(--phone-w);
+  height: var(--phone-h);
+}
+.phoneBody {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--phone-w) * 0.15);
+  box-shadow: inset 0 0 0 calc(var(--hairline) * 1.5) var(--ink);
+}
+.island {
+  position: absolute;
+  top: 2.4%;
+  left: 50%;
+  width: 30%;
+  height: 3.2%;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+.screen {
+  position: absolute;
+  inset: 1.6% 3.4%;
+  border-radius: calc(var(--phone-w) * 0.12);
+  box-shadow: inset 0 0 0 var(--hairline) var(--rule);
+  container-type: size;
+  color: var(--ink);
+}
+.screenUi {
+  position: absolute;
+  inset: 0;
+}
+.store {
+  position: absolute;
+  top: 12cqh;
+  inset-inline: 0;
+  text-align: center;
+  font-size: 4.6cqw;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.amount {
+  position: absolute;
+  top: 19cqh;
+  inset-inline: 0;
+  text-align: center;
+  font-size: 12cqw;
+  font-weight: 500;
+  letter-spacing: var(--track-title);
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: "opsz" 32;
+}
+.coinSlot {
+  position: absolute;
+  left: 50%;
+  top: 60cqh;
+  width: 34cqw;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  color: var(--ink);
+}
+.coinSlot svg {
+  width: 100%;
+  height: 100%;
+}
+.live .coinSlot {
+  visibility: hidden; /* the canvas draws it, from the first frame (MOTION.md §2.1) */
+}
+.prompt {
+  position: absolute;
+  top: 80cqh;
+  inset-inline: 0;
+  text-align: center;
+  font-size: 4.4cqw;
+  color: var(--ink-2);
+}
+
+/* Layer 2: the ridge camera */
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: none;
+}
+.live .canvas {
+  display: block;
+}
+
+/* Layer 3: hero type */
+.heroLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.heroLayer a,
+.heroLayer button {
+  pointer-events: auto;
+}
+.heroTitle {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  grid-template-columns: 1fr var(--phone-w) 1fr;
+  align-items: center;
+  column-gap: var(--s-7);
+  padding-inline: var(--page-x);
+  font-size: var(--t-hero);
+  line-height: 0.9;
+  letter-spacing: var(--track-mega);
+  font-weight: 400;
+  font-variation-settings: "opsz" 32;
+  white-space: nowrap;
+}
+.heroLeft {
+  grid-column: 1;
+  justify-self: end;
+}
+.heroRight {
+  grid-column: 3;
+  justify-self: start;
+}
+.heroLead {
+  position: absolute;
+  left: var(--page-x);
+  bottom: var(--s-9); /* clears the honesty pill below it */
+  max-width: 30ch;
+}
+.cue {
+  position: absolute;
+  right: var(--page-x);
+  bottom: var(--s-8);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: var(--ink-2);
+}
+.cueLine {
+  display: block;
+  width: 6rem;
+  height: var(--hairline);
+  background: currentColor;
+  transform-origin: left center;
+  animation: cue 2.4s var(--ease-in-out) infinite alternate;
+}
+:global(html[data-scrolled]) .cueLine {
+  animation: none;
+}
+@keyframes cue {
+  from { transform: scaleX(0.5); }
+  to { transform: scaleX(1); }
+}
+
+/* Hero entrance from first paint, in CSS so nothing flashes before hydration (MOTION.md §4.2) */
+@media (prefers-reduced-motion: no-preference) {
+  .heroTitle [data-l] {
+    animation: rise 0.9s var(--ease-expo-out) backwards;
+  }
+  .heroTitle .mask:nth-child(2) [data-l] { animation-delay: 30ms; }
+  .heroTitle .mask:nth-child(3) [data-l] { animation-delay: 60ms; }
+  .heroTitle .mask:nth-child(4) [data-l] { animation-delay: 90ms; }
+  .heroTitle .mask:nth-child(5) [data-l] { animation-delay: 120ms; }
+  .heroTitle .mask:nth-child(6) [data-l] { animation-delay: 150ms; }
+  .heroTitle .mask:nth-child(7) [data-l] { animation-delay: 180ms; }
+  .heroTitle .mask:nth-child(8) [data-l] { animation-delay: 210ms; }
+  .heroRight [data-l] {
+    animation-delay: 120ms;
+  }
+  .heroRight .mask:nth-child(n + 2) [data-l] {
+    animation-delay: calc(120ms + 30ms * 4);
+  }
+  /* `backwards` fill: once finished, the scroll-driven inline styles take over again */
+  .plateWrap {
+    animation: lift 0.9s var(--ease-out) backwards;
+  }
+  .heroLead {
+    animation: fade 0.6s var(--ease-out) 0.3s backwards;
+  }
+  .cue {
+    animation: fade 0.6s var(--ease-out) 0.5s backwards;
+  }
+}
+@keyframes rise {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+@keyframes lift {
+  from { transform: translateY(1.5rem); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Layer 4: hairlines (act 3) */
+.hairlines {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.hairH,
+.hairV,
+.slitLine {
+  position: absolute;
+  display: block;
+}
+.hairH {
+  inset-inline: 0;
+  top: 50%;
+  height: var(--hairline);
+  background: var(--night-rule);
+  transform: scaleX(0);
+}
+.hairV {
+  top: 0;
+  bottom: 0;
+  left: calc(var(--page-x) + (100% - 2 * var(--page-x) + var(--gutter)) * 8 / 12 - var(--gutter) / 2);
+  width: var(--hairline);
+  background: var(--night-rule);
+  transform: scaleY(0);
+}
+.hairRelease {
+  position: absolute;
+  inset: 0;
+}
+.cols {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-inline: var(--page-x);
+  opacity: 0;
+}
+.cols > span {
+  box-shadow: inset var(--hairline) 0 0 var(--night-rule), var(--hairline) 0 0 var(--night-rule);
+  opacity: 0.5;
+}
+
+/* Layer 5: inside (the three words) */
+.inside {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  --fg: var(--night-text);
+  --fg-2: var(--night-2);
+  color: var(--fg);
+  visibility: hidden;
+}
+.inside[data-on] {
+  visibility: visible;
+}
+.insideContent {
+  position: absolute;
+  inset: 0;
+}
+.index {
+  position: absolute;
+  top: calc(var(--s-4) + var(--nav-h) + var(--s-7));
+  left: var(--page-x);
+  color: var(--night-2);
+  display: flex;
+  gap: 0.5ch;
+}
+.indexNum {
+  display: inline-block;
+  overflow: clip;
+}
+.indexNum > span {
+  display: inline-block;
+}
+.panel {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+.panel[data-on] {
+  visibility: visible;
+}
+.word {
+  position: absolute;
+  left: var(--page-x);
+  top: calc(50% + var(--s-5));
+  font-size: var(--t-mega);
+  line-height: 0.88;
+  letter-spacing: var(--track-mega);
+  font-weight: 400;
+  font-variation-settings: "opsz" 32;
+}
+.panel [data-l] {
+  transform: translateY(110%);
+  opacity: 0;
+}
+.para {
+  position: absolute;
+  right: var(--page-x);
+  bottom: calc(50% + var(--s-6));
+  width: min(30rem, 32vw);
+}
+.para [data-line] {
+  display: inline;
+  opacity: 0;
+}
+
+/* Instant: the time rail */
+.rail {
+  position: absolute;
+  inset-inline: var(--page-x);
+  top: 86%;
+  height: var(--hairline);
+}
+.railLine,
+.railCovered {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.railLine {
+  background: var(--night-rule);
+}
+.railCovered {
+  background: var(--night-2);
+  opacity: 0.3;
+}
+.tick {
+  position: absolute;
+  top: 0;
+  width: var(--hairline);
+  height: var(--s-2);
+  background: var(--night-2);
+  opacity: 0;
+}
+.tick[data-t="0"] { left: 0; }
+.tick[data-t="1"] { left: 33.333%; }
+.tick[data-t="2"] { left: 66.667%; }
+.tick[data-t="3"] { left: calc(100% - var(--hairline)); }
+.tickLabel {
+  position: absolute;
+  top: var(--s-3);
+  left: 0;
+  translate: -50% 0;
+  color: var(--night-2);
+  white-space: nowrap;
+}
+.tick[data-t="0"] .tickLabel { translate: 0 0; }
+.tick[data-t="3"] .tickLabel { translate: -100% 0; }
+.railNote {
+  position: absolute;
+  right: 0;
+  top: var(--s-7);
+  color: var(--night-2);
+  opacity: 0;
+}
+.track {
+  position: absolute;
+  inset: 0;
+}
+.marker {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--hairline);
+  height: var(--s-4);
+  background: var(--night-text);
+}
+.marker::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--s-2) * -0.75);
+  left: 50%;
+  width: 0.375rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--night-text);
+  translate: -50% 0;
+}
+.markerLabel {
+  position: absolute;
+  bottom: calc(100% + var(--s-3));
+  left: 50%;
+  translate: -50% 0;
+  color: var(--night-text);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* Private: ridges to a line */
+.private {
+  position: absolute;
+  inset-inline: var(--page-x);
+  top: 56%;
+  bottom: 8%;
+}
+.privateRidges {
+  position: absolute;
+  inset: 0 0 18% 0;
+  width: 100%;
+  height: 82%;
+  overflow: visible;
+  opacity: 0;
+  transform-origin: left center;
+}
+.privateRidges path {
+  fill: none;
+  stroke: var(--night-text);
+  stroke-width: 1.5;
+}
+.hash {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  font-family: var(--font-mono);
+  font-size: var(--t-mono);
+  color: var(--night-2);
+  clip-path: inset(0 100% 0 0);
+}
+.hashText {
+  border-top: var(--hairline) solid var(--night-rule);
+  padding-top: var(--s-3);
+}
+
+/* Certain: the settle card (dark glass, SYSTEM.md §6.2) */
+.card {
+  position: absolute;
+  right: var(--page-x);
+  top: calc(50% + var(--s-6));
+  width: min(22.5rem, 32vw);
+  padding: var(--s-5);
+  border-radius: var(--r-card);
+  background: var(--glass-dark-bg);
+  backdrop-filter: var(--glass-dark-blur);
+  -webkit-backdrop-filter: var(--glass-dark-blur);
+  box-shadow: var(--glass-dark-shadow);
+  opacity: 0;
+}
+.cardStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--settle-night);
+}
+.cardStatus [data-st] {
+  opacity: 0;
+}
+.dot {
+  position: relative;
+  width: var(--s-2);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--settle-night);
+  transform: scale(0);
+}
+.dotRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 var(--hairline) var(--settle-night);
+  opacity: 0;
+}
+.cardAmount {
+  margin-top: var(--s-4);
+  font-size: var(--t-title);
+  line-height: 1.08;
+  letter-spacing: var(--track-title);
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: "opsz" 32;
+  opacity: 0;
+}
+.cardMeta {
+  margin-top: var(--s-2);
+  font-size: var(--t-caption);
+  color: var(--night-2);
+  opacity: 0;
+}
+
+/* Layer 6: the slit (ink → paper) */
+.slit {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: var(--paper);
+  clip-path: inset(50% 0);
+  visibility: hidden;
+}
+.slitLine {
+  inset-inline: 0;
+  top: 50%;
+  z-index: 6;
+  height: var(--hairline);
+  background: var(--paper);
+  opacity: 0;
+}
+
+/* Still version (reduced motion): no pinning; static panels in reading order (MOTION.md §9) */
+.still {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .stage {
+    --p-len: 400vh;
+    --phone-h: min(46svh, 25rem);
+  }
+  .heroTitle {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto var(--phone-h) auto;
+    row-gap: var(--s-4);
+  }
+  .heroLeft {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+  .heroRight {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: end;
+  }
+  .heroLead {
+    right: var(--page-x);
+    bottom: var(--s-6);
+    max-width: none;
+  }
+  .cue,
+  .hairV,
+  .cols {
+    display: none;
+  }
+  .word {
+    top: auto;
+    bottom: calc(50% + var(--s-4));
+  }
+  .para {
+    top: calc(50% + var(--s-5));
+    bottom: auto;
+    left: var(--page-x);
+    width: auto;
+  }
+  .private {
+    top: 70%;
+  }
+  .card {
+    top: auto;
+    bottom: var(--s-8);
+    left: var(--page-x);
+    width: auto;
+  }
+  .rail {
+    top: 88%;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .stage {
+    --p-len: 300vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    height: auto;
+  }
+  .frame {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+  .plateLayer {
+    height: 100svh;
+  }
+  .heroLayer {
+    position: relative;
+    height: 100svh;
+  }
+  .canvas,
+  .hairlines,
+  .slit,
+  .slitLine,
+  .index,
+  .skipInline,
+  .cueLine {
+    display: none;
+  }
+  .inside {
+    position: relative;
+    visibility: visible;
+    background: var(--ink);
+  }
+  .insideContent {
+    position: relative;
+  }
+  .still {
+    display: block;
+    position: relative;
+    height: 100svh;
+    color: var(--night-text);
+    overflow: hidden;
+  }
+  .still svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .panel {
+    position: relative;
+    visibility: visible;
+    min-height: 100svh;
+    border-top: var(--hairline) solid var(--night-rule);
+  }
+  .panel [data-l],
+  .para [data-line],
+  .tick,
+  .railNote,
+  .markerLabel,
+  .card,
+  .cardStatus [data-st],
+  .cardAmount,
+  .cardMeta {
+    transform: none;
+    opacity: 1;
+  }
+  .railLine,
+  .railCovered {
+    transform: none;
+  }
+  .railCovered {
+    transform: scaleX(0.8667);
+  }
+  .track {
+    transform: translateX(86.67%);
+  }
+  .dot {
+    transform: none;
+  }
+  .privateRidges {
+    display: none;
+  }
+  .hash {
+    clip-path: none;
+  }
+}

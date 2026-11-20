@@ -1,0 +1,183 @@
+/* Centred glass cluster (PAGE.md §2). */
+.nav {
+  position: fixed;
+  top: var(--s-5);
+  inset-inline: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  pointer-events: auto;
+}
+.orbLink {
+  display: grid;
+  place-items: center;
+  width: var(--nav-h);
+  height: var(--nav-h);
+  border-radius: 28%;
+  text-decoration: none;
+}
+.orbLink > span {
+  width: 100%;
+  height: 100%;
+}
+.orbLink::after {
+  /* invisible 44 px hit area around the 40 px orb */
+  inset: calc((var(--nav-h) - var(--tap)) / 2);
+}
+.pill {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  height: var(--nav-h);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  margin: 0;
+}
+.link,
+.contact {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  text-decoration: none;
+  color: var(--fg-2);
+  transition: color var(--d-fast) var(--ease-out);
+}
+.link:hover,
+.link:focus-visible {
+  color: var(--fg);
+}
+.contact {
+  display: flex;
+  align-items: center;
+  height: var(--nav-h);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  color: var(--fg);
+}
+.menuBtn {
+  display: none;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+}
+
+.honesty {
+  position: fixed;
+  left: var(--s-5);
+  bottom: var(--s-5);
+  z-index: 40;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-pill);
+  color: var(--fg-2);
+  text-decoration: none;
+  transition: opacity var(--d-base) var(--ease-out), visibility var(--d-base);
+}
+:global(html[data-film="on"]) .honesty {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Mobile: orb left, menu right, links in a glass sheet */
+.sheet {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0 0 var(--r-card) var(--r-card);
+  transform: none;
+  opacity: 0;
+  translate: 0 -1.5rem;
+  transition: opacity var(--d-base) var(--ease-out), translate var(--d-base) var(--ease-out), overlay var(--d-base) allow-discrete,
+    display var(--d-base) allow-discrete;
+}
+.sheet[open] {
+  opacity: 1;
+  translate: 0 0;
+}
+@starting-style {
+  .sheet[open] {
+    opacity: 0;
+    translate: 0 -1.5rem;
+  }
+}
+.sheet::backdrop {
+  background: rgba(10, 10, 11, 0.2);
+}
+.sheetBody {
+  display: grid;
+  gap: var(--s-6);
+  padding: var(--s-5) var(--page-x) var(--s-7);
+}
+.sheetClose {
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+}
+.sheetLinks {
+  display: grid;
+  gap: var(--s-4);
+}
+.sheetLinks a {
+  font-size: var(--t-title);
+  line-height: 1.08;
+  letter-spacing: var(--track-title);
+  font-variation-settings: "opsz" 32;
+  text-decoration: none;
+}
+.sheetContact {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+@media (max-width: 767px) {
+  .nav {
+    top: var(--s-4);
+    justify-content: stretch;
+    padding-inline: var(--page-x);
+  }
+  .cluster {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .pill,
+  .contact {
+    display: none;
+  }
+  .menuBtn {
+    display: grid;
+  }
+  .orbLink {
+    width: var(--tap);
+    height: var(--tap);
+  }
+  .honesty {
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+  }
+  :global(html[data-scrolled]) .honesty {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

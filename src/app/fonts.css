@@ -1,0 +1,10 @@
+/* Replaces @astryxdesign/theme-neutral/fonts.css (aliased in next.config.ts): that file pulls Figtree
+   from Google Fonts, which breaks CSP font-src 'self' and leaks visitor IPs. Same family, self-hosted. */
+@import '@fontsource/figtree/400.css';
+@import '@fontsource/figtree/500.css';
+@import '@fontsource/figtree/600.css';
+@import '@fontsource/figtree/700.css';
+/* FingerPay theme faces (themes/fingerpay): display, text and amounts. Self-hosted for the same CSP reason. */
+@import '@fontsource-variable/bricolage-grotesque/opsz.css';
+@import '@fontsource-variable/instrument-sans/index.css';
+@import '@fontsource-variable/jetbrains-mono/index.css';

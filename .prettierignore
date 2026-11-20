@@ -1,6 +1,0 @@
-pnpm-lock.yaml
-dist
-.next
-coverage
-docs/*.pdf
-backend/db/schema.sql

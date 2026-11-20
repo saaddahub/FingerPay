@@ -498,6 +498,8 @@ All routes live under `/api/v1`, take JSON bodies validated by zod, and map erro
 | `GET /system/health` | public (counts only for admin/auditor) | `api_health` |
 | `GET /me` | staff | `api_staff_context` |
 | `POST /terminals/pair` · `POST /terminals/{id}/revoke` | owner · owner/admin | `api_pair_terminal` · `api_revoke_terminal` |
+| `GET /terminals` · `POST /terminals/{id}/freeze` | owner · owner/cashier (freeze), owner (unfreeze) | `api_list_terminals` · `api_set_terminal_frozen` (added 2026-11-20; a frozen terminal opens no charges) |
+| `GET /terminals/self` | terminal (signed) | `api_terminal_status` |
 | `POST /pos/charges` | terminal + cashier | `api_open_charge` |
 | `POST /pos/charges/{id}/thumb` | terminal | `api_thumb_pay` |
 | `POST /pos/charges/{id}/cancel` | terminal | `api_cancel_charge` |

@@ -1,0 +1,338 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, MotionConfig, useReducedMotion } from "motion/react";
+import { BottomSheet } from "@astryxdesign/core/BottomSheet";
+import { Button } from "@astryxdesign/core/Button";
+import { VStack } from "@astryxdesign/core/Layout";
+import { Heading, Text } from "@astryxdesign/core/Text";
+import styles from "./wallet.module.css";
+
+const glyphs = {
+  bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
+  eye: "M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z M15 12a3 3 0 1 0-6 0 3 3 0 0 0 6 0Z",
+  eyeOff: "m3 3 18 18M10.6 10.7a2 2 0 0 0 2.7 2.7M9 6.4A11 11 0 0 1 12 6c6.4 0 10 6 10 6a13 13 0 0 1-2.2 2.6M6.2 7.6A15 15 0 0 0 2 12s3.6 6 10 6a10 10 0 0 0 4.4-1",
+  send: "M6 18 18 6M7 6h11v11",
+  request: "M18 6 6 18M6 7v11h11",
+  plus: "M12 5v14M5 12h14",
+  snow: "M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M4 10l4-1-1-4M20 14l-4 1 1 4M4 14l4 1-1 4M20 10l-4-1 1-4",
+  home: "m3 11 9-8 9 8M5 10v10h5v-6h4v6h5V10",
+  card: "M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm-1 5h18M7 15h3",
+  activity: "M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 5h8m-8 4h8m-8 4h5",
+  insights: "M12 3a9 9 0 1 0 9 9h-9V3Zm4 0v5h5a7 7 0 0 0-5-5Z",
+  profile: "M22 12a10 10 0 1 0-20 0 10 10 0 0 0 20 0Zm-7-2a3 3 0 1 0-6 0 3 3 0 0 0 6 0ZM6 20v-1a6 6 0 0 1 12 0v1",
+  contactless: "M6 9c1.8 1.5 1.8 4.5 0 6m4-8c2.9 2.7 2.9 7.3 0 10m4-12c4 3.8 4 10.2 0 14",
+} as const;
+
+function Glyph({ name }: { name: keyof typeof glyphs }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={glyphs[name]} />
+    </svg>
+  );
+}
+
+const cards = {
+  everyday: { name: "Everyday", lastFour: "2806" },
+  savings: { name: "Savings", lastFour: "0473" },
+  travel: { name: "Travel", lastFour: "7318" },
+} as const;
+type CardId = keyof typeof cards;
+
+const tabs = ["Home", "Cards", "Activity", "Insights", "Profile"] as const;
+const tabGlyphs = ["home", "card", "activity", "insights", "profile"] as const;
+const actions = ["Send", "Request", "Top up"] as const;
+const actionGlyphs = ["send", "request", "plus"] as const;
+type Action = typeof actions[number];
+type Activity = { id: number; label: string; note: string; amount: bigint; pending?: boolean };
+
+const initialActivity: Activity[] = [
+  { id: 2, label: "Counter payment", note: "Today · Everyday", amount: 18000n },
+  { id: 1, label: "Bank settlement", note: "Yesterday · Savings", amount: -120000n },
+];
+const sampleAmount = 18000n;
+const spring = { type: "spring", duration: 0.44, bounce: 0.16 } as const;
+
+function money(paisa: bigint) {
+  const amount = paisa < 0n ? -paisa : paisa;
+  return {
+    whole: (amount / 100n).toLocaleString("en-PK"),
+    cents: (amount % 100n).toString().padStart(2, "0"),
+  };
+}
+
+function ActivityRows({ rows }: { rows: Activity[] }) {
+  return (
+    <ul className={styles.rows}>
+      {rows.map((row) => {
+        const { whole, cents } = money(row.amount);
+        return (
+          <li className={styles.row} key={row.id}>
+            <span className={styles.rowIcon} data-credit={row.amount > 0n && !row.pending}>
+              <Glyph name={row.amount > 0n ? "request" : "send"} />
+            </span>
+            <span className={styles.rowCopy}><strong>{row.label}</strong><small>{row.note}</small></span>
+            <span className={styles.rowAmount}>{row.pending ? "" : row.amount < 0n ? "−" : "+"}Rs{whole}.{cents}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function Wallet() {
+  const [order, setOrder] = useState<CardId[]>(["travel", "savings", "everyday"]);
+  const [frozen, setFrozen] = useState<Partial<Record<CardId, boolean>>>({});
+  const [flipped, setFlipped] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [tab, setTab] = useState<typeof tabs[number]>("Home");
+  const [sheet, setSheet] = useState<Action | "Notifications" | null>(null);
+  const [notice, setNotice] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const [balance, setBalance] = useState(2480617n);
+  const [activity, setActivity] = useState(initialActivity);
+  const scroll = useRef<HTMLElement>(null);
+  const dragging = useRef(false);
+  const reducedMotion = useReducedMotion();
+  const active = order[0];
+  const activeFrozen = Boolean(frozen[active]);
+  const { whole, cents } = money(balance);
+  const home = tab === "Home";
+  const showCards = home || tab === "Cards";
+
+  useEffect(() => {
+    if (!toastVisible) return;
+    const timer = window.setTimeout(() => setToastVisible(false), 3500);
+    return () => window.clearTimeout(timer);
+  }, [notice, toastVisible]);
+
+  function announce(message: string) {
+    setNotice(message);
+    setToastVisible(true);
+  }
+
+  function navigate(next: typeof tabs[number]) {
+    setTab(next);
+    scroll.current?.scrollTo({ top: 0 });
+  }
+
+  function selectCard(id: CardId) {
+    setOrder((current) => [id, ...current.filter((card) => card !== id)]);
+    setFlipped(false);
+  }
+
+  function toggleFreeze() {
+    setFrozen((current) => ({ ...current, [active]: !activeFrozen }));
+    setFlipped(false);
+    announce(activeFrozen ? `${cards[active].name} card unfrozen. Payments are back on.` : `${cards[active].name} card frozen. Payments are paused.`);
+  }
+
+  function confirmAction(action: Action) {
+    if (action === "Send" && (activeFrozen || balance < sampleAmount)) return;
+    const delta = action === "Send" ? -sampleAmount : action === "Top up" ? sampleAmount : 0n;
+    setBalance((current) => current + delta);
+    setActivity((rows) => [{
+      id: (rows[0]?.id ?? 0) + 1,
+      label: action === "Send" ? "Demo payment sent" : action === "Request" ? "Demo request created" : "Demo top up",
+      note: action === "Request" ? "Just now · Pending" : `Just now · ${cards[active].name}`,
+      amount: action === "Request" ? sampleAmount : delta,
+      pending: action === "Request",
+    }, ...rows]);
+    announce(action === "Request" ? "Demo request created." : action === "Send" ? "Demo payment sent." : "Demo top up complete.");
+    setSheet(null);
+  }
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <main className={styles.stage}>
+        <section className={styles.device} aria-label="FingerPay mobile wallet prototype">
+          <section className={styles.scroll} ref={scroll} aria-label={`${tab} screen`}>
+            <header className={styles.header}>
+              <button className={styles.avatar} type="button" onClick={() => navigate("Profile")} aria-label="Open Rasheed's profile">RA</button>
+              <section className={styles.greeting}>
+                <Text color="inherit" className={styles.greetingLabel}>Good night</Text>
+                <Heading color="inherit" level={1} className={styles.name}>Rasheed</Heading>
+              </section>
+              <button type="button" className={styles.bell} aria-label="Notifications" onClick={() => setSheet("Notifications")}><Glyph name="bell" /></button>
+            </header>
+
+            <section className={styles.noticeArea} aria-live="polite" aria-atomic="true">
+              <AnimatePresence initial={false}>
+                {toastVisible && (
+                  <motion.p className={styles.notice} key={notice}
+                    initial={{ opacity: 0, y: -7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <Glyph name={activeFrozen ? "snow" : "activity"} />{notice}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </section>
+
+            {home && (
+              <section className={styles.balance} aria-label="Total balance">
+                <section className={styles.balanceLabel}>
+                  <Text color="inherit">Total balance</Text>
+                  <button type="button" className={styles.eye} onClick={() => setHidden(!hidden)} aria-label={hidden ? "Show balance" : "Hide balance"}>
+                    <Glyph name={hidden ? "eyeOff" : "eye"} />
+                  </button>
+                </section>
+                <p className={styles.amount} aria-label={hidden ? "Balance hidden" : `PKR ${whole}.${cents}`}>
+                  {hidden ? "••••••" : <><span className={styles.currency}>Rs</span>{whole}<small>.{cents}</small></>}
+                </p>
+                <p className={styles.delta}>{hidden ? "Monthly change hidden" : <><Glyph name="send" /><strong>+Rs1,284.50</strong> this month</>}</p>
+              </section>
+            )}
+
+            {!home && <Heading level={2} color="inherit" className={styles.screenTitle}>{tab}</Heading>}
+
+            {showCards && (
+              <>
+                <section className={styles.deck} aria-label="Payment cards">
+                  {(Object.keys(cards) as CardId[]).map((id) => {
+                    const slot = 2 - order.indexOf(id);
+                    const front = id === active;
+                    const isFlipped = front && flipped;
+                    const card = cards[id];
+                    return (
+                      <motion.button
+                        key={id}
+                        type="button"
+                        initial={false}
+                        layout={reducedMotion ? false : "position"}
+                        data-card={id}
+                        data-slot={slot}
+                        data-frozen={Boolean(frozen[id])}
+                        data-flipped={isFlipped}
+                        aria-label={front ? (isFlipped ? `Show front of ${card.name} card` : `Show ${card.name} card details`) : `Select ${card.name} card`}
+                        aria-describedby={isFlipped ? `wallet-card-details-${id}` : undefined}
+                        className={styles.card}
+                        transition={spring}
+                        drag={front ? "x" : false}
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={reducedMotion ? 0 : 0.32}
+                        dragMomentum={false}
+                        onDragStart={() => { dragging.current = true; }}
+                        onDragEnd={(_, { offset, velocity }) => {
+                          if (Math.abs(offset.x) > 36 || Math.abs(velocity.x) > 420) {
+                            selectCard(order[offset.x < 0 ? 1 : 2]);
+                          }
+                          requestAnimationFrame(() => { dragging.current = false; });
+                        }}
+                        onClick={() => {
+                          if (dragging.current) return;
+                          if (front) setFlipped(!flipped);
+                          else selectCard(id);
+                        }}
+                      >
+                        <span className={styles.flipper}>
+                          <span className={styles.cardFace} aria-hidden="true">
+                            <span className={styles.sheen} />
+                            <span className={styles.cardHeader}>
+                              <Image src="/brand/fingerpay-wordmark.svg" alt="" width={93} height={21} className={styles.wordmark} loading="eager" draggable={false} />
+                              <span className={styles.cardName}>{card.name}</span>
+                              {frozen[id] ? <span className={styles.frozenTag}>Frozen</span> : <Glyph name="contactless" />}
+                            </span>
+                            <span className={styles.chip} />
+                            <span className={styles.cardFooter}>
+                              <span><strong>•••• {card.lastFour}</strong><small>Rasheed Ahmed</small></span>
+                              <small>Virtual</small>
+                            </span>
+                            {frozen[id] && (
+                              <svg className={styles.frost} viewBox="0 0 352 220" preserveAspectRatio="none" aria-hidden="true">
+                                <path d="M0 43 46 62 72 103 45 140 0 163M46 62 78 27 132 0M72 103 138 113 173 65 157 27 193 0M45 140 74 184 50 220M138 113 129 153 74 184 126 206 171 220M129 153 178 178 201 137 173 65M178 178 222 220M201 137 259 151 279 102 249 66 173 65M249 66 282 31 279 0M279 102 330 89 352 116M282 31 331 38 352 14M330 89 331 38M259 151 305 190 289 220M305 190 352 168" />
+                              </svg>
+                            )}
+                          </span>
+                          <span className={styles.cardBack} aria-hidden={!isFlipped}>
+                            <span className={styles.strip} />
+                            <span className={styles.cardDetails} id={`wallet-card-details-${id}`}>
+                              <small>DEMO CARD NUMBER</small>
+                              <strong>•••• •••• •••• {card.lastFour}</strong>
+                              <span>Cardholder <strong>Rasheed Ahmed</strong></span>
+                            </span>
+                          </span>
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </section>
+
+                <section className={styles.actions} aria-label="Card actions">
+                  {actions.map((action, index) => (
+                    <button type="button" className={styles.action} key={action} onClick={() => setSheet(action)}>
+                      <span className={styles.actionIcon} data-primary={index === 0}><Glyph name={actionGlyphs[index]} /></span>
+                      {action}
+                    </button>
+                  ))}
+                  <button type="button" className={styles.action} onClick={toggleFreeze}>
+                    <span className={styles.actionIcon} data-frozen={activeFrozen}><Glyph name="snow" /></span>
+                    {activeFrozen ? "Unfreeze" : "Freeze"}
+                  </button>
+                </section>
+              </>
+            )}
+
+            {(home || tab === "Activity") && (
+              <section className={styles.activity} aria-label="Recent activity">
+                {home && (
+                  <header className={styles.activityHeader}>
+                    <Heading level={2} color="inherit" className={styles.sectionTitle}>Recent activity</Heading>
+                    <button type="button" className={styles.textButton} onClick={() => navigate("Activity")}>See all</button>
+                  </header>
+                )}
+                <ActivityRows rows={home ? activity.slice(0, 2) : activity} />
+              </section>
+            )}
+
+            {tab === "Insights" && (
+              <section className={styles.panel}>
+                <Heading level={3} color="inherit" className={styles.sectionTitle}>This month</Heading>
+                <Text color="inherit" className={styles.panelText}>Sample change in balance</Text>
+                <p className={styles.insightAmount}>{hidden ? "••••••" : "+Rs1,284.50"}</p>
+              </section>
+            )}
+
+            {tab === "Profile" && (
+              <section className={styles.panel}>
+                <Heading level={3} color="inherit" className={styles.sectionTitle}>Rasheed Ahmed</Heading>
+                <Text color="inherit" className={styles.panelText}>Rasheed Kiryana Store</Text>
+                <Text color="inherit" className={styles.panelText}>FingerPay is a student prototype. All accounts and transactions shown here are simulated.</Text>
+                <Button label={hidden ? "Show balance" : "Hide balance"} variant="secondary" onClick={() => setHidden(!hidden)} />
+              </section>
+            )}
+          </section>
+
+          <nav className={styles.dock} aria-label="Wallet navigation">
+            {tabs.map((name, index) => (
+              <button type="button" key={name} aria-current={tab === name ? "page" : undefined} onClick={() => navigate(name)}>
+                {tab === name && <motion.span layoutId="active-wallet-tab" className={styles.activeTab} transition={spring} aria-hidden="true" />}
+                <Glyph name={tabGlyphs[index]} />{name}
+              </button>
+            ))}
+          </nav>
+
+          <BottomSheet isOpen={sheet !== null} onOpenChange={(open) => { if (!open) setSheet(null); }}
+            label={sheet ?? "Wallet action"} height="hug" className={styles.sheet}>
+            <VStack gap={3}>
+              <Heading level={2} color="inherit">{sheet}</Heading>
+              <Text color="inherit">
+                {sheet === "Notifications" ? notice || "No new notifications." :
+                  sheet === "Send" && activeFrozen ? "This card is frozen. Unfreeze it to simulate a payment." :
+                    sheet === "Send" && balance < sampleAmount ? "There isn’t enough demo balance for this payment." :
+                      `Simulate ${sheet === "Send" ? "sending" : sheet === "Request" ? "requesting" : "adding"} PKR 180.00.`}
+              </Text>
+              {sheet && sheet !== "Notifications" && !(sheet === "Send" && (activeFrozen || balance < sampleAmount)) &&
+                <Button label={`Confirm demo ${sheet.toLowerCase()}`} variant="primary" onClick={() => confirmAction(sheet)} />}
+              <Button label="Close" variant="secondary" onClick={() => setSheet(null)} />
+            </VStack>
+          </BottomSheet>
+
+          <span className={styles.launch} aria-hidden="true">
+            <span className={styles.launchRing} />
+            <Image src="/brand/fingerpay-wordmark.svg" alt="" width={116} height={26} loading="eager" />
+          </span>
+        </section>
+      </main>
+    </MotionConfig>
+  );
+}
