@@ -11,19 +11,11 @@ import p from "./pages.module.css";
 import w from "../widgets/widgets.module.css";
 
 const TOPICS = [
-  { id: "bank", label: "Bank Partner (Allied Bank / SBP Raast)" },
-  { id: "shop", label: "Pilot Kiryana Store / Campus Counter" },
-  { id: "investor", label: "Competition Judge / Investor" },
-  { id: "general", label: "General Question" },
+  { id: "bank", label: "Bank partner" },
+  { id: "shop", label: "Pilot shop" },
+  { id: "investor", label: "Judge / investor" },
+  { id: "general", label: "General" },
 ] as const;
-
-const RATING_LABELS: Record<number, string> = {
-  5: "5/5 · Low-key fire — ready for pilot",
-  4: "4/5 · Clean counter flow & strong security",
-  3: "3/5 · Solid prototype, want to see more",
-  2: "2/5 · Needs refinement",
-  1: "1/5 · Not convinced yet",
-};
 
 export function ContactPage() {
   const [topic, setTopic] = useState<"bank" | "shop" | "investor" | "general">("bank");
@@ -112,55 +104,45 @@ export function ContactPage() {
       <main id="contact-main" className={p.page}>
         <section className={`${p.hero} page-grid`} aria-labelledby="contact-title">
           <h1 id="contact-title" className={p.heroTitle}>
-            Write to the team. Get the brief in your inbox.
+            Write to the team.
           </h1>
           <p className={`${p.heroLead} two-tone t-lead`}>
-            <strong>We are looking for a bank partner and a pilot kiryana counter.</strong> Enter your email below to
-            contact the team or leave a review — our Resend integration will immediately email you a thank-you note and
-            the FingerPay technical brief.
+            <strong>We are looking for a bank partner and a pilot counter.</strong> Leave your email below and we’ll
+            send a thank-you note with the FingerPay project brief right away.
           </p>
         </section>
 
-        <section className={`${p.section} page-grid`} aria-labelledby="forms-title">
-          <h2 id="forms-title" className="visually-hidden">Contact and Review Forms</h2>
-          <div className={p.splitGrid}>
-            <article className={p.glassPanel}>
-              <span className="t-mono-s">Partner &amp; Pilot Desk</span>
-              <h3 className={p.panelHeading}>Contact the FingerPay team</h3>
-              <p className={p.panelBody}>
-                Select your track and enter your email. We will log your inquiry and send you the FingerPay Paper &amp;
-                Ink project summary immediately.
-              </p>
-
+        <section className={`${p.section} page-grid`} aria-labelledby="desk-title">
+          <div className={p.leftSticky}>
+            <h2 id="desk-title" className={p.sectionTitle}>Direct note or review.</h2>
+            <p className={`${p.sectionSub} two-tone t-lead`}>
+              <strong>Every submission dispatches the technical summary to your inbox.</strong> Powered by Resend.
+            </p>
+          </div>
+          <div className={p.rightStream}>
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Contact the team</h3>
               {done ? (
-                <div className={w.statusBox} role="status">
-                  <span className={w.statusIcon}><Icon name="check" /></span>
-                  <div className={w.statusText}>
-                    <strong>Thank you — email sent to {done}</strong>
-                    <span>Check your inbox for the FingerPay confirmation and architecture brief.</span>
-                  </div>
-                </div>
+                <p className="two-tone t-lead" role="status">
+                  <strong>Sent to {done}.</strong> Check your inbox for the FingerPay brief.
+                </p>
               ) : (
                 <form className={w.form} onSubmit={onContactSubmit}>
-                  <div className={w.field}>
-                    <span className={w.label}>Inquiry track</span>
-                    <div className={w.topicPills}>
-                      {TOPICS.map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          data-active={topic === t.id}
-                          className={w.topicPill}
-                          onClick={() => setTopic(t.id)}
-                        >
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
+                  <div className={w.topicPills}>
+                    {TOPICS.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        data-active={topic === t.id}
+                        className={w.topicPill}
+                        onClick={() => setTopic(t.id)}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
                   </div>
-
                   <div className={w.field}>
-                    <label htmlFor="page-contact-name" className={w.label}>Your name</label>
+                    <label htmlFor="page-contact-name" className={w.label}>Name (optional)</label>
                     <input
                       id="page-contact-name"
                       type="text"
@@ -171,9 +153,8 @@ export function ContactPage() {
                       autoComplete="name"
                     />
                   </div>
-
                   <div className={w.field}>
-                    <label htmlFor="page-contact-email" className={w.label}>Your email address (required)</label>
+                    <label htmlFor="page-contact-email" className={w.label}>Email</label>
                     <input
                       id="page-contact-email"
                       type="email"
@@ -185,69 +166,52 @@ export function ContactPage() {
                       autoComplete="email"
                     />
                   </div>
-
                   <div className={w.field}>
-                    <label htmlFor="page-contact-msg" className={w.label}>Message</label>
+                    <label htmlFor="page-contact-msg" className={w.label}>Message (optional)</label>
                     <textarea
                       id="page-contact-msg"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Tell us about your branch, store counter, or question…"
+                      placeholder="Your branch, shop, or question…"
                       className={w.textarea}
                     />
                   </div>
-
                   {error ? <p className={w.errorNote} role="alert">{error}</p> : null}
-
                   <div>
                     <button type="submit" className={w.btnDark} disabled={busy}>
-                      {busy ? "Sending…" : "Send message & get email"} <Icon name="arrow-right" />
+                      {busy ? "Sending…" : "Send note"} <Icon name="arrow-right" />
                     </button>
                   </div>
                 </form>
               )}
             </article>
 
-            <article className={p.glassPanel}>
-              <span className="t-mono-s">Judge &amp; Visitor Feedback</span>
-              <h3 className={p.panelHeading}>Review the FingerPay prototype</h3>
-              <p className={p.panelBody}>
-                How does the 3-second thumb checkout, liquid glass UI, and ink-in-water simulation feel? Rate the
-                experience and receive a copy of your review by email.
-              </p>
-
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Leave a review</h3>
               {revDone ? (
-                <div className={w.statusBox} role="status">
-                  <span className={w.statusIcon}><Icon name="check" /></span>
-                  <div className={w.statusText}>
-                    <strong>Review recorded — thank-you email sent to {revDone}</strong>
-                    <span>Thank you for rating FingerPay ({rating}/5 stars).</span>
-                  </div>
-                </div>
+                <p className="two-tone t-lead" role="status">
+                  <strong>Sent to {revDone}.</strong> Thank you for the {rating}/5 rating.
+                </p>
               ) : (
                 <form className={w.form} onSubmit={onReviewSubmit}>
-                  <div className={w.ratingSection}>
-                    <div className={w.ratingRow} role="radiogroup" aria-label="Rating out of 5 stars">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <button
-                          key={n}
-                          type="button"
-                          role="radio"
-                          aria-checked={rating === n}
-                          aria-label={`${n} out of 5 stars`}
-                          data-active={n <= rating}
-                          className={w.starBtn}
-                          onClick={() => setRating(n)}
-                        >
-                          <Icon name="star" />
-                        </button>
-                      ))}
-                    </div>
-                    <span className={w.ratingCaption}>{RATING_LABELS[rating]}</span>
+                  <div className={w.ratingRow} role="radiogroup" aria-label="Rating out of 5">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        role="radio"
+                        aria-checked={rating === n}
+                        aria-label={`${n} out of 5`}
+                        data-active={n <= rating}
+                        className={w.starBtn}
+                        onClick={() => setRating(n)}
+                      >
+                        {n}
+                      </button>
+                    ))}
                   </div>
-
                   <div className={w.field}>
-                    <label htmlFor="page-review-email" className={w.label}>Your email address (required)</label>
+                    <label htmlFor="page-review-email" className={w.label}>Email</label>
                     <input
                       id="page-review-email"
                       type="email"
@@ -259,23 +223,21 @@ export function ContactPage() {
                       autoComplete="email"
                     />
                   </div>
-
                   <div className={w.field}>
-                    <label htmlFor="page-review-note" className={w.label}>Your review notes</label>
-                    <textarea
+                    <label htmlFor="page-review-note" className={w.label}>Note (optional)</label>
+                    <input
                       id="page-review-note"
+                      type="text"
                       value={revNote}
                       onChange={(e) => setRevNote(e.target.value)}
-                      placeholder="Share your thoughts on the counter speed, SMS LOCK, or design…"
-                      className={w.textarea}
+                      placeholder="One line on the counter flow or design…"
+                      className={w.input}
                     />
                   </div>
-
                   {revError ? <p className={w.errorNote} role="alert">{revError}</p> : null}
-
                   <div>
                     <button type="submit" className={w.btnDark} disabled={revBusy}>
-                      {revBusy ? "Submitting…" : "Submit review & get thank-you email"} <Icon name="arrow-right" />
+                      {revBusy ? "Sending…" : "Send review"} <Icon name="arrow-right" />
                     </button>
                   </div>
                 </form>

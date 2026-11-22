@@ -46,27 +46,31 @@
   display: grid;
   gap: var(--s-5);
 }
-.downloadCards {
+.downloadCards,
+.downloadRight {
   grid-column: 7 / span 6;
   display: grid;
-  gap: var(--s-6);
   padding-top: 4svh;
 }
-.downloadCard {
-  padding: var(--s-6);
-  border-radius: var(--r-card);
-  display: grid;
-  gap: var(--s-4);
+.downloadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  padding-block: var(--s-6);
+  border-top: var(--hairline) solid var(--rule);
 }
 .downloadCardTitle {
   font-size: var(--t-title);
   line-height: 1.1;
   letter-spacing: var(--track-title);
   font-weight: 400;
+  margin-bottom: var(--s-1);
 }
 .downloadCardDesc {
   color: var(--ink-2);
-  line-height: 1.55;
+  max-width: 38ch;
 }
 
 .cta {
@@ -171,6 +175,7 @@
   .lead,
   .downloadIntro,
   .downloadCards,
+  .downloadRight,
   .disclaimer,
   .footLinks {
     grid-column: 1 / -1;

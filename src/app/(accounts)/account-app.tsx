@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { Button } from "@astryxdesign/core/Button";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { credentialsSchema, signupProfileSchema, type DemoWallet } from "@/lib/fp/signup";
+import { InkField } from "@/site/ink/ink.tsx";
+import { startGlobalLiquidGlass } from "@/site/glass/liquid-glass.ts";
 import s from "./accounts.module.css";
 
 const personalFields = [
@@ -46,6 +48,10 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
   const stageHeading = useRef<HTMLHeadingElement>(null);
   const merchant = accountType === "merchant";
   const name = merchant ? "Merchant" : "Customer";
+
+  useEffect(() => {
+    return startGlobalLiquidGlass();
+  }, []);
 
   const accept = useCallback((data: AccountResponse) => {
     if (entry && data.wallet) {
@@ -125,7 +131,7 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
   const alternateHref = signup ? "/login" + roleQuery : "/signup" + roleQuery;
   const alternateLabel = signup ? "Sign in" : "Create an account";
   const rolePicker = <fieldset className={s.rolePicker} disabled={busy}>
-    <legend>Account type</legend>
+    <legend className="visually-hidden">Account type</legend>
     <div>{(["customer", "merchant"] as const).map((role) => <label key={role}>
       <input type="radio" name="accountType" value={role} checked={accountType === role} onChange={() => setAccountType(role)} />
       <span>{role === "customer" ? "Customer" : "Merchant"}</span>
@@ -135,58 +141,54 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
 
   return <main className={s.shell}>
     <header className={s.header}>
-      <Link href="/" className={s.brand}><Image src="/brand/fingerpay-wordmark.svg" alt="FingerPay home" width={120} height={27} priority /></Link>
+      <Link href="/" className={s.brand}><Image src="/brand/fingerpay-wordmark.svg" alt="FingerPay home" width={112} height={25} priority /></Link>
       {stage === "wallet" || stage === "details"
         ? <Button label="Sign out" variant="ghost" isDisabled={busy} clickAction={signOut} />
         : <Link className={s.headerLink} href={alternateHref}>{alternateLabel}</Link>}
     </header>
-    {stage !== "wallet" && <div className={`${s.access} ${stage === "details" ? s.accessWide : ""}`}>
+    {stage !== "wallet" && <div className={`${s.access} ${stage === "details" ? s.accessWide : ""}`} data-liquid-surface>
       <section className={s.accessContent}>
         {stage === "auth" && <>
           <div className={s.formHeading}>
-            {signup && <div className={s.creditBadge}>
-              <span className={s.creditDot} />
-              <span>PKR 200 demo credit on registration</span>
-            </div>}
-            {signup && <p className={s.step}>Step 1 of 2</p>}
-            <h1>{signup ? "Create your account" : "Sign in to FingerPay"}</h1>
-            <p>{signup ? "Choose an account type and enter your email." : "Use the email and password you registered with."}</p>
+            <h1>{signup ? "Create an account." : "Sign in."}</h1>
+            <p>
+              <strong>{signup ? "PKR 200 demo credit included." : "Welcome back."}</strong>{" "}
+              {signup ? "Choose an account type and enter your email." : "Enter the email and password you registered with."}
+            </p>
           </div>
           <form className={s.form} onSubmit={authenticate} method="post" aria-busy={busy}>
-            {signup && (entry ? rolePicker : <p className={s.step}>{name} account · <Link href={"/signup" + roleQuery}>Change type</Link></p>)}
-            <TextInput controlClassName={s.field} label="Email address" htmlName="email" type="email" autoComplete="username" value={email} onChange={setEmail} isDisabled={busy} aria-required />
+            {signup && (entry ? rolePicker : <p className={s.step}>{name} account · <Link href={"/signup" + roleQuery}>Change</Link></p>)}
+            <TextInput controlClassName={s.field} label="Email" htmlName="email" type="email" autoComplete="username" value={email} onChange={setEmail} isDisabled={busy} aria-required />
             <div className={s.passwordField}>
-              <TextInput id="account-password" controlClassName={s.field} label="Password" htmlName="password" description={signup ? "At least 12 characters, including upper and lowercase letters, a number, and a symbol." : undefined} type={showPassword ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={setPassword} hasSpellCheck={false} autoCapitalize="none" isDisabled={busy} aria-required />
-              <button type="button" className={s.passwordToggle} aria-controls="account-password" onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide password" : "Show password"}</button>
+              <TextInput id="account-password" controlClassName={s.field} label="Password" htmlName="password" description={signup ? "12+ characters with upper, lower, number, and symbol." : undefined} type={showPassword ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} value={password} onChange={setPassword} hasSpellCheck={false} autoCapitalize="none" isDisabled={busy} aria-required />
+              <button type="button" className={s.passwordToggle} aria-controls="account-password" onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide" : "Show"}</button>
             </div>
             {signup && <TextInput controlClassName={s.field} label="Confirm password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={confirm} onChange={setConfirm} hasSpellCheck={false} autoCapitalize="none" isDisabled={busy} aria-required />}
             {error}
-            <Button type="submit" label={signup ? "Create account" : "Sign in"} variant="primary" isDisabled={checking} isLoading={busy} />
+            <Button type="submit" label={signup ? "Continue" : "Sign in"} variant="primary" isDisabled={checking} isLoading={busy} />
           </form>
-          <p className={s.switchMode}>{signup ? "Already have an account?" : "New to FingerPay?"} <Link href={alternateHref}>{alternateLabel}</Link></p>
+          <p className={s.switchMode}>{signup ? "Already registered?" : "New to FingerPay?"} <Link href={alternateHref}>{alternateLabel}</Link></p>
         </>}
         {stage === "verify" && <div className={s.formHeading}>
-          <p className={s.step}>Email confirmation</p>
-          <h1 ref={stageHeading} tabIndex={-1}>Check your email</h1>
-          <p>Open the confirmation link sent to <strong>{email.trim()}</strong>. Then sign in to finish setting up your account.</p>
-          <Link className={s.primaryLink} href={"/login" + roleQuery}>Go to sign in</Link>
+          <h1 ref={stageHeading} tabIndex={-1}>Check your email.</h1>
+          <p><strong>Confirmation sent to {email.trim()}.</strong> Open the link in your inbox, then sign in to continue.</p>
+          <Link className={s.primaryLink} href={"/login" + roleQuery}>Sign in</Link>
           <p className={s.switchMode}><button type="button" onClick={() => setStage("auth")}>Use a different email</button></p>
         </div>}
         {stage === "details" && <>
           <div className={s.formHeading}>
-            <p className={s.step}>Step 2 of 2</p>
-            <h1 ref={stageHeading} tabIndex={-1}>Set up your profile</h1>
-            <p>Signed in as {email}. Use sample details for this demo. We encrypt your profile details.</p>
+            <h1 ref={stageHeading} tabIndex={-1}>Your profile.</h1>
+            <p><strong>Signed in as {email}.</strong> Use sample details for this prototype; everything is encrypted before storage.</p>
           </div>
           <form className={s.form} method="post" onSubmit={complete} aria-busy={busy}>
             {entry && rolePicker}
-            <fieldset className={s.fields}><legend>Personal details</legend>
+            <fieldset className={s.fields}><legend>Personal</legend>
               {personalFields.map(([key, label, autoComplete, placeholder]) => <TextInput id={"account-" + key} controlClassName={s.field} key={key} label={label} autoComplete={autoComplete} placeholder={placeholder} type={key === "phone" ? "tel" : "text"} value={fields[key] ?? ""} onChange={(v) => setFields((previous) => ({ ...previous, [key]: v }))} isDisabled={busy} isRequired />)}
             </fieldset>
-            {merchant && <fieldset className={s.fields}><legend>Business details</legend>
+            {merchant && <fieldset className={s.fields}><legend>Business</legend>
               {businessFields.map(([key, label, autoComplete, placeholder]) => <TextInput id={"account-" + key} controlClassName={s.field} key={key} label={label} autoComplete={autoComplete} placeholder={placeholder} value={fields[key] ?? ""} onChange={(v) => setFields((previous) => ({ ...previous, [key]: v }))} isDisabled={busy} isRequired={key !== "registrationNumber"} />)}
             </fieldset>}
-            <label className={s.consent}><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} disabled={busy} required /><span>I agree to store these details for my demo account. The PKR 200 credit has no cash value.</span></label>
+            <label className={s.consent}><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} disabled={busy} required /><span>Store these encrypted details for my demo account. The PKR 200 credit has no cash value.</span></label>
             {error}
             <Button type="submit" label="Open wallet" variant="primary" isLoading={busy} />
           </form>
@@ -194,16 +196,17 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
       </section>
     </div>}
     {stage === "wallet" && error}
-    {stage === "wallet" && wrongApp && <section className={s.intro}><h1>Your account is a {wallet.profile.accountType} account.</h1><p>Open the matching app to see your wallet.</p><Link className={s.choice} href={`/${wallet.profile.accountType}`}>Open FingerPay {wallet.profile.accountType} ↗</Link></section>}
+    {stage === "wallet" && wrongApp && <section className={s.intro}><h1>Your account is a {wallet.profile.accountType} account.</h1><p>Open the matching view to see your wallet.</p><Link className={s.choice} href={`/${wallet.profile.accountType}`}>Open FingerPay {wallet.profile.accountType} →</Link></section>}
     {stage === "wallet" && wallet && !wrongApp && <>
       <nav aria-label={`${name} app`} className={s.tabs}>{["Wallet", "Activity", "Profile"].map((t) => <Button key={t} label={t} variant={tab === t ? "primary" : "ghost"} aria-current={tab === t ? "page" : undefined} clickAction={() => setTab(t)} />)}</nav>
-      {tab === "Wallet" && <section className={s.dashboard}><div><p className={s.eyebrow}>{merchant ? "YOUR BUSINESS WALLET" : "YOUR PERSONAL WALLET"}</p><h1>{wallet.profile.accountType === "merchant" ? wallet.profile.businessName : `Hello, ${wallet.profile.fullName.split(" ")[0]}.`}</h1><p>{merchant ? "Your shop has its own home in FingerPay." : "A little something to get you started."}</p></div>
-        <div className={s.balance}><div className={s.balanceTop}><span>Demo balance · PKR</span><Button label={hidden ? "Show balance" : "Hide balance"} variant="ghost" clickAction={() => setHidden(!hidden)} /></div><strong>{hidden ? "••••" : wallet.balance}</strong><p>Signup credit received. No cash value.</p></div>
-        <section className={s.next}><h2>{merchant ? "Next: set up your counter" : "Your wallet is ready"}</h2><p>{merchant ? "Your business profile is saved. Ask your FingerPay administrator to activate your shop and connect a terminal before accepting payments." : "Your signup credit is saved to your account. Bank linking and fingerprint enrolment are separate steps and are not available through this demo signup."}</p>{merchant && <Link href="/mobile">Explore the merchant terminal demo ↗</Link>}</section>
+      {tab === "Wallet" && <section className={s.dashboard}><div><h1>{wallet.profile.accountType === "merchant" ? wallet.profile.businessName : `Hello, ${wallet.profile.fullName.split(" ")[0]}.`}</h1><p>{merchant ? "Your shop has its own home in FingerPay." : "Your demo wallet is active."}</p></div>
+        <div className={s.balance} data-liquid-surface><div className={s.balanceTop}><span>Demo balance · PKR</span><Button label={hidden ? "Show" : "Hide"} variant="ghost" clickAction={() => setHidden(!hidden)} /></div><strong>{hidden ? "••••" : wallet.balance}</strong><p>Promotional signup credit · No cash value</p></div>
+        <section className={s.next}><h2>{merchant ? "Counter setup" : "Ready"}</h2><p>{merchant ? "Your business profile is saved. Pair an Android terminal to accept thumb payments at the counter." : "Your signup credit is saved. Branch CNIC verification and thumb enrollment are simulated at the counter."}</p>{merchant && <Link href="/mobile">Open terminal simulator →</Link>}</section>
       </section>}
-      {tab === "Activity" && <section className={s.intro}><p className={s.eyebrow}>YOUR DEMO WALLET</p><h1>Activity.</h1>{wallet.activity.map((a) => <div className={s.receipt} key={a.createdAt}><div><h2>{a.label}</h2><p>{new Date(a.createdAt).toLocaleDateString("en-PK", { timeZone: "Asia/Karachi", dateStyle: "medium" })} · Demo credit</p></div><strong>+ PKR {a.amount}</strong></div>)}<p>Payments and transfers are not enabled for this demo credit.</p></section>}
-      {tab === "Profile" && <section className={s.intro}><p className={s.eyebrow}>{name.toUpperCase()} ACCOUNT</p><h1>Your details.</h1><dl className={s.profile}><div><dt>Email</dt><dd>{email}</dd></div>{[...personalFields, ...(merchant ? businessFields : [])].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{String((wallet.profile as unknown as Record<string, unknown>)[key] || "Not provided")}</dd></div>)}</dl></section>}
+      {tab === "Activity" && <section className={s.intro}><h1>Activity.</h1>{wallet.activity.map((a) => <div className={s.receipt} key={a.createdAt}><div><h2>{a.label}</h2><p>{new Date(a.createdAt).toLocaleDateString("en-PK", { timeZone: "Asia/Karachi", dateStyle: "medium" })} · Demo credit</p></div><strong>+ PKR {a.amount}</strong></div>)}<p>Counter payments run through paired terminals.</p></section>}
+      {tab === "Profile" && <section className={s.intro}><h1>Details.</h1><dl className={s.profile}><div><dt>Email</dt><dd>{email}</dd></div>{[...personalFields, ...(merchant ? businessFields : [])].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{String((wallet.profile as unknown as Record<string, unknown>)[key] || "Not provided")}</dd></div>)}</dl></section>}
     </>}
     <footer className={s.foot}>Student prototype · Demo credit only · No real money or biometrics processed</footer>
+    <InkField />
   </main>;
 }

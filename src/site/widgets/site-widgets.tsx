@@ -8,18 +8,10 @@ import s from "./widgets.module.css";
 const COOKIE_STORAGE_KEY = "fp_cookie_consent_v1";
 const REVIEW_STORAGE_KEY = "fp_review_prompt_v1";
 
-const RATING_LABELS: Record<number, string> = {
-  5: "5/5 · Low-key fire — ready for pilot",
-  4: "4/5 · Clean counter flow & strong security",
-  3: "3/5 · Solid prototype, want to see more",
-  2: "2/5 · Needs refinement",
-  1: "1/5 · Not convinced yet",
-};
-
 const TOPICS = [
-  { id: "bank", label: "Bank Partner" },
-  { id: "shop", label: "Pilot Kiryana Shop" },
-  { id: "investor", label: "Judge / Investor" },
+  { id: "bank", label: "Bank partner" },
+  { id: "shop", label: "Pilot shop" },
+  { id: "investor", label: "Judge / investor" },
   { id: "general", label: "General" },
 ] as const;
 
@@ -35,8 +27,8 @@ export function openContactModal() {
   window.dispatchEvent(new CustomEvent("fp:open-contact"));
 }
 
-/** End-of-website & section email capture card that sends the FingerPay brief via Resend. */
-export function EmailBriefBar({ heading = "Get the FingerPay brief in your inbox." }: { heading?: string }) {
+/** Minimalist end-of-website email row (stiff left heading + quiet right input). */
+export function EmailBriefBar({ heading = "Project brief, by email." }: { heading?: string }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -68,49 +60,46 @@ export function EmailBriefBar({ heading = "Get the FingerPay brief in your inbox
   };
 
   return (
-    <aside className={s.emailBar} data-liquid-surface aria-label="Receive project brief by email">
+    <aside className={s.emailBar} aria-label="Receive project brief by email">
       <div className={s.emailBarCopy}>
-        <h3 className={s.emailBarTitle}>{heading}</h3>
-        <p className={s.emailBarSub}>
-          Enter your email and we will send you a thank-you note with the FingerPay architecture brief, fee math, and
-          demo wallet link via Resend.
+        <h3 className="t-display">{heading}</h3>
+        <p className="two-tone t-lead">
+          <strong>Leave your address.</strong> We’ll send a thank-you note with the architecture summary, fee math, and
+          demo link.
         </p>
       </div>
-      {sentTo ? (
-        <div className={s.statusBox} role="status">
-          <span className={s.statusIcon}><Icon name="check" /></span>
-          <div className={s.statusText}>
-            <strong>Brief sent to {sentTo}</strong>
-            <span>Check your inbox for the FingerPay Paper &amp; Ink summary.</span>
-          </div>
-        </div>
-      ) : (
-        <form className={s.emailBarForm} onSubmit={onSubmit}>
-          <label htmlFor="fp-footer-email" className="visually-hidden">Your email address</label>
-          <input
-            id="fp-footer-email"
-            type="email"
-            required
-             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@domain.com"
-            className={s.emailBarInput}
-            autoComplete="email"
-          />
-          <button type="submit" className={s.btnDark} disabled={busy}>
-            {busy ? "Sending…" : "Send me the brief"} <Icon name="arrow-right" />
-          </button>
-          {error ? <p className={s.errorNote} role="alert">{error}</p> : null}
-        </form>
-      )}
+      <div className={s.emailBarRight}>
+        {sentTo ? (
+          <p className="two-tone t-lead" role="status">
+            <strong>Sent to {sentTo}.</strong> Check your inbox for the FingerPay brief.
+          </p>
+        ) : (
+          <form className={s.emailBarForm} onSubmit={onSubmit}>
+            <label htmlFor="fp-footer-email" className="visually-hidden">Your email address</label>
+            <input
+              id="fp-footer-email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@domain.com"
+              className={s.emailBarInput}
+              autoComplete="email"
+            />
+            <button type="submit" className={s.btnDark} disabled={busy}>
+              {busy ? "Sending…" : "Send brief"} <Icon name="arrow-right" />
+            </button>
+            {error ? <p className={s.errorNote} role="alert">{error}</p> : null}
+          </form>
+        )}
+      </div>
     </aside>
   );
 }
 
-/** Global Cookie Consent Panel, Scroll/Entry Review Popup, and Contact Modal. */
+/** Global Cookie Consent Pill, Scroll/Entry Review Dialog, and Contact Dialog. */
 export function SiteWidgets() {
   const [cookieOpen, setCookieOpen] = useState(false);
-  const [cookieDetails, setCookieDetails] = useState(false);
 
   const [reviewOpen, setReviewOpen] = useState(false);
   const [rating, setRating] = useState(5);
@@ -136,7 +125,7 @@ export function SiteWidgets() {
   useEffect(() => {
     const savedCookie = window.localStorage.getItem(COOKIE_STORAGE_KEY);
     if (!savedCookie) {
-      const t = window.setTimeout(() => setCookieOpen(true), 700);
+      const t = window.setTimeout(() => setCookieOpen(true), 800);
       return () => window.clearTimeout(t);
     }
   }, []);
@@ -155,12 +144,12 @@ export function SiteWidgets() {
     const onScroll = () => {
       const scrolled = window.scrollY;
       const docHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      if (scrolled > 380 || scrolled / docHeight > 0.25) {
+      if (scrolled > 420 || scrolled / docHeight > 0.28) {
         triggerReview();
       }
     };
 
-    const timer = window.setTimeout(triggerReview, 14000);
+    const timer = window.setTimeout(triggerReview, 16000);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.clearTimeout(timer);
@@ -276,37 +265,13 @@ export function SiteWidgets() {
     <>
       {cookieOpen ? (
         <aside className={s.cookieAside} data-liquid-surface aria-label="Cookie consent">
-          <div className={s.cookieHeader}>
-            <span className={s.cookieTitle}>
-              <Icon name="cookie" /> Cookies on FingerPay
-            </span>
-            <button type="button" className={s.btnText} onClick={() => setCookieDetails((v) => !v)}>
-              {cookieDetails ? "Hide details" : "Inspect cookies"}
-            </button>
-          </div>
-          <p className={s.cookieCopy}>
-            We use first-party session cookies (<code>sb-*</code>) for your demo wallet sign-in and a preference cookie
-            to remember your choices. Zero third-party ad trackers.
+          <p className={`${s.cookieCopy} two-tone`}>
+            <strong>Cookies keep your demo session signed in.</strong> First-party only (<code>sb-*</code>); zero ad
+            trackers.
           </p>
-          {cookieDetails ? (
-            <dl className={s.cookieTable}>
-              <div className={s.cookieRow}>
-                <dt className={s.cookieKey}>sb-auth-token</dt>
-                <dd className={s.cookieVal}>Supabase session · Essential</dd>
-              </div>
-              <div className={s.cookieRow}>
-                <dt className={s.cookieKey}>fp_cookie_consent</dt>
-                <dd className={s.cookieVal}>Consent memory · 1 year</dd>
-              </div>
-              <div className={s.cookieRow}>
-                <dt className={s.cookieKey}>fp_review_prompt</dt>
-                <dd className={s.cookieVal}>Popup dismissal · 30 days</dd>
-              </div>
-            </dl>
-          ) : null}
           <div className={s.cookieActions}>
             <button type="button" className={s.btnDark} onClick={() => saveCookieConsent("all")}>
-              Accept all <Icon name="check" />
+              Accept
             </button>
             <button type="button" className={s.btnGlass} onClick={() => saveCookieConsent("essential")}>
               Essential only
@@ -321,10 +286,10 @@ export function SiteWidgets() {
           <div className={s.modal} data-liquid-surface>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
-                <h2 id="fp-review-title" className={s.modalTitle}>How does FingerPay feel so far?</h2>
-                <p className={s.modalLead}>
-                  Leave a quick rating and your email — we’ll send you a thank-you note with the FingerPay project
-                  brief right away.
+                <h2 id="fp-review-title" className={s.modalTitle}>A quick thought.</h2>
+                <p className={`${s.modalLead} two-tone`}>
+                  <strong>How does FingerPay read so far?</strong> Leave a rating and your email — we’ll send you the
+                  project brief right away.
                 </p>
               </div>
               <button type="button" className={s.closeBtn} onClick={skipReview} aria-label="Skip review">
@@ -334,43 +299,36 @@ export function SiteWidgets() {
 
             {reviewDone ? (
               <div className={s.form}>
-                <div className={s.statusBox} role="status">
-                  <span className={s.statusIcon}><Icon name="check" /></span>
-                  <div className={s.statusText}>
-                    <strong>Thank you — email sent to {reviewDone}</strong>
-                    <span>We’ve recorded your {rating}/5 rating and emailed you the FingerPay overview.</span>
-                  </div>
-                </div>
+                <p className="two-tone t-lead" role="status">
+                  <strong>Sent to {reviewDone}.</strong> Thank you for the {rating}/5 note.
+                </p>
                 <div className={s.modalFooter}>
                   <button type="button" className={s.btnDark} onClick={() => setReviewOpen(false)}>
-                    Back to FingerPay
+                    Continue
                   </button>
                 </div>
               </div>
             ) : (
               <form className={s.form} onSubmit={submitReview}>
-                <div className={s.ratingSection}>
-                  <div className={s.ratingRow} role="radiogroup" aria-label="Rating out of 5 stars">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <button
-                        key={n}
-                        type="button"
-                        role="radio"
-                        aria-checked={rating === n}
-                        aria-label={`${n} out of 5 stars`}
-                        data-active={n <= rating}
-                        className={s.starBtn}
-                        onClick={() => setRating(n)}
-                      >
-                        <Icon name="star" />
-                      </button>
-                    ))}
-                  </div>
-                  <span className={s.ratingCaption}>{RATING_LABELS[rating]}</span>
+                <div className={s.ratingRow} role="radiogroup" aria-label="Rating out of 5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      role="radio"
+                      aria-checked={rating === n}
+                      aria-label={`${n} out of 5`}
+                      data-active={n <= rating}
+                      className={s.starBtn}
+                      onClick={() => setRating(n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
                 </div>
 
                 <div className={s.field}>
-                  <label htmlFor="fp-review-email" className={s.label}>Your email (for the thank-you brief)</label>
+                  <label htmlFor="fp-review-email" className={s.label}>Email</label>
                   <input
                     id="fp-review-email"
                     type="email"
@@ -384,24 +342,25 @@ export function SiteWidgets() {
                 </div>
 
                 <div className={s.field}>
-                  <label htmlFor="fp-review-note" className={s.label}>Quick thought (optional)</label>
-                  <textarea
+                  <label htmlFor="fp-review-note" className={s.label}>Note (optional)</label>
+                  <input
                     id="fp-review-note"
+                    type="text"
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="What stood out — the 3-second thumb tap, SMS LOCK, or the liquid glass feel?"
-                    className={s.textarea}
+                    placeholder="One line on the counter flow or design…"
+                    className={s.input}
                   />
                 </div>
 
                 {reviewError ? <p className={s.errorNote} role="alert">{reviewError}</p> : null}
 
                 <div className={s.modalFooter}>
-                  <button type="button" className={s.btnGlass} onClick={skipReview}>
-                    Skip for now
+                  <button type="button" className={s.btnText} onClick={skipReview}>
+                    Skip
                   </button>
                   <button type="submit" className={s.btnDark} disabled={reviewBusy}>
-                    {reviewBusy ? "Sending…" : "Send review & get email"} <Icon name="arrow-right" />
+                    {reviewBusy ? "Sending…" : "Send"} <Icon name="arrow-right" />
                   </button>
                 </div>
               </form>
@@ -416,10 +375,10 @@ export function SiteWidgets() {
           <div className={s.modal} data-liquid-surface>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
-                <h2 id="fp-contact-title" className={s.modalTitle}>Contact the FingerPay team</h2>
-                <p className={s.modalLead}>
-                  Looking to pilot a store counter, partner on SBP Raast settlement, or review our spec? Leave your
-                  email and we’ll send our project brief immediately.
+                <h2 id="fp-contact-title" className={s.modalTitle}>Write to the team.</h2>
+                <p className={`${s.modalLead} two-tone`}>
+                  <strong>Looking to pilot a counter or partner on settlement?</strong> Leave your email and we’ll send
+                  our brief immediately.
                 </p>
               </div>
               <button type="button" className={s.closeBtn} onClick={() => setContactOpen(false)} aria-label="Close contact panel">
@@ -429,13 +388,9 @@ export function SiteWidgets() {
 
             {contactDone ? (
               <div className={s.form}>
-                <div className={s.statusBox} role="status">
-                  <span className={s.statusIcon}><Icon name="check" /></span>
-                  <div className={s.statusText}>
-                    <strong>Confirmation sent to {contactDone}</strong>
-                    <span>Thank you for reaching out — check your inbox for the FingerPay brief.</span>
-                  </div>
-                </div>
+                <p className="two-tone t-lead" role="status">
+                  <strong>Sent to {contactDone}.</strong> Check your inbox for the FingerPay brief.
+                </p>
                 <div className={s.modalFooter}>
                   <button type="button" className={s.btnDark} onClick={() => setContactOpen(false)}>
                     Done
@@ -444,25 +399,22 @@ export function SiteWidgets() {
               </div>
             ) : (
               <form className={s.form} onSubmit={submitContact}>
-                <div className={s.field}>
-                  <span className={s.label}>Inquiry track</span>
-                  <div className={s.topicPills}>
-                    {TOPICS.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        data-active={contactTopic === t.id}
-                        className={s.topicPill}
-                        onClick={() => setContactTopic(t.id)}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
+                <div className={s.topicPills}>
+                  {TOPICS.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      data-active={contactTopic === t.id}
+                      className={s.topicPill}
+                      onClick={() => setContactTopic(t.id)}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
 
                 <div className={s.field}>
-                  <label htmlFor="fp-contact-name" className={s.label}>Your name (optional)</label>
+                  <label htmlFor="fp-contact-name" className={s.label}>Name (optional)</label>
                   <input
                     id="fp-contact-name"
                     type="text"
@@ -475,7 +427,7 @@ export function SiteWidgets() {
                 </div>
 
                 <div className={s.field}>
-                  <label htmlFor="fp-contact-email" className={s.label}>Your email address</label>
+                  <label htmlFor="fp-contact-email" className={s.label}>Email</label>
                   <input
                     id="fp-contact-email"
                     type="email"
@@ -494,7 +446,7 @@ export function SiteWidgets() {
                     id="fp-contact-msg"
                     value={contactMsg}
                     onChange={(e) => setContactMsg(e.target.value)}
-                    placeholder="Tell us about your branch, store counter, or question…"
+                    placeholder="Your branch, shop, or question…"
                     className={s.textarea}
                   />
                 </div>
@@ -502,11 +454,11 @@ export function SiteWidgets() {
                 {contactError ? <p className={s.errorNote} role="alert">{contactError}</p> : null}
 
                 <div className={s.modalFooter}>
-                  <button type="button" className={s.btnGlass} onClick={() => setContactOpen(false)}>
+                  <button type="button" className={s.btnText} onClick={() => setContactOpen(false)}>
                     Cancel
                   </button>
                   <button type="submit" className={s.btnDark} disabled={contactBusy}>
-                    {contactBusy ? "Sending…" : "Send & receive brief"} <Icon name="arrow-right" />
+                    {contactBusy ? "Sending…" : "Send"} <Icon name="arrow-right" />
                   </button>
                 </div>
               </form>

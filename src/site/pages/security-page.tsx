@@ -11,43 +11,39 @@ import p from "./pages.module.css";
 
 const PILLARS = [
   {
-    num: "01",
-    title: "Keyed HMAC thumb lookup — zero fingerprint images",
-    desc: "The scanner derives a one-time capture token in memory. The server derives a purpose-isolated subkey via HKDF-SHA256 ('fingerpay:thumb-idx-v1') and computes a 32-byte HMAC-SHA256 digest. A database leak reveals no fingerprint minutiae or ridges.",
+    title: "Keyed HMAC, never an image.",
+    lead: "The reader discards the ridge picture in memory.",
+    rest: "The server derives a purpose-isolated subkey via HKDF-SHA256 and stores only a 32-byte HMAC digest. There is no print in the database to steal.",
     specs: [
-      { k: "KDF", v: "HKDF-SHA256 (32-byte subkey)" },
-      { k: "Stored digest", v: "HMAC-SHA256 (32 bytes)" },
-      { k: "Key versioning", v: "thumb_key_version smallint" },
+      { k: "Key derivation", v: "HKDF-SHA256 · fingerpay:thumb-idx-v1" },
+      { k: "Stored value", v: "32-byte HMAC-SHA256" },
     ],
   },
   {
-    num: "02",
-    title: "AES-256-GCM envelope encryption with row + column AAD",
-    desc: "Every shopper name, CNIC, phone number, and bank account number is encrypted before touching Postgres. Each ciphertext binds to its exact table, column, and UUID rowId via Additional Authenticated Data (AAD), preventing cut-and-paste attacks across rows.",
+    title: "Row-bound AES-256-GCM.",
+    lead: "Every name, CNIC, phone, and account number is encrypted.",
+    rest: "Each ciphertext binds its exact table, column, and row UUID in Additional Authenticated Data, so a value copied between rows fails decryption.",
     specs: [
-      { k: "Cipher", v: "AES-256-GCM (96-bit nonce)" },
-      { k: "AAD binding", v: "table | column | row_uuid" },
-      { k: "Blind index", v: "HMAC(K_lookup, normalized)" },
+      { k: "Cipher", v: "AES-256-GCM · 96-bit nonce" },
+      { k: "Additional data", v: "table | column | row_uuid" },
     ],
   },
   {
-    num: "03",
-    title: "Hardware ECDSA P-256 terminal signing & freeze switch",
-    desc: "Only a MERCHANT_OWNER can pair a counter terminal, registering its P-256 SPKI public key. Every charge and thumb request must be signed over method, path, terminalId, timestamp, nonce, and SHA-256 body hash. Any cashier can freeze a lost terminal in one tap.",
+    title: "Hardware-signed terminals.",
+    lead: "Only a store owner can pair a counter device.",
+    rest: "Every request is signed with the terminal’s ECDSA P-256 private key over method, path, terminal UUID, timestamp, nonce, and body hash. Any cashier can freeze a lost terminal in one tap.",
     specs: [
-      { k: "Curve", v: "NIST P-256 (prime256v1)" },
-      { k: "Clock skew max", v: "120 seconds" },
-      { k: "Throttle pause", v: "10 unknown thumbs / 10 min" },
+      { k: "Curve", v: "NIST P-256 · SPKI" },
+      { k: "Brute-force pause", v: "10 unknown thumbs in 10 min" },
     ],
   },
   {
-    num: "04",
-    title: "Append-only double-entry ledger & SHA-256 audit hash chain",
-    desc: "Money changes only inside fp.post_journal. Deferred constraint triggers verify at COMMIT that every journal has at least 2 lines summing to 0.00. Every audit row hashes the previous row’s SHA-256 digest so tampering with any historical row breaks the chain.",
+    title: "Append-only ledger & hash chain.",
+    lead: "Balances move only through fp.post_journal.",
+    rest: "Deferred triggers verify at COMMIT that every journal sums to zero. Every audit row hashes the previous digest so historical tampering is detected immediately.",
     specs: [
-      { k: "App DB role", v: "fp_app (0 table privileges)" },
-      { k: "Mutation guard", v: "BEFORE UPDATE/DELETE/TRUNCATE" },
-      { k: "Chain verifier", v: "fp.verify_audit_chain()" },
+      { k: "Database role", v: "fp_app · 0 table privileges" },
+      { k: "Integrity check", v: "fp.verify_audit_chain()" },
     ],
   },
 ] as const;
@@ -64,37 +60,35 @@ export function SecurityPage() {
             No fingerprint image ever touches a disk.
           </h1>
           <p className={`${p.heroLead} two-tone t-lead`}>
-            <strong>Biometric payment systems fail when they hoard raw prints or trust the client.</strong> FingerPay
-            stores only keyed HMAC digests, encrypts every PII column with row-bound AES-256-GCM, and gives every
-            shopper a one-second SMS kill switch.
+            <strong>Trust comes from the mechanism, not a promise.</strong> Keyed HMAC digests, row-bound AES-256-GCM
+            encryption, and a one-second SMS kill switch on any keypad phone.
           </p>
           <div className={p.heroActions}>
             <Link href="/how-it-works" className={p.ctaDark}>
-              See the 3-second payment loop <Icon name="arrow-right" />
+              How it works <Icon name="arrow-right" />
             </Link>
             <Link href="/numbers" className={p.ctaGlass}>
-              Explore limits &amp; fee rules
+              Numbers
             </Link>
           </div>
         </section>
 
         <section className={`${p.section} page-grid`} aria-labelledby="pillars-title">
-          <div className={p.sectionHeader}>
-            <h2 id="pillars-title" className={p.sectionTitle}>Four layers of defense in depth</h2>
-            <p className={p.sectionSub}>
-              Verified on every commit by 128 automated database attack and invariant tests running against the real
-              migrations.
+          <div className={p.leftSticky}>
+            <h2 id="pillars-title" className={p.sectionTitle}>Four layers of control.</h2>
+            <p className={`${p.sectionSub} two-tone t-lead`}>
+              <strong>Tested on every commit.</strong> 128 automated database invariant and attack checks verify the
+              schema.
             </p>
           </div>
-          <ol className={p.timeline}>
+          <div className={p.rightStream}>
             {PILLARS.map((pl) => (
-              <li key={pl.num} className={p.stepItem}>
-                <span className={p.stepBadge}>{pl.num}</span>
-                <div className={p.stepMain}>
-                  <h3 className={p.stepTitle}>{pl.title}</h3>
-                  <p className={p.stepDesc}>{pl.desc}</p>
-                </div>
-                <dl className={p.stepSpec}>
+              <article key={pl.title} className={p.streamItem}>
+                <h3 className={p.streamTitle}>{pl.title}</h3>
+                <p className={`${p.streamDesc} two-tone t-lead`}>
+                  <strong>{pl.lead}</strong> {pl.rest}
+                </p>
+                <dl className={p.specList}>
                   {pl.specs.map((sp) => (
                     <div key={sp.k} className={p.specLine}>
                       <dt className={p.specKey}>{sp.k}</dt>
@@ -102,41 +96,33 @@ export function SecurityPage() {
                     </div>
                   ))}
                 </dl>
-              </li>
+              </article>
             ))}
-          </ol>
+          </div>
         </section>
 
         <section className={`${p.section} page-grid`} aria-labelledby="sms-lock-title">
-          <div className={p.sectionHeader}>
-            <h2 id="sms-lock-title" className={p.sectionTitle}>SMS Thumb Lock &amp; merchant privacy</h2>
-            <p className={p.sectionSub}>
-              Inspired by real lessons from AePS cloned-fingerprint fraud: the shopper controls their biometric status
-              from any basic phone.
+          <div className={p.leftSticky}>
+            <h2 id="sms-lock-title" className={p.sectionTitle}>Reply LOCK from any phone.</h2>
+            <p className={`${p.sectionSub} two-tone t-lead`}>
+              <strong>Inspired by real lessons from cloned-print fraud.</strong> The shopper owns the kill switch.
             </p>
           </div>
-          <div className={p.splitGrid}>
-            <article className={p.glassPanel}>
-              <h3 className={p.panelHeading}>Reply LOCK from any phone, any time</h3>
-              <p className={p.panelBody}>
-                Replying <code>LOCK</code> to any FingerPay SMS immediately sets <code>thumb_locked = true</code>. Any
-                subsequent tap at any store is declined at PKR 0 cost and triggers an instant security alert SMS to the
-                shopper. A merchant cannot unlock a thumb — unlocking requires an in-person Allied Bank branch visit.
+          <div className={p.rightStream}>
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Locked in one second, unlocked at a branch.</h3>
+              <p className={`${p.streamDesc} two-tone t-lead`}>
+                <strong>Replying LOCK to any receipt blocks thumb payments immediately.</strong> Every subsequent attempt
+                is declined at PKR 0 and sends an alert SMS. Unlocking requires an in-person Allied Bank branch visit.
               </p>
-              <pre className={p.codeBlock}>{`SMS → "LOCK"
-← Allied Bank FingerPay: Thumb payments are now LOCKED.
-  Visit any Allied Bank branch with your CNIC to unlock.`}</pre>
+              <p className={p.codeLine}>Allied Bank FingerPay: Thumb payments are now LOCKED. Visit any Allied Bank branch with your CNIC to unlock.</p>
             </article>
-            <article className={p.glassPanel}>
-              <h3 className={p.panelHeading}>Zero shopper leakage on merchant screens</h3>
-              <p className={p.panelBody}>
-                A merchant never sees a shopper’s account balance, CNIC, or phone number. On a settled sale, the
-                merchant sees only first name and last initial (<code>Ayesha K.</code>). On any declined sale (low
-                balance, limit exceeded, or locked thumb), the shopper’s name is completely redacted.
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Nothing leaks to the merchant counter.</h3>
+              <p className={`${p.streamDesc} two-tone t-lead`}>
+                <strong>A shop never sees a shopper’s balance, CNIC, or phone number.</strong> Settled sales show only
+                first name and initial; declined attempts hide the name completely.
               </p>
-              <pre className={p.codeBlock}>{`Canonical Terminal Signature Layout (SPEC §4.5):
-METHOD + "\\n" + PATH + "\\n" + TERMINAL_UUID + "\\n"
-+ ISO_TIMESTAMP + "\\n" + NONCE_B64 + "\\n" + SHA256_HEX(BODY)`}</pre>
             </article>
           </div>
         </section>

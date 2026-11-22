@@ -66,51 +66,42 @@ export function Close() {
             <span className={g.inner}>Contact the team <Icon name="arrow-right" /></span>
           </button>
           <button ref={reviewBtn} type="button" className={`${g.glass} ${s.cta}`} onClick={openReviewPopup}>
-            <span className={g.inner}>Leave a review <Icon name="star" /></span>
+            <span className={g.inner}>Leave a review</span>
           </button>
-          <Link href="/contact" className={s.top}>
-            Full contact page <Icon name="arrow-right" />
-          </Link>
+          <a href="#top" className={s.top} onClick={(e) => (e.preventDefault(), scrollToTarget(0))}>
+            Back to top <Icon name="arrow-up" />
+          </a>
         </div>
       </section>
 
-      {/* Standalone full-viewport Section: Get FingerPay for Android */}
+      {/* Standalone full-viewport Section: Get FingerPay for Android (minimalist, no cards) */}
       <section id="download" className={`${s.downloadSection} page-grid`} aria-labelledby="download-title">
         <div className={s.downloadIntro}>
           <h2 id="download-title" className="t-display">Get FingerPay for Android.</h2>
           <p className={`${s.lead} two-tone t-lead`}>
-            <strong>Two dedicated builds for the counter and the shopper.</strong> Android 9 or later · Install directly
-            from the downloaded APK, or test in your browser.
+            <strong>Two builds. One counter loop.</strong> Android 9 or later · Install directly from the downloaded
+            APK.
           </p>
         </div>
-        <div className={s.downloadCards}>
-          <article className={`${g.glass} ${s.downloadCard}`} data-liquid-surface>
-            <span className="t-mono-s">Android APK · Shopper Companion</span>
-            <h3 className={s.downloadCardTitle}>FingerPay Customer App</h3>
-            <p className={s.downloadCardDesc}>
-              Inspect your live Allied Bank FingerPay balance, view Raast thumb receipts, share your student referral
-              code, and test the PKR 200 demo bonus.
-            </p>
-            <div className={s.actions}>
-              <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-customer.apk" download>
-                <Icon name="download" /> Download Customer app
-              </a>
+        <div className={s.downloadRight}>
+          <div className={s.downloadRow}>
+            <div>
+              <h3 className={s.downloadCardTitle}>Customer companion</h3>
+              <p className={s.downloadCardDesc}>Balance, Raast receipts, referral code, and PKR 200 demo credit.</p>
             </div>
-          </article>
-
-          <article className={`${g.glass} ${s.downloadCard}`} data-liquid-surface>
-            <span className="t-mono-s">Android APK · Counter Point-of-Sale</span>
-            <h3 className={s.downloadCardTitle}>FingerPay Merchant Terminal</h3>
-            <p className={s.downloadCardDesc}>
-              Hardware-signed ECDSA P-256 counter till, live thumb charge prompt, instant Settled confirmation, one-tap
-              terminal freeze, and daily fee savings vs 2.5% card POS.
-            </p>
-            <div className={s.actions}>
-              <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-merchant.apk" download>
-                <Icon name="download" /> Download Merchant app
-              </a>
+            <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-customer.apk" download>
+              Download Customer app <Icon name="arrow-right" />
+            </a>
+          </div>
+          <div className={s.downloadRow}>
+            <div>
+              <h3 className={s.downloadCardTitle}>Merchant counter terminal</h3>
+              <p className={s.downloadCardDesc}>Hardware-signed P-256 till, live thumb charge, and instant settlement.</p>
             </div>
-          </article>
+            <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-merchant.apk" download>
+              Download Merchant app <Icon name="arrow-right" />
+            </a>
+          </div>
         </div>
       </section>
     </>
@@ -135,9 +126,9 @@ export function Footer() {
           <li><Link href="/numbers">Numbers</Link></li>
           <li><Link href="/download">Download</Link></li>
           <li><Link href="/contact">Contact</Link></li>
-          <li><button type="button" onClick={openReviewPopup}>Leave a review</button></li>
-          <li><button type="button" onClick={openCookiePanel}>Cookie preferences</button></li>
-          <li><a href="#top" onClick={(e) => (e.preventDefault(), scrollToTarget(0))}>Back to top ↑</a></li>
+          <li><button type="button" onClick={openReviewPopup}>Review</button></li>
+          <li><button type="button" onClick={openCookiePanel}>Cookies</button></li>
+          <li><a href="#top" onClick={(e) => (e.preventDefault(), scrollToTarget(0))}>Top</a></li>
           <li>© 2026 FingerPay</li>
         </ul>
       </div>

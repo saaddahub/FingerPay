@@ -12,47 +12,39 @@ import p from "./pages.module.css";
 
 const STEPS = [
   {
-    num: "01",
-    title: "One-time branch enrollment",
-    desc: "A shopper visits any Allied Bank branch once with their CNIC. The branch officer verifies identity via NADRA, records biometric consent, and scans the shopper’s thumb once to link their existing CASA or student account.",
+    title: "Branch enrollment, once.",
+    lead: "Two minutes at any Allied Bank counter with a CNIC.",
+    rest: "The officer checks NADRA, records biometric consent, and scans the thumb once to derive a keyed HMAC blind index. No fingerprint image is ever saved.",
     specs: [
-      { k: "Actor role", v: "BRANCH_OFFICER / MANAGER" },
-      { k: "Stored biometric", v: "HMAC-SHA256(K_lookup, token)" },
-      { k: "Raw image stored", v: "0 bytes (discarded)" },
-      { k: "Setup time", v: "~2 minutes, once" },
+      { k: "Stored digest", v: "HMAC-SHA256(K_lookup, token)" },
+      { k: "Raw image stored", v: "0 bytes" },
     ],
   },
   {
-    num: "02",
-    title: "Cashier opens a signed charge",
-    desc: "At the kiryana counter, Rasheed types PKR 180.00 into the paired Android terminal. The terminal signs the payload with its hardware-backed ECDSA P-256 private key, a 16-byte random nonce, and an ISO timestamp.",
+    title: "A signed charge at the till.",
+    lead: "Rasheed enters PKR 180.00 on the shop’s Android phone.",
+    rest: "The paired terminal signs the charge with its hardware-backed ECDSA P-256 key, a fresh 16-byte nonce, and a timestamp.",
     specs: [
-      { k: "Endpoint", v: "POST /api/v1/pos/charges" },
       { k: "Signature", v: "ECDSA P-256 IEEE-P1363" },
-      { k: "Replay window", v: "±120s + unique nonce" },
-      { k: "Charge expiry", v: "90 seconds" },
+      { k: "Replay window", v: "±120 s · unique nonce" },
     ],
   },
   {
-    num: "03",
-    title: "Thumb tap & Risk Engine check",
-    desc: "Ayesha places her thumb on the counter reader. No phone, no card, no PIN. The Risk Engine verifies the thumb isn’t locked, checks per-tap and daily limits, blocks 15-second duplicate taps, and posts a double-entry ledger journal.",
+    title: "One thumb on the reader.",
+    lead: "Ayesha rests her thumb. No phone, no card, no PIN.",
+    rest: "The Risk Engine verifies the thumb is unlocked, checks the per-tap and daily limit, blocks 15-second duplicate taps, and posts a double-entry ledger journal.",
     specs: [
-      { k: "Salary per-tap limit", v: "PKR 5,000.00" },
-      { k: "Student per-tap limit", v: "PKR 2,000.00" },
-      { k: "Duplicate guard", v: "15s same store/amount" },
-      { k: "Brute-force lock", v: "3 failed thumbs / charge" },
+      { k: "Per-tap limit", v: "PKR 5,000 salary · PKR 2,000 student" },
+      { k: "Duplicate guard", v: "15 s same shop & amount" },
     ],
   },
   {
-    num: "04",
-    title: "Counter settles & plain-SMS receipt arrives",
-    desc: "The merchant’s own screen turns green in under 3 seconds — no fake transfer screenshots to inspect. Simultaneously, Ayesha receives a plain SMS receipt on any keypad phone with instant LOCK and DISPUTE reply commands.",
+    title: "Settled on screen, receipt by SMS.",
+    lead: "The shop’s own screen confirms in under three seconds.",
+    rest: "No transfer screenshots to inspect. Ayesha gets a plain SMS receipt on any keypad phone with Reply LOCK and Reply DISPUTE.",
     specs: [
-      { k: "Target latency", v: "< 3.0 seconds" },
-      { k: "Net to merchant (PKR 180)", v: "PKR 179.19 (fee 0.81)" },
-      { k: "First-tap cashback", v: "PKR 50.00 (on ≥ PKR 150)" },
-      { k: "Self-defense commands", v: "Reply LOCK · Reply DISPUTE" },
+      { k: "Net to merchant (PKR 180)", v: "PKR 179.19 · fee PKR 0.81" },
+      { k: "Shopper controls", v: "Reply LOCK · Reply DISPUTE" },
     ],
   },
 ] as const;
@@ -66,43 +58,41 @@ export function HowItWorksPage() {
       <main id="hiw-main" className={p.page}>
         <section className={`${p.hero} page-grid`} aria-labelledby="hiw-title">
           <h1 id="hiw-title" className={p.heroTitle}>
-            Three seconds at the counter. Zero devices in your pocket.
+            Three seconds at the counter. Nothing in your pocket.
           </h1>
           <p className={`${p.heroLead} two-tone t-lead`}>
-            <strong>A shopper walks into a kiryana store with empty hands and leaves with a settled receipt.</strong>{" "}
-            Here is the complete technical loop from one-time branch enrollment to live counter settlement and SMS
-            self-defense.
+            <strong>A shopper walks in empty-handed and leaves with a settled receipt.</strong> From one-time branch
+            enrollment to live counter settlement and plain-SMS controls.
           </p>
           <div className={p.heroActions}>
             <Link href="/signup" className={p.ctaDark}>
-              Try with PKR 200 demo credit <Icon name="arrow-right" />
+              Create an account <Icon name="arrow-right" />
             </Link>
             <Link href="/security" className={p.ctaGlass}>
-              Inspect the cryptography <Icon name="shield" />
+              Security
             </Link>
             <button type="button" className={p.ctaGlass} onClick={openContactModal}>
-              Ask the team a question
+              Contact the team
             </button>
           </div>
         </section>
 
         <section className={`${p.section} page-grid`} aria-labelledby="steps-title">
-          <div className={p.sectionHeader}>
-            <h2 id="steps-title" className={p.sectionTitle}>The four-stage payment loop</h2>
-            <p className={p.sectionSub}>
-              Every step runs through strict database functions under role <code>fp_app</code> with zero direct table
-              access.
+          <div className={p.leftSticky}>
+            <h2 id="steps-title" className={p.sectionTitle}>Four steps, start to finish.</h2>
+            <p className={`${p.sectionSub} two-tone t-lead`}>
+              <strong>Every step runs inside strict database functions.</strong> The application role holds zero direct
+              table access.
             </p>
           </div>
-          <ol className={p.timeline}>
+          <div className={p.rightStream}>
             {STEPS.map((st) => (
-              <li key={st.num} className={p.stepItem}>
-                <span className={p.stepBadge}>{st.num}</span>
-                <div className={p.stepMain}>
-                  <h3 className={p.stepTitle}>{st.title}</h3>
-                  <p className={p.stepDesc}>{st.desc}</p>
-                </div>
-                <dl className={p.stepSpec}>
+              <article key={st.title} className={p.streamItem}>
+                <h3 className={p.streamTitle}>{st.title}</h3>
+                <p className={`${p.streamDesc} two-tone t-lead`}>
+                  <strong>{st.lead}</strong> {st.rest}
+                </p>
+                <dl className={p.specList}>
                   {st.specs.map((sp) => (
                     <div key={sp.k} className={p.specLine}>
                       <dt className={p.specKey}>{sp.k}</dt>
@@ -110,37 +100,33 @@ export function HowItWorksPage() {
                     </div>
                   ))}
                 </dl>
-              </li>
+              </article>
             ))}
-          </ol>
+          </div>
         </section>
 
         <Sale />
 
         <section className={`${p.section} page-grid`} aria-labelledby="edge-title">
-          <div className={p.sectionHeader}>
-            <h2 id="edge-title" className={p.sectionTitle}>What happens when things go wrong</h2>
-            <p className={p.sectionSub}>
-              Counters in Lahore and Karachi face dropped data, rush-hour double taps, and shared family phones.
-              FingerPay fails closed every time.
+          <div className={p.leftSticky}>
+            <h2 id="edge-title" className={p.sectionTitle}>When the network drops.</h2>
+            <p className={`${p.sectionSub} two-tone t-lead`}>
+              <strong>Counters in Lahore and Karachi lose signal mid-rush.</strong> FingerPay fails closed every time.
             </p>
           </div>
-          <div className={p.splitGrid}>
-            <article className={p.glassPanel}>
-              <h3 className={p.panelHeading}>If the shop’s internet drops: TAKE CASH</h3>
-              <p className={p.panelBody}>
-                FingerPay never queues an offline biometric payment. Deferred settlement risks overdrafts and replay
-                attacks. When connectivity drops, the terminal immediately displays <strong>TAKE CASH</strong> and logs
-                an <code>OFFLINE_CASH</code> telemetry event once back online without moving a single paisa.
+          <div className={p.rightStream}>
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Take cash. Never queue.</h3>
+              <p className={`${p.streamDesc} two-tone t-lead`}>
+                <strong>An offline biometric payment is a promise you cannot verify.</strong> When connectivity drops,
+                the terminal immediately shows Take cash and never queues a deferred charge.
               </p>
             </article>
-            <article className={p.glassPanel}>
-              <h3 className={p.panelHeading}>Same-day void &amp; Maker-Checker refunds</h3>
-              <p className={p.panelBody}>
-                A store owner (never a cashier) can void a settled sale on the same Karachi calendar day, automatically
-                clawing back any cashback and returning the exact MDR fee. If a shopper replies <code>DISPUTE</code> to
-                their SMS receipt, a ticket opens and requires two distinct bank officers (maker + checker) to approve
-                the reversal.
+            <article className={p.streamItem}>
+              <h3 className={p.streamTitle}>Same-day void &amp; maker-checker refunds.</h3>
+              <p className={`${p.streamDesc} two-tone t-lead`}>
+                <strong>Only the store owner can void a same-day sale.</strong> If a shopper replies DISPUTE to an SMS
+                receipt, two distinct bank officers must sign off to reverse the journal.
               </p>
             </article>
           </div>
