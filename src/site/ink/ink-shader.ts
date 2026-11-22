@@ -7,18 +7,18 @@ const SIM_RES = 128; // velocity / pressure grid (short side)
 const DYE_RES = 512; // ink texture (short side)
 const PRESSURE_ITERATIONS = 20;
 const PRESSURE_DECAY = 0.8;
-const CURL = 24; // vorticity confinement: how hard eddies spin up
-const VELOCITY_DISSIPATION = 0.18; // water keeps moving a while after the cursor stops
-const DYE_DISSIPATION = 0.38; // ink half-life ~1.8 s
-const SPLAT_RADIUS = 0.0022;
-const SPLAT_FORCE = 5200;
-const IDLE_MS = 15000; // stop stepping once the ink has fully faded
+const CURL = 26; // vorticity confinement: how hard eddies spin up
+const VELOCITY_DISSIPATION = 0.16; // water keeps moving a while after the cursor stops
+const DYE_DISSIPATION = 0.34; // ink half-life ~2.0 s
+const SPLAT_RADIUS = 0.0025;
+const SPLAT_FORCE = 5400;
+const IDLE_MS = 16000; // stop stepping once the ink has fully faded
 
 // Absorbance (per RGB channel) of three blue inks; exp(-a) is the colour they leave on white paper.
 const INKS: [number, number, number][] = [
-  [1.0, 0.62, 0.12], // cobalt
-  [0.95, 0.36, 0.1], // cerulean
-  [0.74, 0.84, 0.1], // ultramarine
+  [1.05, 0.64, 0.11], // cobalt
+  [0.98, 0.38, 0.09], // cerulean
+  [0.76, 0.86, 0.09], // ultramarine
 ];
 
 const VERT = `#version 300 es
@@ -78,7 +78,7 @@ void main() {
   float L = texture(uVelocity, vL).x, R = texture(uVelocity, vR).x;
   float T = texture(uVelocity, vT).y, B = texture(uVelocity, vB).y;
   vec2 C = texture(uVelocity, vUv).xy;
-  if (vL.x < 0.0) L = -C.x; if (vR.x > 1.0) R = -C.x;   // walls reflect
+  if (vL.x < 0.0) L = -C.x; if (vR.x > 1.0) R = -C.x;
   if (vT.y > 1.0) T = -C.y; if (vB.y < 0.0) B = -C.y;
   o = vec4(0.5 * (R - L + T - B), 0.0, 0.0, 1.0);
 }`;
@@ -101,8 +101,7 @@ void main() {
   o = vec4(texture(uVelocity, vUv).xy - vec2(R - L, T - B), 0.0, 1.0);
 }`;
 
-// Beer–Lambert: transmitted light = exp(-absorbance). A soft shoulder keeps dense ink from going muddy, and the
-// density gradient darkens the rims slightly, the way ink tendrils read in a glass of water.
+// Beer–Lambert: transmitted light = exp(-absorbance).
 const DISPLAY = HEAD + `
 uniform sampler2D uDye;
 void main() {
@@ -121,13 +120,21 @@ type Double = { read: FBO; write: FBO; swap: () => void };
 export function startInk(canvas: HTMLCanvasElement): () => void {
   const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: false });
   if (!gl) return () => {};
-  if (!gl.getExtension("EXT_color_buffer_float") && !gl.getExtension("EXT_color_buffer_half_float")) return () => {};
+  if (gl.isContextLost()) {
+    gl.getExtension("WEBGL_lose_context")?.restoreContext();
+    if (gl.isContextLost()) return () => {};
+  }
+  const hasFloat = Boolean(gl.getExtension("EXT_color_buffer_float") || gl.getExtension("EXT_color_buffer_half_float"));
+  if (!hasFloat) return () => {};
+  const hasLinear = Boolean(gl.getExtension("OES_texture_float_linear") || gl.getExtension("OES_texture_half_float_linear") || true);
 
+  const shaders: WebGLShader[] = [];
   const shader = (type: number, src: string) => {
     const sh = gl.createShader(type)!;
     gl.shaderSource(sh, src);
     gl.compileShader(sh);
     if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh) ?? "ink shader");
+    shaders.push(sh);
     return sh;
   };
   let vs: WebGLShader;
@@ -203,7 +210,7 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
   };
   const free = (f: FBO) => { gl.deleteTexture(f.tex); gl.deleteFramebuffer(f.fb); };
   const res = (r: number) => {
-    const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight;
+    const aspect = gl.drawingBufferWidth / Math.max(1, gl.drawingBufferHeight);
     const long = Math.round(r * Math.max(aspect, 1 / aspect));
     return aspect >= 1 ? { w: long, h: r } : { w: r, h: long };
   };
@@ -213,8 +220,9 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
   const build = () => {
     if (built) [velocity.read, velocity.write, dye.read, dye.write, pressure.read, pressure.write, divergence, curl].forEach(free);
     const s = res(SIM_RES), d = res(DYE_RES);
-    velocity = double(s.w, s.h, gl.LINEAR);
-    dye = double(d.w, d.h, gl.LINEAR);
+    const lin = hasLinear ? gl.LINEAR : gl.NEAREST;
+    velocity = double(s.w, s.h, lin);
+    dye = double(d.w, d.h, lin);
     pressure = double(s.w, s.h, gl.NEAREST);
     divergence = fbo(s.w, s.h, gl.NEAREST);
     curl = fbo(s.w, s.h, gl.NEAREST);
@@ -223,8 +231,10 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
 
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
-    const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+    const cw = canvas.clientWidth || window.innerWidth || 1280;
+    const ch = canvas.clientHeight || window.innerHeight || 800;
+    const w = Math.max(1, Math.round(cw * dpr));
+    const h = Math.max(1, Math.round(ch * dpr));
     if (w === canvas.width && h === canvas.height && built) return;
     canvas.width = w;
     canvas.height = h;
@@ -302,7 +312,7 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
     dye.swap();
   };
 
-  const aspect = () => canvas.width / canvas.height;
+  const aspect = () => canvas.width / Math.max(1, canvas.height);
   const splat = (x: number, y: number, dx: number, dy: number, color: [number, number, number]) => {
     const a = aspect();
     bind(splatP, tx(velocity.read));
@@ -319,7 +329,6 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
     dye.swap();
   };
 
-  // Ink colour drifts slowly between the three blues, so each stroke is a slightly different pour.
   const inkAt = (t: number, amount: number): [number, number, number] => {
     const k = (t / 9000) % INKS.length;
     const i = Math.floor(k), f = k - i;
@@ -328,35 +337,55 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
     return [(A[0] + (B[0] - A[0]) * s) * amount, (A[1] + (B[1] - A[1]) * s) * amount, (A[2] + (B[2] - A[2]) * s) * amount];
   };
 
-  // Pointer & touch → queued splats (applied inside the frame so input never touches GL mid-step).
   let last: { x: number; y: number } | null = null;
   const queue: { x: number; y: number; dx: number; dy: number; amt: number }[] = [];
-  let lastInput = 0;
+  let lastInput = performance.now();
+
   const pushPoint = (clientX: number, clientY: number) => {
-    const x = clientX / window.innerWidth;
-    const y = 1 - clientY / window.innerHeight;
+    const w = Math.max(1, window.innerWidth);
+    const h = Math.max(1, window.innerHeight);
+    const x = clientX / w;
+    const y = 1 - clientY / h;
     if (last) {
       let dx = x - last.x, dy = y - last.y;
       const a = aspect();
       if (a < 1) dx *= a; else dy /= a;
-      const px = Math.hypot(clientX - last.x * window.innerWidth, clientY - (1 - last.y) * window.innerHeight);
-      if (px > 0.5) queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, amt: 0.05 + Math.min(px / 45, 1) * 0.2 });
+      const px = Math.hypot(clientX - last.x * w, clientY - (1 - last.y) * h);
+      if (px > 0.25) {
+        queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, amt: 0.06 + Math.min(px / 40, 1) * 0.22 });
+      }
+    } else {
+      // Initial hover entry or tap drops a subtle swirl immediately
+      queue.push({ x, y, dx: 140, dy: -110, amt: 0.14 });
     }
     last = { x, y };
     lastInput = performance.now();
     wake();
   };
+
   const onMove = (e: PointerEvent) => pushPoint(e.clientX, e.clientY);
+  const onDown = (e: PointerEvent) => {
+    const w = Math.max(1, window.innerWidth);
+    const h = Math.max(1, window.innerHeight);
+    const x = e.clientX / w;
+    const y = 1 - e.clientY / h;
+    queue.push({ x, y, dx: 220, dy: 180, amt: 0.22 });
+    last = { x, y };
+    lastInput = performance.now();
+    wake();
+  };
   const onTouchStart = (e: TouchEvent) => {
     const t = e.touches[0];
-    if (t) last = { x: t.clientX / window.innerWidth, y: 1 - t.clientY / window.innerHeight };
+    if (t) pushPoint(t.clientX, t.clientY);
   };
   const onTouchMove = (e: TouchEvent) => {
     const t = e.touches[0];
     if (t) pushPoint(t.clientX, t.clientY);
   };
   const onLeave = () => { last = null; };
+
   window.addEventListener("pointermove", onMove, { passive: true });
+  window.addEventListener("pointerdown", onDown, { passive: true });
   window.addEventListener("pointercancel", onLeave, { passive: true });
   window.addEventListener("touchstart", onTouchStart, { passive: true });
   window.addEventListener("touchmove", onTouchMove, { passive: true });
@@ -392,15 +421,17 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
   const onResize = () => wake();
   window.addEventListener("resize", onResize);
 
-  // First paint: clean paper.
+  // First paint: clean paper, then wake loop.
   gl.useProgram(dispP.p);
   gl.uniform1i(dispP.u.uDye, dye.read.attach(0));
   blit(null);
   canvas.dataset.ready = "";
+  wake();
 
   return () => {
     if (raf) cancelAnimationFrame(raf);
     window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerdown", onDown);
     window.removeEventListener("pointercancel", onLeave);
     window.removeEventListener("touchstart", onTouchStart);
     window.removeEventListener("touchmove", onTouchMove);
@@ -409,7 +440,10 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
     document.removeEventListener("visibilitychange", onVis);
     window.removeEventListener("resize", onResize);
     delete canvas.dataset.ready;
+    if (built) [velocity.read, velocity.write, dye.read, dye.write, pressure.read, pressure.write, divergence, curl].forEach(free);
+    if (quad) gl.deleteBuffer(quad);
+    programs.forEach((pr) => gl.deleteProgram(pr.p));
+    shaders.forEach((sh) => gl.deleteShader(sh));
     programs.length = 0;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
   };
 }

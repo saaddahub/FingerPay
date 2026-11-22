@@ -128,6 +128,7 @@ export function startOrbShader(canvas: HTMLCanvasElement): () => void {
     window.removeEventListener("pointermove", onMove);
     host.style.transform = "";
     delete canvas.dataset.ready;
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    if (buf) gl.deleteBuffer(buf);
+    gl.deleteProgram(prog);
   };
 }

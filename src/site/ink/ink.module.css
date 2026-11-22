@@ -8,14 +8,8 @@
   pointer-events: none;
   mix-blend-mode: multiply;
   opacity: 0;
-  transition: opacity 600ms ease-out;
+  transition: opacity 400ms ease-out;
 }
 .ink[data-ready] {
   opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ink {
-    display: none;
-  }
 }
