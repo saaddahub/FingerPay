@@ -1,4 +1,4 @@
-/* Three-column bar: logo | links | auth */
+/* Three-column bar on desktop: logo | links | auth; two-row interactive taskbar + drawer on mobile */
 .nav {
   position: fixed;
   top: var(--s-5);
@@ -48,6 +48,7 @@
   letter-spacing: -0.006em;
   text-decoration: none;
   color: var(--fg-2);
+  white-space: nowrap;
   transition: color var(--d-fast) var(--ease-out);
 }
 .link:hover,
@@ -80,7 +81,7 @@
   --specular: rgba(255,255,255,0.08) !important;
   --rim: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0) 40%, rgba(255,255,255,0.05)) !important;
 }
-.signup .inner {
+.signup span {
   color: var(--paper);
 }
 .menuBtn {
@@ -107,103 +108,186 @@
   visibility: hidden;
 }
 
-/* Mobile: orb left, menu right, links in a glass sheet */
-.sheet {
+/* Mobile menu sheet: explicit pointer-events: auto so clicks always register inside .nav */
+.sheetBackdrop {
   position: fixed;
-  inset: 0 0 auto;
+  inset: 0;
+  z-index: 70;
+  pointer-events: auto;
+  background: var(--backdrop-scrim);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--s-3);
+  animation: sheetFade var(--d-fast) var(--ease-out) both;
+}
+
+.sheetPanel {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0 0 var(--r-card) var(--r-card);
-  transform: none;
-  opacity: 0;
-  translate: 0 -1.5rem;
-  transition: opacity var(--d-base) var(--ease-out), translate var(--d-base) var(--ease-out), overlay var(--d-base) allow-discrete,
-    display var(--d-base) allow-discrete;
-}
-.sheet[open] {
-  opacity: 1;
-  translate: 0 0;
-}
-@starting-style {
-  .sheet[open] {
-    opacity: 0;
-    translate: 0 -1.5rem;
-  }
-}
-.sheet::backdrop {
-  background: rgba(10, 10, 11, 0.2);
-}
-.sheetBody {
+  max-width: 30rem;
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-panel-blur);
+  -webkit-backdrop-filter: var(--glass-panel-blur);
+  box-shadow: var(--glass-panel-shadow);
+  color: var(--ink);
+  padding: var(--s-5);
   display: grid;
-  gap: var(--s-6);
-  padding: var(--s-5) var(--page-x) var(--s-7);
+  gap: var(--s-5);
+  animation: sheetSlide var(--d-base) var(--ease-expo-out) both;
 }
+
+.sheetTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink-2);
+}
+
 .sheetClose {
-  justify-self: end;
   display: grid;
   place-items: center;
-  width: var(--tap);
-  height: var(--tap);
+  width: var(--nav-h);
+  height: var(--nav-h);
   border-radius: 50%;
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink);
 }
+
 .sheetLinks {
   display: grid;
-  gap: var(--s-4);
+  gap: var(--s-2);
 }
+
 .sheetLinks a {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding-inline: var(--s-3);
+  border-radius: var(--r-bubble);
   font-size: var(--t-title);
-  line-height: 1.08;
+  line-height: 1.15;
   letter-spacing: var(--track-title);
   font-variation-settings: "opsz" 32;
   text-decoration: none;
+  color: var(--ink);
+  transition: background var(--d-fast) var(--ease-out);
 }
-.sheetContact {
-  justify-self: start;
-  display: inline-flex;
+.sheetLinks a:hover,
+.sheetLinks a[data-active="true"] {
+  background: var(--paper-2);
+  font-weight: 500;
+}
+
+.sheetActions {
+  display: flex;
   align-items: center;
   gap: var(--s-2);
-  padding: var(--s-3) var(--s-5);
+  flex-wrap: wrap;
+  padding-top: var(--s-2);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.sheetSecondary {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tap);
+  padding-inline: var(--s-4);
   border-radius: var(--r-pill);
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink);
+  font-size: var(--t-caption);
   font-weight: 500;
   text-decoration: none;
 }
 
-@media (max-width: 767px) {
+.sheetContact {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--tap);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--cta-dark-shadow);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+@keyframes sheetFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheetSlide {
+  from { opacity: 0; transform: translate3d(0, -1rem, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@media (max-width: 960px) {
   .nav {
-    top: var(--s-4);
-    inset-inline: var(--s-4);
+    top: var(--s-3);
+    inset-inline: var(--s-3);
   }
   .cluster {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    row-gap: var(--s-2);
   }
-  .pill {
-    display: none;
+  .orbLink {
+    grid-column: 1;
+    grid-row: 1;
+    width: var(--tap);
+    height: var(--tap);
   }
   .authGroup {
-    gap: var(--s-1);
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    gap: var(--s-2);
   }
-  .contact:not(.signup) {
+  /* Keep the liquid-glass taskbar links visible and directly tappable on mobile in row 2! */
+  .pill {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    height: 2.25rem;
+    padding-inline: var(--s-3);
+    gap: var(--s-4);
+    overflow-x: auto;
+    justify-content: space-between;
+    scrollbar-width: none;
+  }
+  .pill::-webkit-scrollbar {
     display: none;
   }
   .menuBtn {
     display: grid;
   }
+}
+
+@media (max-width: 767px) {
+  .contact:not(.signup) {
+    display: none;
+  }
   .signup {
     display: flex;
-    padding-inline: var(--s-4);
-    font-size: 0.75rem;
-  }
-  .orbLink {
-    width: var(--tap);
     height: var(--tap);
+    padding-inline: var(--s-4);
+    font-size: var(--t-caption);
   }
   .honesty {
     left: 50%;
+    bottom: var(--s-3);
     translate: -50% 0;
     white-space: nowrap;
   }

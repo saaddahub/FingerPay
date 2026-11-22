@@ -355,6 +355,12 @@
   border-bottom: 0;
 }
 
+@media (max-width: 960px) {
+  .page {
+    padding-top: calc(var(--nav-h) + var(--s-10));
+  }
+}
+
 @media (max-width: 767px) {
   .heroTitle,
   .heroLead,

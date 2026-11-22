@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { useGlass } from "../glass/use-glass.ts";
 import { Orb } from "../glass/orb.tsx";
 import { Icon } from "../icons.tsx";
@@ -41,8 +41,17 @@ export function Nav() {
   const pathname = usePathname();
   const pillRef = useGlass<HTMLUListElement>(6);
   const menuRef = useGlass<HTMLButtonElement>(6);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const close = () => dialogRef.current?.close();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const close = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   return (
     <header className={s.nav}>
@@ -70,37 +79,65 @@ export function Nav() {
         <div className={s.authGroup}>
           <GlassLink href="/login" className={s.contact}>Sign in</GlassLink>
           <GlassLink href="/signup" className={`${s.contact} ${s.signup}`}>Create an account</GlassLink>
-          <button ref={menuRef} type="button" className={`${g.glass} ${s.menuBtn}`} aria-haspopup="dialog" aria-controls="site-menu"
-            onClick={() => dialogRef.current?.showModal()}>
-            <span className={g.inner}><Icon name="menu" /></span>
-            <span className="visually-hidden">Menu</span>
+          <button
+            ref={menuRef}
+            type="button"
+            className={`${g.glass} ${s.menuBtn}`}
+            aria-expanded={menuOpen}
+            aria-controls="site-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span className={g.inner}><Icon name={menuOpen ? "close" : "menu"} /></span>
           </button>
         </div>
       </nav>
 
-      <dialog ref={dialogRef} id="site-menu" className={`${g.glass} ${s.sheet}`} aria-label="Menu"
-        onClick={(e) => e.target === e.currentTarget && close()}>
-        <div className={s.sheetBody}>
-          <button type="button" className={s.sheetClose} onClick={close} autoFocus>
-            <Icon name="close" />
-            <span className="visually-hidden">Close menu</span>
-          </button>
-          <ul className={s.sheetLinks}>
-            <li>
-              <Link href="/" onClick={close}>Home</Link>
-            </li>
-            {LINKS.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} onClick={close}>{l.label}</Link>
+      {menuOpen ? (
+        <div
+          id="site-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site navigation"
+          className={s.sheetBackdrop}
+          onClick={(e) => e.target === e.currentTarget && close()}
+        >
+          <div className={s.sheetPanel}>
+            <div className={s.sheetTop}>
+              <span className="t-mono-s">FingerPay Navigation</span>
+              <button type="button" className={s.sheetClose} onClick={close} aria-label="Close menu">
+                <Icon name="close" />
+              </button>
+            </div>
+            <ul className={s.sheetLinks}>
+              <li>
+                <Link href="/" data-active={pathname === "/" ? "true" : undefined} onClick={close}>
+                  Home
+                </Link>
               </li>
-            ))}
-            <li><Link href="/login" onClick={close}>Sign in</Link></li>
-          </ul>
-          <Link href="/signup" className={s.sheetContact} onClick={close}>
-            Create an account <Icon name="arrow-right" />
-          </Link>
+              {LINKS.map((l) => (
+                <li key={l.href}>
+                  <Link
+                    href={l.href}
+                    data-active={pathname === l.href ? "true" : undefined}
+                    onClick={close}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className={s.sheetActions}>
+              <Link href="/login" className={s.sheetSecondary} onClick={close}>
+                Sign in
+              </Link>
+              <Link href="/signup" className={s.sheetContact} onClick={close}>
+                Create an account <Icon name="arrow-right" />
+              </Link>
+            </div>
+          </div>
         </div>
-      </dialog>
+      ) : null}
     </header>
   );
 }

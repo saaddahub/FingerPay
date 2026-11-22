@@ -328,26 +328,39 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
     return [(A[0] + (B[0] - A[0]) * s) * amount, (A[1] + (B[1] - A[1]) * s) * amount, (A[2] + (B[2] - A[2]) * s) * amount];
   };
 
-  // Pointer → queued splats (applied inside the frame so input never touches GL mid-step).
+  // Pointer & touch → queued splats (applied inside the frame so input never touches GL mid-step).
   let last: { x: number; y: number } | null = null;
   const queue: { x: number; y: number; dx: number; dy: number; amt: number }[] = [];
   let lastInput = 0;
-  const onMove = (e: PointerEvent) => {
-    const x = e.clientX / window.innerWidth;
-    const y = 1 - e.clientY / window.innerHeight;
+  const pushPoint = (clientX: number, clientY: number) => {
+    const x = clientX / window.innerWidth;
+    const y = 1 - clientY / window.innerHeight;
     if (last) {
       let dx = x - last.x, dy = y - last.y;
       const a = aspect();
       if (a < 1) dx *= a; else dy /= a;
-      const px = Math.hypot(e.clientX - last.x * window.innerWidth, e.clientY - (1 - last.y) * window.innerHeight);
+      const px = Math.hypot(clientX - last.x * window.innerWidth, clientY - (1 - last.y) * window.innerHeight);
       if (px > 0.5) queue.push({ x, y, dx: dx * SPLAT_FORCE, dy: dy * SPLAT_FORCE, amt: 0.05 + Math.min(px / 45, 1) * 0.2 });
     }
     last = { x, y };
     lastInput = performance.now();
     wake();
   };
+  const onMove = (e: PointerEvent) => pushPoint(e.clientX, e.clientY);
+  const onTouchStart = (e: TouchEvent) => {
+    const t = e.touches[0];
+    if (t) last = { x: t.clientX / window.innerWidth, y: 1 - t.clientY / window.innerHeight };
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    const t = e.touches[0];
+    if (t) pushPoint(t.clientX, t.clientY);
+  };
   const onLeave = () => { last = null; };
   window.addEventListener("pointermove", onMove, { passive: true });
+  window.addEventListener("pointercancel", onLeave, { passive: true });
+  window.addEventListener("touchstart", onTouchStart, { passive: true });
+  window.addEventListener("touchmove", onTouchMove, { passive: true });
+  window.addEventListener("touchend", onLeave, { passive: true });
   document.documentElement.addEventListener("pointerleave", onLeave);
 
   let raf = 0;
@@ -388,6 +401,10 @@ export function startInk(canvas: HTMLCanvasElement): () => void {
   return () => {
     if (raf) cancelAnimationFrame(raf);
     window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointercancel", onLeave);
+    window.removeEventListener("touchstart", onTouchStart);
+    window.removeEventListener("touchmove", onTouchMove);
+    window.removeEventListener("touchend", onLeave);
     document.documentElement.removeEventListener("pointerleave", onLeave);
     document.removeEventListener("visibilitychange", onVis);
     window.removeEventListener("resize", onResize);
