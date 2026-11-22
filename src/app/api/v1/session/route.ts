@@ -1,9 +1,10 @@
-import { createHmac, randomInt } from "node:crypto";
+import { createHmac, randomInt, randomUUID } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/fp/db";
 import { env } from "@/lib/fp/env";
 import { HttpError } from "@/lib/fp/errors";
+import { log } from "@/lib/fp/log";
 import { handle, ok, parseBody, rateLimit } from "@/lib/fp/route";
 import { credentialsSchema } from "@/lib/fp/signup";
 
@@ -76,24 +77,26 @@ function buildOtpEmailHtml(email: string, code: string): string {
 </html>`;
 }
 
-async function sendOtpEmail(email: string, code: string): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY?.trim();
+async function sendOtpEmail(email: string, code: string): Promise<{ id: string | null; from: string }> {
+  const apiKey = process.env.RESEND_API_KEY?.trim().replace(/^["']|["']$/g, "").trim();
   if (!apiKey) {
     throw new HttpError(503, "MAIL_UNAVAILABLE", "Email verification service is not configured.");
   }
-  const preferredFrom = process.env.RESEND_FROM_EMAIL?.trim();
+  const preferredFrom = process.env.RESEND_FROM_EMAIL?.trim().replace(/^["']|["']$/g, "").trim();
   const candidates = Array.from(
     new Set([
       ...(preferredFrom ? [preferredFrom] : []),
       "FingerPay <noreply@fingerpay.app>",
-      "FingerPay <onboarding@resend.dev>",
+      "FingerPay <verify@fingerpay.app>",
     ]),
   );
 
-  const subject = `${code} is your FingerPay verification code`;
+  const subject = `FingerPay verification code: ${code}`;
   const html = buildOtpEmailHtml(email, code);
   const text = `Your FingerPay verification code is: ${code}\n\nEnter this 6-digit code in FingerPay to confirm ${email} and activate your PKR 200.00 demo wallet. Valid for 15 minutes.`;
 
+  let lastStatus = 0;
+  let lastError = "";
   for (const from of candidates) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -101,10 +104,34 @@ async function sendOtpEmail(email: string, code: string): Promise<void> {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from, to: [email], subject, html, text }),
+      body: JSON.stringify({
+        from,
+        to: [email],
+        reply_to: "support@fingerpay.app",
+        subject,
+        html,
+        text,
+        headers: {
+          "X-Entity-Ref-ID": randomUUID(),
+        },
+      }),
     });
-    if (res.ok) return;
+    const raw = await res.text();
+    if (res.ok) {
+      let id: string | null = null;
+      try {
+        id = (JSON.parse(raw) as { id?: string }).id ?? null;
+      } catch {
+        id = null;
+      }
+      log.info("session.otp.sent", { from, emailId: id });
+      return { id, from };
+    }
+    lastStatus = res.status;
+    lastError = raw.slice(0, 240);
+    log.error("session.otp.candidate_failed", { from, status: res.status, detail: lastError });
   }
+  log.error("session.otp.failed", { status: lastStatus, detail: lastError });
   throw new HttpError(502, "MAIL_FAILED", "Could not send the verification code to your email. Check your address and try again.");
 }
 
@@ -137,8 +164,8 @@ export function POST(request: NextRequest) {
       if (useEmailOtp) {
         const code = generateOtpCode();
         await db()`select fp.api_register_email_otp(${normalizedEmail}, ${input.password}, ${otpDigest(normalizedEmail, code)})`;
-        await sendOtpEmail(normalizedEmail, code);
-        return ok({ signedIn: false, requiresCode: true, email: normalizedEmail });
+        const mail = await sendOtpEmail(normalizedEmail, code);
+        return ok({ signedIn: false, requiresCode: true, email: normalizedEmail, emailId: mail.id, from: mail.from });
       }
       // Local CI fallback when running against 127.0.0.1 without external mail delivery
       const { data, error } = await supabase.auth.signUp({ email: normalizedEmail, password: input.password });
@@ -170,8 +197,8 @@ export function POST(request: NextRequest) {
       if (useEmailOtp && /not confirmed/i.test(error.message ?? "")) {
         const code = generateOtpCode();
         await db()`select fp.api_register_email_otp(${normalizedEmail}, ${input.password}, ${otpDigest(normalizedEmail, code)})`;
-        await sendOtpEmail(normalizedEmail, code);
-        return ok({ signedIn: false, requiresCode: true, email: normalizedEmail });
+        const mail = await sendOtpEmail(normalizedEmail, code);
+        return ok({ signedIn: false, requiresCode: true, email: normalizedEmail, emailId: mail.id, from: mail.from });
       }
       throw new HttpError(
         error.status === 429 ? 429 : 400,

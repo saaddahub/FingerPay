@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { log } from "@/lib/fp/log";
@@ -144,14 +144,17 @@ function buildEmail(data: z.infer<typeof BodySchema>): { subject: string; html: 
 }
 
 async function sendViaResend(apiKey: string, to: string, emailContent: { subject: string; html: string; text: string }): Promise<{ sent: boolean; id?: string }> {
-  const candidates = [
-    process.env.RESEND_FROM_EMAIL,
-    "FingerPay <noreply@fingerpay.app>",
-    "FingerPay <hello@fingerpay.app>",
-    "FingerPay <noreply@fingerpay.dev>",
-    "FingerPay <hello@fingerpay.dev>",
-    "FingerPay <onboarding@resend.dev>",
-  ].filter((v): v is string => Boolean(v));
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, "").trim();
+  const preferred = process.env.RESEND_FROM_EMAIL?.trim().replace(/^["']|["']$/g, "").trim();
+  const candidates = Array.from(
+    new Set(
+      [
+        preferred,
+        "FingerPay <noreply@fingerpay.app>",
+        "FingerPay <hello@fingerpay.app>",
+      ].filter((v): v is string => Boolean(v)),
+    ),
+  );
 
   const bcc = process.env.RESEND_NOTIFY_EMAIL ? [process.env.RESEND_NOTIFY_EMAIL] : undefined;
 
@@ -160,22 +163,25 @@ async function sendViaResend(apiKey: string, to: string, emailContent: { subject
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${cleanKey}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           from,
           to: [to],
+          reply_to: "support@fingerpay.app",
           ...(bcc ? { bcc } : {}),
           subject: emailContent.subject,
           html: emailContent.html,
           text: emailContent.text,
+          headers: { "X-Entity-Ref-ID": randomUUID() },
         }),
       });
       if (res.ok) {
         const json = (await res.json()) as { id?: string };
         return { sent: true, id: json.id };
       }
+      log.error("site.contact.resend_failed", { from, status: res.status });
     } catch {
       // Try next sender candidate or fall back cleanly
     }

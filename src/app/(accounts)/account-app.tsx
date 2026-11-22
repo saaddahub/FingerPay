@@ -646,8 +646,8 @@ export function AccountApp({
                     Enter your 6-digit code.
                   </h1>
                   <p>
-                    <strong>We sent a verification code to {email.trim()}.</strong> Enter the 6 digits from your email
-                    below to confirm your address and unlock your {name.toLowerCase()} wallet.
+                    <strong>We sent a 6-digit code to {email.trim()}.</strong> Check your Inbox, Spam, or Junk folder
+                    for mail from <strong>noreply@fingerpay.app</strong>, then enter the 6 digits below.
                   </p>
                 </div>
 
