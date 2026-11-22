@@ -1,0 +1,21 @@
+.ink {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  z-index: 30; /* above the stage (20), below the nav (40/50) */
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+.ink[data-ready] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink {
+    display: none;
+  }
+}
