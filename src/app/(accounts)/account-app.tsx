@@ -7,7 +7,6 @@ import { Button } from "@astryxdesign/core/Button";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { credentialsSchema, signupProfileSchema, type DemoWallet } from "@/lib/fp/signup";
 import { InkField } from "@/site/ink/ink.tsx";
-import { startGlobalLiquidGlass } from "@/site/glass/liquid-glass.ts";
 import s from "./accounts.module.css";
 
 const personalFields = [
@@ -48,10 +47,6 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
   const stageHeading = useRef<HTMLHeadingElement>(null);
   const merchant = accountType === "merchant";
   const name = merchant ? "Merchant" : "Customer";
-
-  useEffect(() => {
-    return startGlobalLiquidGlass();
-  }, []);
 
   const accept = useCallback((data: AccountResponse) => {
     if (entry && data.wallet) {
@@ -140,13 +135,14 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
   const error = notice && <p className={s.notice} role="alert">{notice}</p>;
 
   return <main className={s.shell}>
+    <InkField />
     <header className={s.header}>
       <Link href="/" className={s.brand}><Image src="/brand/fingerpay-wordmark.svg" alt="FingerPay home" width={112} height={25} priority /></Link>
       {stage === "wallet" || stage === "details"
         ? <Button label="Sign out" variant="ghost" isDisabled={busy} clickAction={signOut} />
         : <Link className={s.headerLink} href={alternateHref}>{alternateLabel}</Link>}
     </header>
-    {stage !== "wallet" && <div className={`${s.access} ${stage === "details" ? s.accessWide : ""}`} data-liquid-surface>
+    {stage !== "wallet" && <div className={`${s.access} ${stage === "details" ? s.accessWide : ""}`}>
       <section className={s.accessContent}>
         {stage === "auth" && <>
           <div className={s.formHeading}>
@@ -195,18 +191,19 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
         </>}
       </section>
     </div>}
-    {stage === "wallet" && error}
-    {stage === "wallet" && wrongApp && <section className={s.intro}><h1>Your account is a {wallet.profile.accountType} account.</h1><p>Open the matching view to see your wallet.</p><Link className={s.choice} href={`/${wallet.profile.accountType}`}>Open FingerPay {wallet.profile.accountType} →</Link></section>}
-    {stage === "wallet" && wallet && !wrongApp && <>
-      <nav aria-label={`${name} app`} className={s.tabs}>{["Wallet", "Activity", "Profile"].map((t) => <Button key={t} label={t} variant={tab === t ? "primary" : "ghost"} aria-current={tab === t ? "page" : undefined} clickAction={() => setTab(t)} />)}</nav>
-      {tab === "Wallet" && <section className={s.dashboard}><div><h1>{wallet.profile.accountType === "merchant" ? wallet.profile.businessName : `Hello, ${wallet.profile.fullName.split(" ")[0]}.`}</h1><p>{merchant ? "Your shop has its own home in FingerPay." : "Your demo wallet is active."}</p></div>
-        <div className={s.balance} data-liquid-surface><div className={s.balanceTop}><span>Demo balance · PKR</span><Button label={hidden ? "Show" : "Hide"} variant="ghost" clickAction={() => setHidden(!hidden)} /></div><strong>{hidden ? "••••" : wallet.balance}</strong><p>Promotional signup credit · No cash value</p></div>
-        <section className={s.next}><h2>{merchant ? "Counter setup" : "Ready"}</h2><p>{merchant ? "Your business profile is saved. Pair an Android terminal to accept thumb payments at the counter." : "Your signup credit is saved. Branch CNIC verification and thumb enrollment are simulated at the counter."}</p>{merchant && <Link href="/mobile">Open terminal simulator →</Link>}</section>
-      </section>}
-      {tab === "Activity" && <section className={s.intro}><h1>Activity.</h1>{wallet.activity.map((a) => <div className={s.receipt} key={a.createdAt}><div><h2>{a.label}</h2><p>{new Date(a.createdAt).toLocaleDateString("en-PK", { timeZone: "Asia/Karachi", dateStyle: "medium" })} · Demo credit</p></div><strong>+ PKR {a.amount}</strong></div>)}<p>Counter payments run through paired terminals.</p></section>}
-      {tab === "Profile" && <section className={s.intro}><h1>Details.</h1><dl className={s.profile}><div><dt>Email</dt><dd>{email}</dd></div>{[...personalFields, ...(merchant ? businessFields : [])].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{String((wallet.profile as unknown as Record<string, unknown>)[key] || "Not provided")}</dd></div>)}</dl></section>}
-    </>}
+    {stage === "wallet" && <div className={s.walletPanel}>
+      {error}
+      {wrongApp && <section className={s.intro}><h1>Your account is a {wallet.profile.accountType} account.</h1><p>Open the matching view to see your wallet.</p><Link className={s.choice} href={`/${wallet.profile.accountType}`}>Open FingerPay {wallet.profile.accountType} →</Link></section>}
+      {wallet && !wrongApp && <>
+        <nav aria-label={`${name} app`} className={s.tabs}>{["Wallet", "Activity", "Profile"].map((t) => <Button key={t} label={t} variant={tab === t ? "primary" : "ghost"} aria-current={tab === t ? "page" : undefined} clickAction={() => setTab(t)} />)}</nav>
+        {tab === "Wallet" && <section className={s.dashboard}><div><h1>{wallet.profile.accountType === "merchant" ? wallet.profile.businessName : `Hello, ${wallet.profile.fullName.split(" ")[0]}.`}</h1><p>{merchant ? "Your shop has its own home in FingerPay." : "Your demo wallet is active."}</p></div>
+          <div className={s.balance}><div className={s.balanceTop}><span>Demo balance · PKR</span><Button label={hidden ? "Show" : "Hide"} variant="ghost" clickAction={() => setHidden(!hidden)} /></div><strong>{hidden ? "••••" : wallet.balance}</strong><p>Promotional signup credit · No cash value</p></div>
+          <section className={s.next}><h2>{merchant ? "Counter setup" : "Ready"}</h2><p>{merchant ? "Your business profile is saved. Pair an Android terminal to accept thumb payments at the counter." : "Your signup credit is saved. Branch CNIC verification and thumb enrollment are simulated at the counter."}</p>{merchant && <Link href="/mobile">Open terminal simulator →</Link>}</section>
+        </section>}
+        {tab === "Activity" && <section className={s.intro}><h1>Activity.</h1>{wallet.activity.map((a) => <div className={s.receipt} key={a.createdAt}><div><h2>{a.label}</h2><p>{new Date(a.createdAt).toLocaleDateString("en-PK", { timeZone: "Asia/Karachi", dateStyle: "medium" })} · Demo credit</p></div><strong>+ PKR {a.amount}</strong></div>)}<p>Counter payments run through paired terminals.</p></section>}
+        {tab === "Profile" && <section className={s.intro}><h1>Details.</h1><dl className={s.profile}><div><dt>Email</dt><dd>{email}</dd></div>{[...personalFields, ...(merchant ? businessFields : [])].map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{String((wallet.profile as unknown as Record<string, unknown>)[key] || "Not provided")}</dd></div>)}</dl></section>}
+      </>}
+    </div>}
     <footer className={s.foot}>Student prototype · Demo credit only · No real money or biometrics processed</footer>
-    <InkField />
   </main>;
 }

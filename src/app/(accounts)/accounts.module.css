@@ -22,6 +22,7 @@
 }
 
 .shell {
+  position: relative;
   width: 100%;
   max-width: 960px;
   min-height: 100dvh;
@@ -32,10 +33,16 @@
   padding: 24px 20px 36px;
   margin: auto;
 }
+/* Place the ink canvas behind the solid auth & wallet panels on account routes */
+.shell > canvas {
+  z-index: 1 !important;
+}
 .shell a { color: inherit; text-underline-offset: 5px; }
 
 /* Header: logo (wordmark only, no fingerprint) | alternate link */
 .header {
+  position: relative;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,23 +67,21 @@
 }
 .headerLink:hover { color: var(--ink); }
 
-/* Minimalist liquid glass card — centered, single-column, nonchalant typography */
+/* Solid minimalist card — centered, single-column; ink stays strictly behind it */
 .access {
+  position: relative;
+  z-index: 5;
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
   align-self: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.58));
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: var(--paper);
   border-radius: 24px;
+  border: 1px solid var(--rule);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(10, 10, 11, 0.06),
-    0 0 0 1px rgba(10, 10, 11, 0.06),
-    0 24px 48px -18px rgba(10, 10, 11, 0.1);
+    0 24px 48px -18px rgba(10, 10, 11, 0.1),
+    0 2px 6px rgba(10, 10, 11, 0.03);
   overflow: clip;
-  position: relative;
   animation: cardEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .accessWide {
@@ -167,9 +172,7 @@
   min-height: 44px;
   min-width: 0;
   font-size: 15px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: var(--s-2);
   transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -183,7 +186,7 @@
   min-width: 0;
   min-height: 48px;
   height: auto;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--paper);
 }
 .form button, .tabs button { min-height: 44px; }
 
@@ -236,13 +239,11 @@
   border-radius: var(--s-2);
   font-size: 0.875rem;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--paper-2);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .rolePicker input:checked + span {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--paper);
   border-color: var(--ink);
   box-shadow: 0 1px 3px rgba(10, 10, 11, 0.06);
   color: var(--ink);
@@ -338,9 +339,7 @@
 .choice {
   display: block;
   padding: 32px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--paper);
   border-radius: 24px;
   border: 1px solid var(--rule);
   text-decoration: none;
@@ -357,11 +356,29 @@
   margin: 0;
   padding: var(--s-3) var(--s-4);
   border: 1px solid var(--rule);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--paper-2);
   border-radius: var(--s-2);
   overflow-wrap: anywhere;
   font-size: 0.875rem;
   animation: cardEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Solid wallet panel — ink stays strictly behind it */
+.walletPanel {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  align-self: center;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 24px;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  box-shadow:
+    0 24px 48px -18px rgba(10, 10, 11, 0.1),
+    0 2px 6px rgba(10, 10, 11, 0.03);
+  animation: cardEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Dashboard / wallet */
@@ -371,15 +388,13 @@
   padding-bottom: 24px;
   border-bottom: 1px solid var(--rule);
 }
-.dashboard { max-width: 720px; margin: 48px auto; }
+.dashboard { max-width: 720px; margin: 32px auto 0; }
 .balance {
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--paper-2);
   border: 1px solid var(--rule);
   padding: 28px 32px;
-  border-radius: 24px;
-  margin-block: 32px;
+  border-radius: 20px;
+  margin-block: 28px;
 }
 .balanceTop {
   display: flex;
@@ -428,6 +443,8 @@
 .profile dt { color: var(--ink-2); }
 .profile dd { margin: 0; overflow-wrap: anywhere; }
 .foot {
+  position: relative;
+  z-index: 5;
   font-size: 12px;
   margin-top: 40px;
   color: var(--ink-2);
