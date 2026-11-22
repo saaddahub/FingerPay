@@ -146,9 +146,10 @@ function buildEmail(data: z.infer<typeof BodySchema>): { subject: string; html: 
 async function sendViaResend(apiKey: string, to: string, emailContent: { subject: string; html: string; text: string }): Promise<{ sent: boolean; id?: string }> {
   const candidates = [
     process.env.RESEND_FROM_EMAIL,
-    "FingerPay <hello@fingerpay.dev>",
+    "FingerPay <noreply@fingerpay.app>",
     "FingerPay <hello@fingerpay.app>",
     "FingerPay <noreply@fingerpay.dev>",
+    "FingerPay <hello@fingerpay.dev>",
     "FingerPay <onboarding@resend.dev>",
   ].filter((v): v is string => Boolean(v));
 
