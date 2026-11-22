@@ -14,7 +14,7 @@ val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-fun prop(name: String, fallback: String) = (localProps.getProperty(name) ?: fallback).replace("\"", "")
+fun prop(name: String, fallback: String) = (providers.gradleProperty(name).orNull ?: localProps.getProperty(name) ?: fallback).replace("\"", "")
 
 android {
     namespace = "pk.fingerpay.terminal"
@@ -29,6 +29,21 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"${prop("fp.apiBaseUrl", "http://10.0.2.2:3000")}\"")
         buildConfigField("String", "SUPABASE_URL", "\"${prop("fp.supabaseUrl", "http://10.0.2.2:54321")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${prop("fp.supabaseAnonKey", "")}\"")
+    }
+
+    flavorDimensions += "audience"
+    productFlavors {
+        create("merchant") {
+            dimension = "audience"
+            buildConfigField("String", "ACCOUNT_TYPE", "\"merchant\"")
+            resValue("string", "app_name", "FingerPay Merchant")
+        }
+        create("customer") {
+            dimension = "audience"
+            applicationId = "pk.fingerpay.customer"
+            buildConfigField("String", "ACCOUNT_TYPE", "\"customer\"")
+            resValue("string", "app_name", "FingerPay Customer")
+        }
     }
 
     buildTypes {

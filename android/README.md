@@ -1,4 +1,15 @@
-# FingerPay terminal (Android)
+# FingerPay Customer & Merchant (Android)
+
+Two separately installable apps are built from the same native codebase:
+
+| App | Application ID (release) | Entry experience |
+|---|---|---|
+| FingerPay Customer | `pk.fingerpay.customer` | Signup/sign-in, personal details, personal demo wallet, activity and profile. |
+| FingerPay Merchant | `pk.fingerpay.terminal` | Signup/sign-in, personal and business details, business demo wallet. Existing provisioned staff retain the terminal flow below. |
+
+Debug IDs end in `.debug`. Merchant keeps the existing application ID so installed merchant terminals can upgrade. Sessions and device storage are isolated between the two apps.
+
+New accounts receive **PKR 200 demo credit once**, on completing their profile. The server persists the credit; reinstalling, signing in again and retrying signup do not award another bonus. Demo credit has no cash value and is separate from the bank ledger. Self-service merchant signup does not grant staff privileges or pair a terminal. See [account setup](../docs/ACCOUNTS.md) for the required backend migration and Auth settings.
 
 The shop's FingerPay terminal as a native Android app: Kotlin + Jetpack Compose, minSdk 28, targetSdk 36. Rasheed's counter app, in the v4 "Paper & Ink" design (`docs/design/SYSTEM.md`).
 
@@ -26,15 +37,18 @@ Toolchain (installed per-user, no admin): JDK 21 at `%LOCALAPPDATA%\Programs\Tem
 ```powershell
 $env:JAVA_HOME = "$env:LOCALAPPDATA\Programs\Temurin\jdk-21.0.13+9"
 cd android
-.\gradlew.bat testDebugUnitTest assembleDebug
-& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" install -r app\build\outputs\apk\debug\app-debug.apk
+.\gradlew.bat testMerchantDebugUnitTest testCustomerDebugUnitTest assembleMerchantDebug assembleCustomerDebug
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" install -r app\build\outputs\apk\merchant\debug\app-merchant-debug.apk
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" install -r app\build\outputs\apk\customer\debug\app-customer-debug.apk
 ```
 
 Emulator: `fp_pixel` (Pixel 8, Android 36). Start it with
 `& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd fp_pixel`.
 
 A side-loadable release APK (signed with the debug key; fine for the prototype, not for the Play Store):
-`.\gradlew.bat assembleRelease` → `app\build\outputs\apk\release\app-release.apk`.
+`.\gradlew.bat assembleMerchantRelease assembleCustomerRelease` → `app\build\outputs\apk\merchant\release\app-merchant-release.apk` and `app\build\outputs\apk\customer\release\app-customer-release.apk`.
+
+For the landing page, build these release variants with `-Pfp.apiBaseUrl=https://fingerpayy.vercel.app` and the hosted Supabase URL and public key in `local.properties`. Copy the resulting files to `public/downloads/fingerpay-merchant.apk` and `public/downloads/fingerpay-customer.apk` at the repository root before deploying the site.
 
 ## Pointing it at a backend
 

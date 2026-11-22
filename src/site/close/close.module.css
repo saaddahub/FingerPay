@@ -24,6 +24,16 @@
   flex-wrap: wrap;
   gap: var(--s-5);
 }
+.download {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--s-3);
+  padding-top: var(--s-5);
+  border-top: var(--hairline) solid var(--rule);
+  scroll-margin-top: calc(var(--tap) + var(--s-6));
+}
+.download h3 { font-size: var(--t-title); font-weight: 400; }
+.download p { color: var(--ink-2); }
 .cta {
   display: inline-flex;
   align-items: center;
@@ -33,6 +43,14 @@
   border-radius: var(--r-pill);
   font-weight: 500;
   text-decoration: none;
+}
+.cta.dark {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 1px 2px rgba(10,10,11,0.3), 0 4px 16px rgba(10,10,11,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
 }
 .top {
   display: inline-flex;

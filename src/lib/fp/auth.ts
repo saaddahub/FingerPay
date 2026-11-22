@@ -26,14 +26,23 @@ const BEARER = /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/;
 /** The Android terminal sends its Supabase access token as a bearer token (SPEC §11: Supabase Auth, PKCE);
  *  the web console uses cookies. The token is checked with Supabase Auth on every request, never decoded locally. */
 export async function staffFromRequest(request: NextRequest): Promise<Staff | null> {
+  const user = await userFromRequest(request);
+  return user ? staffFor(user.id) : null;
+}
+
+export async function userFromRequest(request: NextRequest) {
   const header = request.headers.get("authorization");
-  if (!header) return currentStaff();
+  if (!header) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  }
   const token = BEARER.exec(header)?.[1];
   if (!token) return null;
   const e = env();
   const supabase = createTokenClient(e.supabaseUrl, e.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: { user }, error } = await supabase.auth.getUser(token);
-  return error || !user ? null : staffFor(user.id);
+  return error || !user ? null : user;
 }
 
 export async function requireStaff(request: NextRequest, roles?: StaffRole[]): Promise<Staff> {

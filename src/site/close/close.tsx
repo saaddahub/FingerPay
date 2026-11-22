@@ -68,6 +68,14 @@ export function Close() {
           Back to top <Icon name="arrow-up" />
         </a>
       </div>
+      <section id="download" className={s.download} aria-labelledby="download-title">
+        <h3 id="download-title">Get FingerPay for Android</h3>
+        <div className={s.actions}>
+          <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-customer.apk" download>Download Customer app</a>
+          <a className={`${s.cta} ${s.dark}`} href="/downloads/fingerpay-merchant.apk" download>Download Merchant app</a>
+        </div>
+        <p className="t-caption">Android 9 or later · Install from the downloaded APK.</p>
+      </section>
     </section>
   );
 }

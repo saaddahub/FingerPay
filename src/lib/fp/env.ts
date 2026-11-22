@@ -14,6 +14,7 @@ const schema = z
     FP_LOOKUP_KEY: key32,
     FP_ENV: z.enum(["development", "staging", "production"]),
     FP_DEMO_MODE: z.enum(["true", "false"]).default("false"),
+    FP_DEMO_SIGNUP: z.enum(["true", "false"]).optional(),
     FP_DEMO_KEY: key32.optional().or(z.literal("")),
     FP_DEMO_OBSERVER_ID: z.uuid().optional().or(z.literal("")),
     SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
@@ -36,6 +37,7 @@ export type Env = {
   keyring: Keyring;
   lookupKey: Buffer;
   fpEnv: "development" | "staging" | "production";
+  demoSignup: boolean;
   demo: { key: Buffer; observerId: string | undefined } | null;
 };
 
@@ -58,6 +60,7 @@ export function env(): Env {
     keyring: parseKeyring(e.FP_KEYRING),
     lookupKey: parseKey32(e.FP_LOOKUP_KEY, "FP_LOOKUP_KEY"),
     fpEnv: e.FP_ENV,
+    demoSignup: (e.FP_DEMO_SIGNUP ?? e.FP_DEMO_MODE) === "true",
     demo: e.FP_DEMO_MODE === "true" ? { key: parseKey32(e.FP_DEMO_KEY!, "FP_DEMO_KEY"), observerId: e.FP_DEMO_OBSERVER_ID || undefined } : null,
   };
   return cached;

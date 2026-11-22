@@ -59,7 +59,9 @@ import pk.fingerpay.terminal.ui.screens.HomeScreen
 import pk.fingerpay.terminal.ui.screens.PairScreen
 import pk.fingerpay.terminal.ui.screens.SellScreen
 import pk.fingerpay.terminal.ui.screens.SettingsScreen
-import pk.fingerpay.terminal.ui.screens.SignInScreen
+import pk.fingerpay.terminal.ui.screens.AccountSignInScreen
+import pk.fingerpay.terminal.ui.screens.AccountDetailsScreen
+import pk.fingerpay.terminal.ui.screens.AccountWalletScreen
 import pk.fingerpay.terminal.ui.theme.FingerPayTheme
 import pk.fingerpay.terminal.ui.theme.Fp
 import pk.fingerpay.terminal.ui.theme.Motion
@@ -77,7 +79,9 @@ class MainActivity : FragmentActivity() {
                 Box(Modifier.fillMaxSize().background(Fp.paper)) {
                     when (state.screen) {
                         Screen.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Coin(Modifier.size(56.dp), color = Fp.ink) }
-                        Screen.SignIn -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { SignInScreen(state.busy, state.notice, vm::signIn) }
+                        Screen.SignIn -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountSignInScreen(state, vm::signIn, vm::signUp, vm::dismissNotice) }
+                        Screen.Profile -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountDetailsScreen(state, vm::completeAccount, vm::dismissNotice, { vm.signOut() }) }
+                        Screen.Wallet -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountWalletScreen(state, { vm.refreshAccount() }, { vm.signOut() }) }
                         Screen.Pair -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { PairScreen(state, vm::pair, { vm.signOut() }) }
                         Screen.Main -> Main(state)
                     }

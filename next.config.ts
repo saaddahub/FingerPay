@@ -19,7 +19,13 @@ const nextConfig: NextConfig = {
     resolveAlias: { "@astryxdesign/theme-neutral/fonts.css": "./src/app/fonts.css" },
   },
   async headers() {
-    return [{ source: "/:path*", headers: staticSecurityHeaders }];
+    return [
+      { source: "/:path*", headers: staticSecurityHeaders },
+      { source: "/downloads/:file*.apk", headers: [
+        { key: "Content-Type", value: "application/vnd.android.package-archive" },
+        { key: "Content-Disposition", value: "attachment" },
+      ] },
+    ];
   },
 };
 

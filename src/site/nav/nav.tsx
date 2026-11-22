@@ -12,9 +12,11 @@ const LINKS = [
   { href: "#sale", label: "How it works" },
   { href: "#private", label: "Security", stagePart: 0.7 },
   { href: "#fine-print", label: "Numbers" },
+  { href: "#download", label: "Download" },
 ] as const;
 
 function go(e: MouseEvent<HTMLAnchorElement>, href: string, stagePart?: number, after?: () => void) {
+  if (!href.startsWith("#")) return;
   e.preventDefault();
   after?.();
   if (href === "#top") scrollToTarget(0);
@@ -54,12 +56,15 @@ export function Nav() {
             </li>
           ))}
         </ul>
-        <GlassLink href="#contact" className={s.contact}>Contact</GlassLink>
-        <button ref={menuRef} type="button" className={`${g.glass} ${s.menuBtn}`} aria-haspopup="dialog" aria-controls="site-menu"
-          onClick={() => dialogRef.current?.showModal()}>
-          <span className={g.inner}><Icon name="menu" /></span>
-          <span className="visually-hidden">Menu</span>
-        </button>
+        <div className={s.authGroup}>
+          <GlassLink href="/login" className={s.contact}>Sign in</GlassLink>
+          <GlassLink href="/signup" className={`${s.contact} ${s.signup}`}>Create an account</GlassLink>
+          <button ref={menuRef} type="button" className={`${g.glass} ${s.menuBtn}`} aria-haspopup="dialog" aria-controls="site-menu"
+            onClick={() => dialogRef.current?.showModal()}>
+            <span className={g.inner}><Icon name="menu" /></span>
+            <span className="visually-hidden">Menu</span>
+          </button>
+        </div>
       </nav>
 
       <dialog ref={dialogRef} id="site-menu" className={`${g.glass} ${s.sheet}`} aria-label="Menu"
@@ -75,9 +80,10 @@ export function Nav() {
                 <a href={l.href} onClick={(e) => go(e, l.href, "stagePart" in l ? l.stagePart : undefined, close)}>{l.label}</a>
               </li>
             ))}
+            <li><a href="/login">Sign in</a></li>
           </ul>
-          <a href="#contact" className={s.sheetContact} onClick={(e) => go(e, "#contact", undefined, close)}>
-            Contact <Icon name="arrow-right" />
+          <a href="/signup" className={s.sheetContact}>
+            Create an account <Icon name="arrow-right" />
           </a>
         </div>
       </dialog>

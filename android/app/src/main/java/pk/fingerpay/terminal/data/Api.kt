@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,6 +41,21 @@ class Api(private val store: SecureStore, private val keys: TerminalKeys) {
         val body = buildJsonObject { put("email", email.trim()); put("password", password) }.toString()
         saveSession(auth("password", body))
     }
+
+    suspend fun signUp(email: String, password: String): Boolean {
+        val body = buildJsonObject { put("email", email.trim()); put("password", password) }.toString()
+        val (code, text) = send(Request.Builder().url("${BuildConfig.SUPABASE_URL}/auth/v1/signup")
+            .header("apikey", BuildConfig.SUPABASE_ANON_KEY).post(body.toRequestBody(jsonType)).build())
+        if (code !in 200..299) throw ApiException(code, "AUTH", "Could not create your account. Try signing in if you already registered.")
+        if (!json.parseToJsonElement(text).jsonObject.containsKey("access_token")) return false
+        val s = json.decodeFromString<Session>(text)
+        saveSession(s.copy(expiresAtMs = System.currentTimeMillis() + s.expiresIn * 1000))
+        return true
+    }
+
+    suspend fun account(): AccountResponse = call("GET", "/api/v1/account")
+    suspend fun completeAccount(profile: AccountProfile): AccountResponse =
+        call("POST", "/api/v1/account", json.encodeToString(AccountProfile.serializer(), profile))
 
     suspend fun signOut() {
         session?.let { s -> runCatching { send(Request.Builder().url("${BuildConfig.SUPABASE_URL}/auth/v1/logout").post(ByteArray(0).toRequestBody()).header("apikey", BuildConfig.SUPABASE_ANON_KEY).header("Authorization", "Bearer ${s.accessToken}").build()) } }

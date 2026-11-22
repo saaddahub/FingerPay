@@ -11,7 +11,7 @@ export type Keyring = { active: number; keys: Map<number, Buffer> };
 // What a ciphertext is bound to: copying a blob to another row or column makes decryption fail.
 // accounts rows are bound to their owner (customer_id / merchant_id): the account row id is only
 // created inside fp.api_enroll_customer, after encryption.
-export type Aad = { table: "customers" | "accounts"; column: string; rowId: string };
+export type Aad = { table: "customers" | "accounts" | "signup_profiles"; column: string; rowId: string };
 
 const aadBytes = ({ table, column, rowId }: Aad) => Buffer.from(`fp:v1:${table}:${column}:${rowId}`, "utf8");
 

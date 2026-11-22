@@ -17,6 +17,26 @@ import kotlinx.serialization.Serializable
     val canSell get() = role == "MERCHANT_OWNER" || role == "MERCHANT_CASHIER"
 }
 
+@Serializable data class AccountProfile(
+    val accountType: String,
+    val fullName: String,
+    val phone: String,
+    val dateOfBirth: String,
+    val address: String,
+    val city: String,
+    val postalCode: String,
+    val occupation: String,
+    val consent: Boolean,
+    val businessName: String? = null,
+    val businessType: String? = null,
+    val businessAddress: String? = null,
+    val businessCity: String? = null,
+    val registrationNumber: String? = null,
+)
+@Serializable data class WalletActivity(val label: String, val amount: String, val createdAt: String)
+@Serializable data class DemoWallet(val profile: AccountProfile, val balance: String, val currency: String, val demo: Boolean, val activity: List<WalletActivity>)
+@Serializable data class AccountResponse(val email: String, val wallet: DemoWallet? = null)
+
 @Serializable data class Paired(val terminalId: String, val storeName: String? = null)
 
 @Serializable data class TerminalSelf(val terminalId: String, val label: String, val storeName: String, val frozen: Boolean)

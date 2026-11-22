@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pk.fingerpay.terminal.data.Api
+import pk.fingerpay.terminal.data.AccountProfile
+import pk.fingerpay.terminal.data.AccountResponse
 import pk.fingerpay.terminal.data.ApiException
 import pk.fingerpay.terminal.data.Charge
 import pk.fingerpay.terminal.data.Me
@@ -25,7 +27,7 @@ import pk.fingerpay.terminal.data.TerminalSelf
 import pk.fingerpay.terminal.data.ThumbResult
 import java.time.Instant
 
-enum class Screen { Loading, SignIn, Pair, Main }
+enum class Screen { Loading, SignIn, Profile, Wallet, Pair, Main }
 enum class Tab { Home, Sell, Activity, Settings }
 
 sealed interface Sell {
@@ -42,6 +44,7 @@ data class UiState(
     val screen: Screen = Screen.Loading,
     val tab: Tab = Tab.Home,
     val me: Me? = null,
+    val account: AccountResponse? = null,
     val terminal: TerminalSelf? = null,
     val summary: Summary? = null,
     val ledger: List<Sale> = emptyList(),
@@ -51,6 +54,7 @@ data class UiState(
     val freezing: Boolean = false,
     val offline: Boolean = false,
     val notice: String? = null,
+    val verificationEmail: String? = null,
 )
 
 /** Outcome codes → banner copy (SPEC View A). The UI maps codes, so Urdu can be added later. */
@@ -81,13 +85,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private suspend fun boot() {
         if (!api.restore()) return _state.update { it.copy(screen = Screen.SignIn) }
         try {
-            val me = api.me()
-            terminalId = store.get("terminalId")?.takeIf { keys.hasKey() }
-            _state.update { it.copy(me = me, screen = if (terminalId == null) Screen.Pair else Screen.Main) }
-            if (terminalId != null) refresh()
+            openAccount()
         } catch (e: OfflineException) {
             terminalId = store.get("terminalId")
-            _state.update { it.copy(screen = if (terminalId == null) Screen.SignIn else Screen.Main, offline = true) }
+            _state.update { it.copy(screen = if (terminalId == null || BuildConfig.ACCOUNT_TYPE == "customer") Screen.SignIn else Screen.Main, offline = true, notice = "Offline. Connect and sign in to load your account.") }
         } catch (e: ApiException) {
             api.signOut()
             _state.update { it.copy(screen = Screen.SignIn) }
@@ -99,7 +100,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             block()
             _state.update { it.copy(offline = false) }
         } catch (e: OfflineException) {
-            _state.update { it.copy(offline = true, busy = false, freezing = false) }
+            _state.update { it.copy(offline = true, busy = false, freezing = false, notice = "Could not connect. Check your connection and try again.") }
         } catch (e: ApiException) {
             if (e.status == 401 && e.code == "AUTH") _state.update { it.copy(notice = e.message, busy = false) }
             else if (e.status == 401) signOut()
@@ -114,21 +115,48 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         else -> e.message ?: "Something went wrong."
     }
 
-    fun dismissNotice() = _state.update { it.copy(notice = null) }
+    fun dismissNotice() = _state.update { it.copy(notice = null, verificationEmail = null) }
     fun select(tab: Tab) = _state.update { it.copy(tab = tab) }
 
     fun signIn(email: String, password: String) = launchSafely {
         _state.update { it.copy(busy = true, notice = null) }
         api.signIn(email, password)
-        val me = api.me()
-        if (!me.canSell) {
-            api.signOut()
-            _state.update { it.copy(busy = false, notice = "This app is for shop owners and cashiers.") }
-            return@launchSafely
+        openAccount()
+    }
+
+    fun signUp(email: String, password: String) = launchSafely {
+        _state.update { it.copy(busy = true, notice = null) }
+        if (api.signUp(email, password)) openAccount()
+        else _state.update { it.copy(busy = false, verificationEmail = email) }
+    }
+
+    private suspend fun openAccount() {
+        if (BuildConfig.ACCOUNT_TYPE == "merchant") {
+            val me = try { api.me() } catch (e: ApiException) {
+                if (e.status == 401 && e.code == "FP401") null else throw e
+            }
+            if (me != null) {
+                if (!me.canSell) throw ApiException(403, "FP403", "This app is for merchants.")
+                terminalId = store.get("terminalId")?.takeIf { keys.hasKey() }
+                _state.update { it.copy(busy = false, me = me, screen = if (terminalId == null) Screen.Pair else Screen.Main) }
+                if (terminalId != null) refresh()
+                return
+            }
         }
-        terminalId = store.get("terminalId")?.takeIf { keys.hasKey() }
-        _state.update { it.copy(busy = false, me = me, screen = if (terminalId == null) Screen.Pair else Screen.Main) }
-        if (terminalId != null) refresh()
+        val account = api.account()
+        _state.update { it.copy(busy = false, account = account, screen = if (account.wallet == null) Screen.Profile else Screen.Wallet) }
+    }
+
+    fun completeAccount(profile: AccountProfile) = launchSafely {
+        _state.update { it.copy(busy = true, notice = null) }
+        val account = api.completeAccount(profile)
+        _state.update { it.copy(busy = false, account = account, screen = Screen.Wallet) }
+    }
+
+    fun refreshAccount() = launchSafely {
+        _state.update { it.copy(busy = true, notice = null) }
+        val account = api.account()
+        _state.update { it.copy(busy = false, account = account) }
     }
 
     fun pair(label: String) = launchSafely {

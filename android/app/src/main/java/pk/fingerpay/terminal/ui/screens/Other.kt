@@ -25,13 +25,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -39,7 +40,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import pk.fingerpay.terminal.UiState
 import pk.fingerpay.terminal.data.Sale
-import pk.fingerpay.terminal.ui.components.Coin
 import pk.fingerpay.terminal.ui.theme.Fp
 import pk.fingerpay.terminal.ui.theme.Type
 import java.time.Instant
@@ -136,35 +136,6 @@ private fun Pair2(k: String, v: String) = Row(Modifier.fillMaxWidth().padding(ve
 }
 
 @Composable
-fun SignInScreen(busy: Boolean, notice: String?, onSignIn: (String, String) -> Unit) {
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    Column(Modifier.fillMaxSize().imePadding().padding(horizontal = 24.dp)) {
-        Spacer(Modifier.height(96.dp))
-        Coin(Modifier.size(56.dp), color = Fp.ink)
-        Spacer(Modifier.height(28.dp))
-        Text("Pay with\nnothing.", style = Type.hero, color = Fp.ink)
-        Spacer(Modifier.height(12.dp))
-        Text("Sign in to run your shop's FingerPay terminal.", style = Type.lead, color = Fp.ink2)
-        Spacer(Modifier.height(36.dp))
-        Field("Email", email, { email = it }, KeyboardType.Email)
-        Spacer(Modifier.height(12.dp))
-        Field("Password", password, { password = it }, KeyboardType.Password, secret = true)
-        notice?.let { Spacer(Modifier.height(12.dp)); Text(it, style = Type.body, color = Fp.ink) }
-        Spacer(Modifier.weight(1f))
-        val enabled = !busy && email.isNotBlank() && password.isNotEmpty()
-        Box(
-            Modifier.fillMaxWidth().height(60.dp).clip(RoundedCornerShape(50)).background(if (enabled) Fp.ink else Fp.paper2)
-                .clickable(enabled = enabled) { onSignIn(email, password) },
-            contentAlignment = Alignment.Center,
-        ) { Text(if (busy) "Signing in…" else "Sign in", style = Type.lead, color = if (enabled) Fp.paper else Fp.ink3) }
-        Spacer(Modifier.height(16.dp))
-        Text("Student prototype · integrations simulated", style = Type.label, color = Fp.ink2, modifier = Modifier.align(Alignment.CenterHorizontally))
-        Spacer(Modifier.height(28.dp))
-    }
-}
-
-@Composable
 fun PairScreen(state: UiState, onPair: (String) -> Unit, onSignOut: () -> Unit) {
     var label by rememberSaveable { mutableStateOf("Counter 1") }
     val owner = state.me?.isOwner == true
@@ -192,7 +163,7 @@ fun PairScreen(state: UiState, onPair: (String) -> Unit, onSignOut: () -> Unit) 
 }
 
 @Composable
-private fun Field(label: String, value: String, onChange: (String) -> Unit, type: KeyboardType, secret: Boolean = false) {
+internal fun Field(label: String, value: String, onChange: (String) -> Unit, type: KeyboardType, secret: Boolean = false) {
     Column {
         Text(label, style = Type.label, color = Fp.ink2)
         Spacer(Modifier.height(6.dp))
@@ -201,7 +172,7 @@ private fun Field(label: String, value: String, onChange: (String) -> Unit, type
             cursorBrush = SolidColor(Fp.ink),
             visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = type, imeAction = ImeAction.Next, autoCorrectEnabled = false),
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Fp.paper2).border(1.dp, Fp.rule, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = label }.clip(RoundedCornerShape(16.dp)).background(Fp.paper2).border(1.dp, Fp.rule, RoundedCornerShape(16.dp)).padding(horizontal = 16.dp, vertical = 16.dp),
         )
     }
 }

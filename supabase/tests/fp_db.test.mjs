@@ -257,6 +257,31 @@ ok(!chain.ok && Number(chain.first_bad_seq) === 5, 'superuser tampering with aud
 const integ = (await asApp(() => one('SELECT fp.api_verify_integrity($1) i', [staff.auditor]))).i;
 ok(integ.audit_chain_ok === false && integ.first_bad_seq === 5, 'auditor integrity check reports the tampered row');
 
+console.log('# self-service demo signup');
+const signupIds = [randomUUID(), randomUUID(), randomUUID()];
+for (const id of signupIds) await q('INSERT INTO auth.users(id) VALUES ($1)', [id]);
+const completeSignup = (id, type, details = enc()) => asApp(() => q('SELECT fp.api_complete_signup($1,$2,$3)', [id, type, details]));
+const signupWallet = (id) => asApp(() => one('SELECT * FROM fp.api_signup_wallet($1)', [id]));
+const beforeSignup = await one('SELECT sum(balance) total FROM fp.accounts');
+for (const [i, type] of ['customer', 'merchant'].entries()) {
+  const details = enc();
+  await completeSignup(signupIds[i], type, details);
+  await completeSignup(signupIds[i], type);
+  const wallet = await signupWallet(signupIds[i]);
+  eq(wallet.balance, '200.00', `${type} receives exactly PKR 200 after a signup retry`);
+  ok(Buffer.from(wallet.details_enc).equals(Buffer.from(details)), `${type} retry preserves original profile`);
+  eq((await one('SELECT count(*) n FROM fp.demo_signup_credits WHERE auth_user_id = $1', [signupIds[i]])).n, 1, `${type} has exactly one bonus entry`);
+  eq((await one('SELECT count(*) n FROM fp.staff WHERE auth_user_id = $1', [signupIds[i]])).n, 0, `${type} signup does not grant staff access`);
+}
+eq(await signupWallet(signupIds[2]), undefined, 'an unrelated account cannot read another wallet');
+eq(await asApp(() => errOf('SELECT fp.api_complete_signup($1,$2,$3)', [signupIds[0], 'merchant', enc()])), 'FP409', 'account type cannot be changed to claim a second bonus');
+eq(await asApp(() => errOf('SELECT fp.api_complete_signup($1,$2,$3)', [signupIds[2], 'BANK_ADMIN', enc()])), 'FP400', 'privileged signup roles are rejected');
+eq(await asApp(() => errOf('SELECT fp.api_complete_signup($1,$2,$3)', [signupIds[2], 'customer', new Uint8Array([0])])), '23514', 'malformed profile rolls back signup');
+eq(await signupWallet(signupIds[2]), undefined, 'failed signup awards no credit');
+eq(await errOf('UPDATE fp.demo_signup_credits SET amount_paisa = 40000'), '42501', 'signup credit is immutable');
+eq(await errOf('TRUNCATE fp.demo_signup_credits'), '42501', 'signup credits cannot be truncated');
+eq((await one('SELECT sum(balance) total FROM fp.accounts')).total, beforeSignup.total, 'demo bonuses never change the bank ledger');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 await db.close();
 process.exit(fail ? 1 : 0);
