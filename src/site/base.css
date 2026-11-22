@@ -139,10 +139,12 @@ a {
   letter-spacing: -0.006em;
 }
 .t-mono-s {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--t-mono-s);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   line-height: 1.3;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 .t-display {

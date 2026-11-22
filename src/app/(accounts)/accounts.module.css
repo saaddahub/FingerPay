@@ -1,5 +1,5 @@
 /* FingerPay accounts — login / signup / verification code / wallet dashboard.
-   Paper & Ink editorial studio using strictly Inter Variable (--font-sans) and Geist Mono (--font-mono).
+   Paper & Ink editorial studio using strictly Inter Variable (--font-sans) everywhere with tabular numerals.
    Solid opaque surfaces (var(--paper) at z-index: 5) so the blue ink canvas (z-index: 1) stays strictly behind. */
 
 @keyframes cardEnter {
@@ -16,7 +16,7 @@
 .page {
   --font-family-body: var(--font-sans);
   --font-family-heading: var(--font-sans);
-  --font-family-code: var(--font-mono);
+  --font-family-code: var(--font-sans);
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -188,9 +188,10 @@
 
 .asideCode {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 0.6875rem;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   color: var(--ink-2);
   margin-bottom: 2px;
 }
@@ -241,8 +242,10 @@
   border: 1px solid var(--rule);
   background: var(--paper);
   color: var(--ink-2);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.71875rem;
+  font-weight: 500;
   display: grid;
   place-items: center;
   margin-top: 1px;
@@ -294,8 +297,10 @@
 }
 .specLedger dd {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.71875rem;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--ink);
 }
 
@@ -324,9 +329,10 @@
 
 .stepBadge {
   display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
+  font-family: var(--font-sans);
+  font-size: 0.71875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   color: var(--ink-2);
   margin-bottom: var(--s-2);
 }
@@ -486,14 +492,16 @@
 .pwChecklist li {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: var(--r-pill);
   border: 1px solid var(--rule);
   background: var(--paper-2);
   color: var(--ink-2);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   transition: all 0.18s ease;
 }
 .pwChecklist li[data-met="true"] {
@@ -575,7 +583,8 @@
   width: 100%;
   height: 56px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   font-size: 1.375rem;
   font-weight: 500;
   color: var(--ink);
@@ -836,7 +845,8 @@
 .balance > strong {
   display: block;
   font-size: clamp(44px, 10vw, 72px);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   font-weight: 400;
   letter-spacing: -0.05em;
   margin-block: 20px;
@@ -860,11 +870,12 @@
   font-size: 18px;
 }
 .receipt strong {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
   color: var(--settle);
   white-space: nowrap;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
 }
 .profile {
   max-width: 760px;

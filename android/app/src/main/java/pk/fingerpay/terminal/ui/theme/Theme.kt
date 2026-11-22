@@ -56,8 +56,8 @@ object Type {
     val lead = TextStyle(fontFamily = Text, fontSize = 17.sp, lineHeight = 24.sp, letterSpacing = (-0.014).em)
     val body = TextStyle(fontFamily = Text, fontSize = 15.sp, lineHeight = 21.sp, letterSpacing = (-0.011).em)
     val label = TextStyle(fontFamily = Text, fontSize = 13.sp, lineHeight = 17.sp, letterSpacing = (-0.006).em, fontWeight = FontWeight(500))
-    val mono = TextStyle(fontFamily = Mono, fontSize = 14.sp, lineHeight = 20.sp)
-    val monoSmall = TextStyle(fontFamily = Mono, fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.06.em)
+    val mono = TextStyle(fontFamily = Text, fontSize = 14.sp, lineHeight = 20.sp, fontFeatureSettings = "tnum")
+    val monoSmall = TextStyle(fontFamily = Text, fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.05.em, fontWeight = FontWeight(500), fontFeatureSettings = "tnum")
 }
 
 /** Apple's damping/response pairs (MOTION.md §1.1) as Compose springs: stiffness = (2π / response)². */

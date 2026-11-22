@@ -177,15 +177,17 @@
 }
 
 .specVal {
-  font-family: var(--font-mono);
-  font-size: var(--t-mono-s);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: var(--t-caption);
   color: var(--ink);
   text-align: right;
 }
 
 .codeLine {
   padding-top: var(--s-2);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--t-caption);
   color: var(--ink-2);
   line-height: 1.55;
@@ -220,7 +222,9 @@
   border-radius: var(--r-pill);
   border: var(--hairline) solid var(--rule);
   color: var(--ink-2);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
   font-size: var(--t-caption);
   transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
 }

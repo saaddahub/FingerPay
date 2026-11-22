@@ -103,8 +103,9 @@
 }
 .fee {
   margin-top: var(--s-1);
-  font-family: var(--font-mono);
-  font-size: var(--t-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-caption);
   color: var(--night-2);
 }
 .thumb {
@@ -133,10 +134,11 @@
   margin-bottom: var(--s-2);
 }
 .smsBody {
-  font-family: var(--font-mono);
-  font-size: var(--t-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-body);
   line-height: 1.45;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   color: var(--ink);
 }
 

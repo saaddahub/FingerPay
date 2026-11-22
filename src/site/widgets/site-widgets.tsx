@@ -266,8 +266,7 @@ export function SiteWidgets() {
       {cookieOpen ? (
         <aside className={s.cookieAside} data-liquid-surface aria-label="Cookie consent">
           <p className={`${s.cookieCopy} two-tone`}>
-            <strong>Cookies keep your demo session signed in.</strong> First-party only (<code>sb-*</code>); zero ad
-            trackers.
+            <strong>Cookies keep your demo session signed in.</strong> First-party only; zero ad trackers.
           </p>
           <div className={s.cookieActions}>
             <button type="button" className={s.btnDark} onClick={() => saveCookieConsent("all")}>

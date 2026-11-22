@@ -55,7 +55,7 @@ function buildOtpEmailHtml(email: string, code: string): string {
     <tr>
       <td style="padding:8px 36px 24px;">
         <div style="padding:24px;border-radius:16px;background:#f5f5f7;border:1px solid rgba(10,10,11,0.08);text-align:center;">
-          <div style="font-family:ui-monospace,'Geist Mono','SFMono-Regular',Menlo,monospace;font-size:36px;font-weight:500;letter-spacing:0.18em;color:#0a0a0b;">
+          <div style="font-size:36px;font-weight:500;letter-spacing:0.16em;font-variant-numeric:tabular-nums;color:#0a0a0b;">
             ${spaced}
           </div>
           <div style="margin-top:8px;font-size:12px;color:#6e6e73;">

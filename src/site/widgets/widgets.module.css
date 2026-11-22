@@ -181,7 +181,9 @@
   background: var(--paper);
   border: var(--hairline) solid var(--rule);
   color: var(--ink-2);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
   font-size: var(--t-caption);
   transition: transform var(--d-press) var(--ease-out), background var(--d-fast) var(--ease-out),
     color var(--d-fast) var(--ease-out);

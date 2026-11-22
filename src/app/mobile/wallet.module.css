@@ -2,7 +2,7 @@
   --wallet-font: var(--font-sans, "Inter Variable", system-ui, sans-serif);
   --font-family-body: var(--wallet-font);
   --font-family-heading: var(--wallet-font);
-  --font-family-code: var(--font-mono, "Geist Mono Variable", ui-monospace, monospace);
+  --font-family-code: var(--wallet-font);
   font-family: var(--wallet-font);
 }
 

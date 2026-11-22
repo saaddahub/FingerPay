@@ -70,7 +70,7 @@ function buildEmail(data: z.infer<typeof BodySchema>): { subject: string; html: 
   const feedbackBlockHtml =
     stars || data.message || topicLabel
       ? `<div style="margin:24px 0;padding:20px;border-radius:16px;background:#f5f5f7;border:1px solid rgba(10,10,11,0.08);">
-          <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#6e6e73;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#6e6e73;margin-bottom:8px;">
             ${data.kind === "review" ? "Your Review Record" : "Your Inquiry Summary"}
           </div>
           ${stars ? `<div style="font-size:18px;letter-spacing:2px;color:#0a0a0b;margin-bottom:8px;">${stars} (${data.rating}/5)</div>` : ""}
@@ -82,9 +82,9 @@ function buildEmail(data: z.infer<typeof BodySchema>): { subject: string; html: 
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8" /><title>${escapeHtml(subject)}</title></head>
-<body style="margin:0;padding:32px 16px;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0a0a0b;">
+<body style="margin:0;padding:32px 16px;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0a0a0b;">
   <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:24px;padding:36px 32px;border:1px solid rgba(10,10,11,0.08);box-shadow:0 12px 32px rgba(10,10,11,0.06);">
-    <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#6e6e73;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#6e6e73;margin-bottom:12px;">
       FingerPay · Paper &amp; Ink Brief
     </div>
     <h1 style="margin:0 0 16px;font-size:28px;line-height:1.1;letter-spacing:-0.03em;font-weight:600;color:#0a0a0b;">
@@ -94,7 +94,7 @@ function buildEmail(data: z.infer<typeof BodySchema>): { subject: string; html: 
     <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#6e6e73;">${intro}</p>
     ${feedbackBlockHtml}
     <div style="margin:24px 0;padding-top:20px;border-top:1px solid rgba(10,10,11,0.1);">
-      <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#6e6e73;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#6e6e73;margin-bottom:12px;">
         How FingerPay Works at a Glance
       </div>
       <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.65;color:#0a0a0b;">
