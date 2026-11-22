@@ -109,15 +109,17 @@
 
 .modal {
   position: relative;
+  z-index: 65;
   width: min(27rem, 100%);
   max-height: calc(100svh - var(--s-6));
   overflow-y: auto;
   padding: var(--s-6);
   border-radius: var(--r-card);
-  background: var(--glass-panel-bg);
-  backdrop-filter: var(--glass-panel-blur);
-  -webkit-backdrop-filter: var(--glass-panel-blur);
-  box-shadow: var(--glass-panel-shadow);
+  background: var(--paper);
+  border: var(--hairline) solid var(--rule);
+  box-shadow:
+    0 24px 48px -18px rgba(10, 10, 11, 0.14),
+    0 2px 6px rgba(10, 10, 11, 0.04);
   color: var(--ink);
   display: grid;
   gap: var(--s-5);
@@ -176,7 +178,7 @@
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--paper);
   border: var(--hairline) solid var(--rule);
   color: var(--ink-2);
   font-family: var(--font-mono);
@@ -194,6 +196,8 @@
 }
 
 .form {
+  position: relative;
+  z-index: 35;
   display: grid;
   gap: var(--s-4);
 }
@@ -205,27 +209,31 @@
 
 .label {
   font-size: var(--t-caption);
-  font-weight: 400;
-  color: var(--ink-2);
+  font-weight: 500;
+  color: var(--ink);
 }
 
 .input,
 .textarea {
+  position: relative;
+  z-index: 35;
   width: 100%;
   font: inherit;
   font-size: var(--t-body);
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--paper);
   border: var(--hairline) solid var(--rule);
-  border-radius: var(--r-bubble);
+  border-radius: 0.75rem;
   padding: var(--s-3) var(--s-4);
-  transition: border-color var(--d-fast) var(--ease-out);
+  box-shadow: none;
+  outline: none;
+  transition: border-color var(--d-fast) var(--ease-out), box-shadow var(--d-fast) var(--ease-out);
 }
 .input {
-  height: var(--tap);
+  height: 3rem;
 }
 .textarea {
-  min-height: 4.75rem;
+  min-height: 5.5rem;
   resize: vertical;
   line-height: 1.5;
 }
@@ -233,10 +241,25 @@
 .textarea::placeholder {
   color: var(--ink-3);
 }
+.input:hover:not(:focus),
+.textarea:hover:not(:focus) {
+  border-color: rgba(10, 10, 11, 0.24);
+}
 .input:focus,
-.textarea:focus {
+.input:focus-visible,
+.textarea:focus,
+.textarea:focus-visible {
   outline: none;
   border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+}
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--paper) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
 }
 
 .topicPills {
@@ -249,7 +272,7 @@
   height: 2.125rem;
   padding-inline: var(--s-3);
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--paper);
   border: var(--hairline) solid var(--rule);
   color: var(--ink-2);
   font-size: var(--t-caption);
@@ -293,6 +316,15 @@
 
 .emailBarRight {
   grid-column: 7 / span 6;
+  position: relative;
+  z-index: 35;
+  background: var(--paper);
+  border: var(--hairline) solid var(--rule);
+  border-radius: var(--r-card);
+  padding: var(--s-4);
+  box-shadow:
+    0 24px 48px -18px rgba(10, 10, 11, 0.08),
+    0 2px 6px rgba(10, 10, 11, 0.03);
 }
 
 .emailBarForm {
@@ -300,29 +332,43 @@
   align-items: center;
   gap: var(--s-2);
   flex-wrap: wrap;
-  padding-bottom: var(--s-3);
-  border-bottom: var(--hairline) solid var(--rule);
 }
 
 .emailBarInput {
   flex: 1 1 14rem;
-  height: var(--tap);
-  padding-inline: var(--s-2);
-  border: 0;
-  background: transparent;
+  height: 3rem;
+  padding-inline: var(--s-4);
+  border: var(--hairline) solid var(--rule);
+  border-radius: 0.75rem;
+  background: var(--paper);
   color: var(--ink);
   font: inherit;
-  font-size: var(--t-lead);
+  font-size: var(--t-body);
+  outline: none;
+  box-shadow: none;
+  transition: border-color var(--d-fast) var(--ease-out), box-shadow var(--d-fast) var(--ease-out);
 }
 .emailBarInput::placeholder {
   color: var(--ink-3);
 }
-.emailBarInput:focus {
+.emailBarInput:hover:not(:focus) {
+  border-color: rgba(10, 10, 11, 0.24);
+}
+.emailBarInput:focus,
+.emailBarInput:focus-visible {
   outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+}
+.emailBarInput:-webkit-autofill,
+.emailBarInput:-webkit-autofill:hover,
+.emailBarInput:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--paper) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
 }
 
-.cookieAside[data-liquid],
-.modal[data-liquid] {
+.cookieAside[data-liquid] {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.5));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),

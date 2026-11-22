@@ -162,31 +162,56 @@
 .shell h2 { font-size: 24px; font-weight: 500; letter-spacing: -0.025em; line-height: 1.2; }
 .shell p { line-height: 1.6; color: var(--ink-2); max-width: 56ch; }
 
-/* Form inputs & layout */
+/* Form inputs & layout — single clean solid box on .field; inner <input> has zero border/outline */
 .form {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--s-4);
 }
-.form input:not([type="checkbox"]) {
+.form input:not([type="checkbox"]):not([type="radio"]) {
   min-height: 44px;
   min-width: 0;
   font-size: 15px;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: var(--s-2);
-  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
-.form input:not([type="checkbox"]):focus {
-  border-color: var(--ink);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08);
+.form input:not([type="checkbox"]):not([type="radio"]):focus,
+.form input:not([type="checkbox"]):not([type="radio"]):focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.form input:-webkit-autofill,
+.form input:-webkit-autofill:hover,
+.form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--paper) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--ink);
+  border: 0 !important;
+  outline: none !important;
 }
 .form .field {
   min-width: 0;
   min-height: 48px;
   height: auto;
-  background: var(--paper);
+  background: var(--paper) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.form .field:hover:not(:focus-within) {
+  border-color: rgba(10, 10, 11, 0.24) !important;
+  box-shadow: none !important;
+}
+.form .field:focus-within {
+  border-color: var(--ink) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(10, 10, 11, 0.08) !important;
 }
 .form button, .tabs button { min-height: 44px; }
 
@@ -265,10 +290,12 @@
 .passwordField input { padding-inline-end: 7rem; }
 .passwordToggle {
   position: absolute;
-  inset: auto var(--s-1) 2px auto;
+  z-index: 3;
+  inset: auto var(--s-2) 2px auto;
   color: var(--ink-2);
   font: inherit;
   font-size: 0.75rem;
+  font-weight: 500;
   padding-inline: var(--s-2);
   background: transparent;
   border: 0;
@@ -350,7 +377,7 @@
   transform: translateY(-1px);
 }
 
-.shell :focus-visible { outline: 2px solid var(--settle); outline-offset: 4px; }
+.shell :focus-visible:not(input):not(textarea) { outline: 2px solid var(--settle); outline-offset: 4px; }
 
 .notice {
   margin: 0;

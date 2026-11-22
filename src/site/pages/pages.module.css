@@ -127,6 +127,22 @@
   border-top: var(--hairline) solid var(--rule);
 }
 
+/* Solid opaque form card on /contact so ink stays strictly behind the form & text areas */
+.hardFormCard {
+  position: relative;
+  z-index: 35;
+  display: grid;
+  gap: var(--s-5);
+  background: var(--paper);
+  border: var(--hairline) solid var(--rule);
+  border-radius: var(--r-card);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  box-shadow:
+    0 24px 48px -18px rgba(10, 10, 11, 0.08),
+    0 2px 6px rgba(10, 10, 11, 0.03);
+  margin-bottom: var(--s-6);
+}
+
 .streamTitle {
   font-size: var(--t-title);
   line-height: 1.08;

@@ -283,7 +283,7 @@ export function SiteWidgets() {
       {reviewOpen ? (
         <div className={s.overlay} role="dialog" aria-modal="true" aria-labelledby="fp-review-title"
           onClick={(e) => e.target === e.currentTarget && skipReview()}>
-          <div className={s.modal} data-liquid-surface>
+          <div className={s.modal}>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
                 <h2 id="fp-review-title" className={s.modalTitle}>A quick thought.</h2>
@@ -372,7 +372,7 @@ export function SiteWidgets() {
       {contactOpen ? (
         <div className={s.overlay} role="dialog" aria-modal="true" aria-labelledby="fp-contact-title"
           onClick={(e) => e.target === e.currentTarget && setContactOpen(false)}>
-          <div className={s.modal} data-liquid-surface>
+          <div className={s.modal}>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
                 <h2 id="fp-contact-title" className={s.modalTitle}>Write to the team.</h2>

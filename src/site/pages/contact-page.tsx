@@ -120,7 +120,7 @@ export function ContactPage() {
             </p>
           </div>
           <div className={p.rightStream}>
-            <article className={p.streamItem}>
+            <article className={p.hardFormCard}>
               <h3 className={p.streamTitle}>Contact the team</h3>
               {done ? (
                 <p className="two-tone t-lead" role="status">
@@ -186,7 +186,7 @@ export function ContactPage() {
               )}
             </article>
 
-            <article className={p.streamItem}>
+            <article className={p.hardFormCard}>
               <h3 className={p.streamTitle}>Leave a review</h3>
               {revDone ? (
                 <p className="two-tone t-lead" role="status">
