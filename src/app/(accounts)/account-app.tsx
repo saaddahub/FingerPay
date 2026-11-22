@@ -135,15 +135,19 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
 
   return <main className={s.shell}>
     <header className={s.header}>
-      <Link href="/" className={s.brand}><Image src="/brand/fingerpay-lockup.svg" alt="FingerPay home" width={128} height={26} loading="eager" /></Link>
+      <Link href="/" className={s.brand}><Image src="/brand/fingerpay-wordmark.svg" alt="FingerPay home" width={120} height={27} priority /></Link>
       {stage === "wallet" || stage === "details"
         ? <Button label="Sign out" variant="ghost" isDisabled={busy} clickAction={signOut} />
         : <Link className={s.headerLink} href={alternateHref}>{alternateLabel}</Link>}
     </header>
-    {stage !== "wallet" && <div className={s.access}>
+    {stage !== "wallet" && <div className={`${s.access} ${stage === "details" ? s.accessWide : ""}`}>
       <section className={s.accessContent}>
         {stage === "auth" && <>
           <div className={s.formHeading}>
+            {signup && <div className={s.creditBadge}>
+              <span className={s.creditDot} />
+              <span>PKR 200 demo credit on registration</span>
+            </div>}
             {signup && <p className={s.step}>Step 1 of 2</p>}
             <h1>{signup ? "Create your account" : "Sign in to FingerPay"}</h1>
             <p>{signup ? "Choose an account type and enter your email." : "Use the email and password you registered with."}</p>
@@ -188,12 +192,6 @@ export function AccountApp({ accountType: initialType, signup, entry = false }: 
           </form>
         </>}
       </section>
-      <aside className={s.markPanel} data-credit={signup || stage === "details" ? "visible" : undefined}>
-        <div className={s.mark} aria-hidden="true" />
-        {(signup || stage === "details") && <div className={s.credit}>
-          <span>Welcome credit</span><strong>PKR 200</strong><p>One per new account. Demo credit only.</p>
-        </div>}
-      </aside>
     </div>}
     {stage === "wallet" && error}
     {stage === "wallet" && wrongApp && <section className={s.intro}><h1>Your account is a {wallet.profile.accountType} account.</h1><p>Open the matching app to see your wallet.</p><Link className={s.choice} href={`/${wallet.profile.accountType}`}>Open FingerPay {wallet.profile.accountType} ↗</Link></section>}
