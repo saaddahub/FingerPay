@@ -33,23 +33,68 @@
   inset: calc((var(--nav-h) - var(--tap)) / 2);
 }
 .pill {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--s-5);
+  gap: var(--s-1);
   height: var(--nav-h);
-  padding-inline: var(--s-5);
+  padding: var(--s-1);
   border-radius: var(--r-pill);
   margin: 0;
 }
+.navLens {
+  position: absolute;
+  z-index: 0;
+  inset-block: var(--s-1);
+  left: var(--l, 0px);
+  right: var(--r, 100%);
+  opacity: 0;
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.72), transparent 60%), rgba(10, 10, 11, 0.055);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(10, 10, 11, 0.08),
+    0 4px 12px -4px rgba(10, 10, 11, 0.12);
+  transition: left 0.55s var(--ease-expo-out), right 0.55s var(--ease-expo-out), opacity 0.35s var(--ease-out);
+}
+.navLens[data-ready="true"] {
+  opacity: 1;
+}
+.pill[data-dir="forward"] .navLens {
+  transition: right 0.36s var(--ease-expo-out), left 0.65s var(--ease-expo-out) 45ms, opacity 0.35s var(--ease-out);
+}
+.pill[data-dir="back"] .navLens {
+  transition: left 0.36s var(--ease-expo-out), right 0.65s var(--ease-expo-out) 45ms, opacity 0.35s var(--ease-out);
+}
+:global(html[data-nav="ink"]) .navLens {
+  background: radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, 0.22), transparent 60%), rgba(245, 245, 247, 0.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 6px 16px -8px rgba(0, 0, 0, 0.7);
+}
 .link,
 .contact {
+  position: relative;
+  z-index: 1;
   font-size: var(--t-caption);
   font-weight: 500;
   letter-spacing: -0.006em;
   text-decoration: none;
   color: var(--fg-2);
   white-space: nowrap;
-  transition: color var(--d-fast) var(--ease-out);
+  transition: color var(--d-fast) var(--ease-out), transform var(--d-press) var(--ease-out);
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--nav-h) - var(--s-2));
+  padding-inline: var(--s-3);
+  border-radius: var(--r-pill);
+}
+.link:active {
+  transform: scale(0.96);
 }
 .link:hover,
 .link:focus-visible,

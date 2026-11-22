@@ -1,9 +1,14 @@
-/* Close and footer (PAGE.md §8). */
+/* Close, Download, and Footer — each divided into its own isolated full-viewport (100svh+) section
+   so visitors see one chapter at a time with zero preview of the next section. */
+
+/* Section 1: Leave everything at home */
 .close {
-  min-height: 100svh;
+  min-height: 105svh;
   align-content: center;
   row-gap: var(--s-7);
-  padding-block: var(--s-10);
+  padding-block: 22svh;
+  border-top: var(--hairline) solid var(--rule);
+  background: var(--paper);
 }
 .title {
   grid-column: 1 / span 11;
@@ -22,18 +27,48 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: var(--s-4);
+}
+
+/* Section 2: Get FingerPay for Android (stiff left heading + floating right cards) */
+.downloadSection {
+  min-height: 130svh;
+  padding-block: 24svh 28svh;
+  align-items: start;
+  border-top: var(--hairline) solid var(--rule);
+  background: var(--paper);
+}
+.downloadIntro {
+  grid-column: 1 / span 5;
+  position: sticky;
+  top: 30svh;
+  align-self: start;
+  display: grid;
   gap: var(--s-5);
 }
-.download {
-  grid-column: 1 / -1;
+.downloadCards {
+  grid-column: 7 / span 6;
   display: grid;
-  gap: var(--s-3);
-  padding-top: var(--s-5);
-  border-top: var(--hairline) solid var(--rule);
-  scroll-margin-top: calc(var(--tap) + var(--s-6));
+  gap: var(--s-6);
+  padding-top: 4svh;
 }
-.download h3 { font-size: var(--t-title); font-weight: 400; }
-.download p { color: var(--ink-2); }
+.downloadCard {
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  display: grid;
+  gap: var(--s-4);
+}
+.downloadCardTitle {
+  font-size: var(--t-title);
+  line-height: 1.1;
+  letter-spacing: var(--track-title);
+  font-weight: 400;
+}
+.downloadCardDesc {
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
 .cta {
   display: inline-flex;
   align-items: center;
@@ -47,7 +82,7 @@
 .cta.dark {
   background: var(--ink);
   color: var(--paper);
-  box-shadow: 0 1px 2px rgba(10,10,11,0.3), 0 4px 16px rgba(10,10,11,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: var(--cta-dark-shadow);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
@@ -69,16 +104,30 @@
   opacity: 0;
 }
 
+/* Section 3: Dedicated Email Brief & Footer Chapter */
 .footer {
   position: relative;
+  min-height: 100svh;
+  align-content: space-between;
+  row-gap: var(--s-9);
+  padding-block: 18svh 10svh;
+  border-top: var(--hairline) solid var(--rule);
+  background: var(--paper);
+}
+.footerBottom {
+  grid-column: 1 / -1;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
   row-gap: var(--s-6);
-  padding-block: var(--s-9);
+  padding-top: var(--s-8);
   align-items: start;
 }
 .footRule {
   position: absolute;
   top: 0;
-  inset-inline: var(--page-x);
+  inset-inline: 0;
   height: var(--hairline);
   background: var(--rule);
 }
@@ -112,14 +161,31 @@
 }
 
 @media (max-width: 767px) {
+  .close,
+  .downloadSection,
+  .footer {
+    min-height: 100svh;
+    padding-block: var(--s-10);
+  }
   .title,
   .lead,
+  .downloadIntro,
+  .downloadCards,
   .disclaimer,
   .footLinks {
     grid-column: 1 / -1;
   }
+  .downloadIntro {
+    position: static;
+  }
+  .downloadCards {
+    padding-top: var(--s-5);
+  }
   .title {
     font-size: clamp(3rem, 15vw, 4rem);
+  }
+  .footerBottom {
+    grid-template-columns: 1fr;
   }
   .footLinks {
     justify-items: start;

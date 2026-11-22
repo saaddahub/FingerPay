@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { Icon } from "../icons.tsx";
+import { startGlobalLiquidGlass } from "../glass/liquid-glass.ts";
 import s from "./widgets.module.css";
 
 const COOKIE_STORAGE_KEY = "fp_cookie_consent_v1";
@@ -67,7 +68,7 @@ export function EmailBriefBar({ heading = "Get the FingerPay brief in your inbox
   };
 
   return (
-    <aside className={s.emailBar} aria-label="Receive project brief by email">
+    <aside className={s.emailBar} data-liquid-surface aria-label="Receive project brief by email">
       <div className={s.emailBarCopy}>
         <h3 className={s.emailBarTitle}>{heading}</h3>
         <p className={s.emailBarSub}>
@@ -127,6 +128,10 @@ export function SiteWidgets() {
   const [contactBusy, setContactBusy] = useState(false);
   const [contactDone, setContactDone] = useState<string | null>(null);
   const [contactError, setContactError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return startGlobalLiquidGlass();
+  }, []);
 
   useEffect(() => {
     const savedCookie = window.localStorage.getItem(COOKIE_STORAGE_KEY);
@@ -270,7 +275,7 @@ export function SiteWidgets() {
   return (
     <>
       {cookieOpen ? (
-        <aside className={s.cookieAside} aria-label="Cookie consent">
+        <aside className={s.cookieAside} data-liquid-surface aria-label="Cookie consent">
           <div className={s.cookieHeader}>
             <span className={s.cookieTitle}>
               <Icon name="cookie" /> Cookies on FingerPay
@@ -313,7 +318,7 @@ export function SiteWidgets() {
       {reviewOpen ? (
         <div className={s.overlay} role="dialog" aria-modal="true" aria-labelledby="fp-review-title"
           onClick={(e) => e.target === e.currentTarget && skipReview()}>
-          <div className={s.modal}>
+          <div className={s.modal} data-liquid-surface>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
                 <h2 id="fp-review-title" className={s.modalTitle}>How does FingerPay feel so far?</h2>
@@ -408,7 +413,7 @@ export function SiteWidgets() {
       {contactOpen ? (
         <div className={s.overlay} role="dialog" aria-modal="true" aria-labelledby="fp-contact-title"
           onClick={(e) => e.target === e.currentTarget && setContactOpen(false)}>
-          <div className={s.modal}>
+          <div className={s.modal} data-liquid-surface>
             <div className={s.modalTop}>
               <div className={s.modalHeadingGroup}>
                 <h2 id="fp-contact-title" className={s.modalTitle}>Contact the FingerPay team</h2>

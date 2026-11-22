@@ -15,6 +15,16 @@
   transform: translate3d(var(--ox), var(--oy), 0) scale(var(--press));
   transition: --glass-bg var(--d-base) var(--ease-out), --fg var(--d-base) var(--ease-out), box-shadow var(--d-base) var(--ease-out);
 }
+/* When SVG Snell's-law refraction is active, make the body crystal-clear so bent characters/lights show through */
+.glass[data-liquid] {
+  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.34));
+  background: var(--glass-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(10, 10, 11, 0.08),
+    0 0 0 1px rgba(10, 10, 11, 0.07),
+    0 18px 40px -18px rgba(10, 10, 11, 0.18);
+}
 .glass::before,
 .glass::after {
   content: "";
@@ -60,6 +70,15 @@
   --rim: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.08));
   backdrop-filter: var(--glass-dark-blur);
   -webkit-backdrop-filter: var(--glass-dark-blur);
+}
+:global(html[data-nav="ink"]) .glass[data-liquid],
+.dark[data-liquid] {
+  background: linear-gradient(180deg, rgba(22, 22, 24, 0.2), rgba(22, 22, 24, 0.32));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(245, 245, 247, 0.12),
+    0 18px 40px -18px rgba(0, 0, 0, 0.65);
 }
 
 /* Reduced motion: press tints instead of scaling */

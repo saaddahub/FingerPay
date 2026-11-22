@@ -3,15 +3,17 @@
 import { useEffect, useRef } from "react";
 import { animate, motionValue } from "motion";
 import { ease, spring } from "../motion.ts";
+import { attachLiquidGlass } from "./liquid-glass.ts";
 
-/** Glass physics (MOTION.md §3): press on touch-down, magnetic pull and a specular highlight that rides the
- *  same spring. Values from the client's portfolio (SocialMenu.jsx: stiffness 150, damping 15, mass 0.1, ×0.3). */
+/** Glass physics (MOTION.md §3) + optical Snell's-law liquid refraction (saadsalam.dev / Apple iOS 26):
+ *  press on touch-down, magnetic pull, specular highlight, and real background bending around the bevel. */
 export function useGlass<T extends HTMLElement>(maxPull = 6, field = 24) {
   const ref = useRef<T>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const detachLiquid = attachLiquidGlass(el);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const ox = motionValue(0);
@@ -73,6 +75,7 @@ export function useGlass<T extends HTMLElement>(maxPull = 6, field = 24) {
     if (fine && !reduced) window.addEventListener("pointermove", move, { passive: true });
 
     return () => {
+      detachLiquid();
       unsub.forEach((u) => u());
       window.removeEventListener("pointermove", move);
       el.removeEventListener("pointerdown", down);

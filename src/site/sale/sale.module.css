@@ -1,27 +1,32 @@
-/* The sale (PAGE.md §6, MOTION.md §6). */
+/* The sale (PAGE.md §6, MOTION.md §6): isolated section where the left punchline stays stiff while the
+   right message thread floats up past it, then carries the left punchline away when finished. */
 .sale {
-  padding-block: var(--s-11);
+  min-height: 175svh;
+  padding-block: 24svh 30svh;
   align-items: start;
   background: var(--paper);
 }
 .intro {
-  grid-column: 1 / span 4;
+  grid-column: 1 / span 5;
   position: sticky;
-  top: var(--s-10);
+  top: 30svh;
+  align-self: start;
   display: grid;
   gap: var(--s-5);
+  padding-bottom: var(--s-6);
 }
 .lead {
   max-width: 34ch;
 }
 .threadCol {
-  grid-column: 6 / span 6;
+  grid-column: 7 / span 6;
   max-width: 35rem;
   width: 100%;
+  padding-top: 6svh;
 }
 .thread {
   display: grid;
-  gap: var(--s-5);
+  gap: var(--s-7);
 }
 .note {
   margin-top: var(--s-7);

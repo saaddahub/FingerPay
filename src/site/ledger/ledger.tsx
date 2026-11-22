@@ -83,11 +83,13 @@ export function Ledger() {
 
   return (
     <section id="fine-print" className={`${s.ledger} page-grid`} aria-labelledby="fine-print-title">
-      <h2 id="fine-print-title" className={`${s.title} t-display`}>The fine print, in large print.</h2>
-      <p className={`${s.lead} two-tone t-lead`}>
-        <strong>Everything a shop or a judge would ask, on one page.</strong> These are the prototype’s rules, from the
-        project spec.
-      </p>
+      <div className={s.intro}>
+        <h2 id="fine-print-title" className={`${s.title} t-display`}>The fine print, in large print.</h2>
+        <p className={`${s.lead} two-tone t-lead`}>
+          <strong>Everything a shop or a judge would ask, on one page.</strong> These are the prototype’s rules, from
+          the project spec.
+        </p>
+      </div>
       <dl ref={listRef} className={s.rows}>
         {ROWS.map((r) => (
           <div key={r.label} className={s.row} data-row>
