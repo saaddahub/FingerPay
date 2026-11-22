@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { animate, inView, stagger } from "motion";
 import { Letters } from "../letters.tsx";
@@ -8,16 +9,14 @@ import { useGlass } from "../glass/use-glass.ts";
 import { ease } from "../motion.ts";
 import { useReducedMotion } from "../use-reduced.ts";
 import { scrollToTarget } from "../scroll/smooth-scroll.tsx";
+import { EmailBriefBar, openContactModal, openCookiePanel, openReviewPopup } from "../widgets/site-widgets.tsx";
 import g from "../glass/glass.module.css";
 import s from "./close.module.css";
 
-// Contact address is still to come from the client (DESIGN.md, "Waiting on the client"). Until then the
-// button points at this section.
-const CONTACT_HREF = "#contact";
-
 export function Close() {
   const ref = useRef<HTMLElement>(null);
-  const cta = useGlass<HTMLAnchorElement>(6);
+  const cta = useGlass<HTMLButtonElement>(6);
+  const reviewBtn = useGlass<HTMLButtonElement>(6);
   const reduced = useReducedMotion();
 
   useEffect(() => {
@@ -61,9 +60,15 @@ export function Close() {
         you, or you know who it is, write to us.
       </p>
       <div className={s.actions} data-close-fade>
-        <a ref={cta} href={CONTACT_HREF} className={`${g.glass} ${s.cta}`}>
+        <button ref={cta} type="button" className={`${g.glass} ${s.cta}`} onClick={openContactModal}>
           <span className={g.inner}>Contact the team <Icon name="arrow-right" /></span>
-        </a>
+        </button>
+        <button ref={reviewBtn} type="button" className={`${g.glass} ${s.cta}`} onClick={openReviewPopup}>
+          <span className={g.inner}>Leave a review <Icon name="star" /></span>
+        </button>
+        <Link href="/contact" className={s.top}>
+          Full contact page <Icon name="arrow-right" />
+        </Link>
         <a href="#top" className={s.top} onClick={(e) => (e.preventDefault(), scrollToTarget(0))}>
           Back to top <Icon name="arrow-up" />
         </a>
@@ -83,6 +88,7 @@ export function Close() {
 export function Footer() {
   return (
     <footer className={`${s.footer} page-grid`}>
+      <EmailBriefBar />
       <span className={s.footRule} aria-hidden="true" />
       {/* eslint-disable-next-line @next/next/no-img-element -- static SVG logo, no optimisation needed */}
       <img className={s.lockup} src="/brand/fingerpay-lockup.svg" alt="FingerPay" width={160} height={42} />
@@ -91,8 +97,13 @@ export function Footer() {
         payment integrations shown are simulated. No real money or real biometric data is processed.
       </p>
       <ul className={`${s.footLinks} t-caption`}>
-        <li><a href={CONTACT_HREF}>Contact</a></li>
-        <li><a href="#top" onClick={(e) => (e.preventDefault(), scrollToTarget(0))}>Top</a></li>
+        <li><Link href="/how-it-works">How it works</Link></li>
+        <li><Link href="/security">Security</Link></li>
+        <li><Link href="/numbers">Numbers</Link></li>
+        <li><Link href="/download">Download</Link></li>
+        <li><Link href="/contact">Contact</Link></li>
+        <li><button type="button" onClick={openReviewPopup}>Leave a review</button></li>
+        <li><button type="button" onClick={openCookiePanel}>Cookie preferences</button></li>
         <li>© 2026 FingerPay</li>
       </ul>
     </footer>

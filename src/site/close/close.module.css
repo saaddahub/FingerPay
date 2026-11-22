@@ -101,10 +101,13 @@
   color: var(--ink-2);
   font-weight: 400;
 }
-.footLinks a {
+.footLinks a,
+.footLinks button {
   text-decoration: none;
+  color: inherit;
 }
-.footLinks a:hover {
+.footLinks a:hover,
+.footLinks button:hover {
   color: var(--ink);
 }
 

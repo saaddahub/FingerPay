@@ -1,41 +1,44 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useRef, type MouseEvent, type ReactNode } from "react";
 import { useGlass } from "../glass/use-glass.ts";
 import { Orb } from "../glass/orb.tsx";
 import { Icon } from "../icons.tsx";
-import { scrollToStage, scrollToTarget } from "../scroll/smooth-scroll.tsx";
+import { scrollToTarget } from "../scroll/smooth-scroll.tsx";
 import g from "../glass/glass.module.css";
 import s from "./nav.module.css";
 
 const LINKS = [
-  { href: "#sale", label: "How it works" },
-  { href: "#private", label: "Security", stagePart: 0.7 },
-  { href: "#fine-print", label: "Numbers" },
-  { href: "#download", label: "Download" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/security", label: "Security" },
+  { href: "/numbers", label: "Numbers" },
+  { href: "/download", label: "Download" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
-function go(e: MouseEvent<HTMLAnchorElement>, href: string, stagePart?: number, after?: () => void) {
+function goHash(e: MouseEvent<HTMLAnchorElement>, href: string, after?: () => void) {
   if (!href.startsWith("#")) return;
   e.preventDefault();
   after?.();
   if (href === "#top") scrollToTarget(0);
-  else if (stagePart !== undefined) scrollToStage(stagePart, href);
   else scrollToTarget(href);
 }
 
-function GlassLink({ href, className, label, children, maxPull, stagePart }: {
-  href: string; className: string; label?: string; children: ReactNode; maxPull?: number; stagePart?: number;
+function GlassLink({ href, className, label, children, maxPull }: {
+  href: string; className: string; label?: string; children: ReactNode; maxPull?: number;
 }) {
   const ref = useGlass<HTMLAnchorElement>(maxPull);
   return (
-    <a ref={ref} href={href} aria-label={label} className={`${g.glass} ${className}`} onClick={(e) => go(e, href, stagePart)}>
+    <Link ref={ref} href={href} aria-label={label} className={`${g.glass} ${className}`}>
       <span className={g.inner}>{children}</span>
-    </a>
+    </Link>
   );
 }
 
 export function Nav() {
+  const pathname = usePathname();
   const pillRef = useGlass<HTMLUListElement>(6);
   const menuRef = useGlass<HTMLButtonElement>(6);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -44,17 +47,25 @@ export function Nav() {
   return (
     <header className={s.nav}>
       <nav aria-label="Main" className={s.cluster}>
-        <GlassLink href="#top" label="FingerPay, back to top" className={s.orbLink} maxPull={10}>
+        <GlassLink href="/" label="FingerPay home" className={s.orbLink} maxPull={10}>
           <Orb />
         </GlassLink>
         <ul ref={pillRef} className={`${g.glass} ${s.pill}`}>
-          {LINKS.map((l) => (
-            <li key={l.href}>
-              <a href={l.href} className={s.link} onClick={(e) => go(e, l.href, "stagePart" in l ? l.stagePart : undefined)}>
-                {l.label}
-              </a>
-            </li>
-          ))}
+          {LINKS.map((l) => {
+            const active = pathname === l.href;
+            return (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  aria-current={active ? "page" : undefined}
+                  data-active={active ? "true" : undefined}
+                  className={s.link}
+                >
+                  {l.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
         <div className={s.authGroup}>
           <GlassLink href="/login" className={s.contact}>Sign in</GlassLink>
@@ -75,16 +86,19 @@ export function Nav() {
             <span className="visually-hidden">Close menu</span>
           </button>
           <ul className={s.sheetLinks}>
+            <li>
+              <Link href="/" onClick={close}>Home</Link>
+            </li>
             {LINKS.map((l) => (
               <li key={l.href}>
-                <a href={l.href} onClick={(e) => go(e, l.href, "stagePart" in l ? l.stagePart : undefined, close)}>{l.label}</a>
+                <Link href={l.href} onClick={close}>{l.label}</Link>
               </li>
             ))}
-            <li><a href="/login">Sign in</a></li>
+            <li><Link href="/login" onClick={close}>Sign in</Link></li>
           </ul>
-          <a href="/signup" className={s.sheetContact}>
+          <Link href="/signup" className={s.sheetContact} onClick={close}>
             Create an account <Icon name="arrow-right" />
-          </a>
+          </Link>
         </div>
       </dialog>
     </header>
@@ -93,7 +107,7 @@ export function Nav() {
 
 export function HonestyPill() {
   return (
-    <a href="#disclaimer" className={`${g.glass} ${s.honesty} t-caption`} onClick={(e) => go(e, "#disclaimer")}>
+    <a href="#disclaimer" className={`${g.glass} ${s.honesty} t-caption`} onClick={(e) => goHash(e, "#disclaimer")}>
       Student prototype · integrations simulated
     </a>
   );

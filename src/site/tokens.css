@@ -80,6 +80,14 @@
   --specular: rgba(255, 255, 255, 0.75);
   --rim: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.35));
   --solid-dark: #161618;
+  --backdrop-scrim: rgba(10, 10, 11, 0.32);
+  --backdrop-blur: blur(10px);
+  --glass-panel-bg: rgba(255, 255, 255, 0.82);
+  --glass-panel-blur: blur(28px) saturate(190%);
+  --glass-panel-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.96), inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(10, 10, 11, 0.08), 0 24px 64px rgba(10, 10, 11, 0.16), 0 4px 12px rgba(10, 10, 11, 0.06);
+  --cta-dark-shadow: 0 1px 2px rgba(10, 10, 11, 0.3), 0 6px 20px rgba(10, 10, 11, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --settle-tint: rgba(10, 127, 75, 0.09);
 
   /* Phone placeholder (BUILD.md §5: 1290 × 2796 frame) */
   --phone-ratio: 0.4614;

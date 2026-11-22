@@ -1,0 +1,374 @@
+/* Dedicated marketing & technical specification pages (/how-it-works, /security, /numbers, /download, /contact).
+   Strictly uses tokens from src/site/tokens.css and follows the Paper & Ink + Liquid Glass system. */
+
+.page {
+  min-height: 100svh;
+  padding-top: calc(var(--nav-h) + var(--s-9));
+  padding-bottom: var(--s-9);
+  display: grid;
+  row-gap: var(--s-9);
+}
+
+.hero {
+  row-gap: var(--s-5);
+  align-items: end;
+}
+
+.heroTitle {
+  grid-column: 1 / span 10;
+  font-size: var(--t-display);
+  line-height: 0.96;
+  letter-spacing: var(--track-display);
+  font-weight: 400;
+  font-variation-settings: "opsz" 32;
+  text-wrap: balance;
+}
+
+.heroLead {
+  grid-column: 1 / span 7;
+  max-width: 58ch;
+}
+
+.heroActions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding-top: var(--s-2);
+}
+
+.ctaDark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--tap);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--cta-dark-shadow);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform var(--d-press) var(--ease-out);
+}
+.ctaDark:hover {
+  transform: translateY(-1px);
+}
+.ctaDark:active {
+  transform: scale(0.98);
+}
+
+.ctaGlass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--tap);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-light-blur);
+  -webkit-backdrop-filter: var(--glass-light-blur);
+  box-shadow: var(--glass-light-shadow);
+  color: var(--ink);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform var(--d-press) var(--ease-out);
+}
+.ctaGlass:hover {
+  transform: translateY(-1px);
+}
+
+/* ── Section Layout ────────────────────────────────────────────────────────────── */
+.section {
+  row-gap: var(--s-6);
+  padding-top: var(--s-7);
+  border-top: var(--hairline) solid var(--rule);
+}
+
+.sectionHeader {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  row-gap: var(--s-3);
+  align-items: baseline;
+}
+
+.sectionTitle {
+  grid-column: 1 / span 6;
+  font-size: var(--t-title);
+  line-height: 1.08;
+  letter-spacing: var(--track-title);
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+.sectionSub {
+  grid-column: 7 / -1;
+  color: var(--ink-2);
+  max-width: 56ch;
+}
+
+/* ── Timeline / Steps list (How It Works & Security) ───────────────────────────── */
+.timeline {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--s-4);
+}
+
+.stepItem {
+  display: grid;
+  grid-template-columns: 3.5rem 1.1fr 1fr;
+  gap: var(--s-5);
+  align-items: start;
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-light-blur);
+  -webkit-backdrop-filter: var(--glass-light-blur);
+  box-shadow: var(--glass-light-shadow);
+}
+
+.stepBadge {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: var(--t-caption);
+  font-weight: 500;
+}
+
+.stepMain {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.stepTitle {
+  font-size: var(--t-lead);
+  font-weight: 500;
+  letter-spacing: var(--track-lead);
+}
+
+.stepDesc {
+  color: var(--ink-2);
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+.stepSpec {
+  padding: var(--s-4);
+  border-radius: var(--r-bubble);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  display: grid;
+  gap: var(--s-2);
+}
+
+.specLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  font-size: var(--t-caption);
+}
+
+.specKey {
+  color: var(--ink-2);
+}
+
+.specVal {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono-s);
+  color: var(--ink);
+  text-align: right;
+}
+
+/* ── Two-column Glass Split Panels ─────────────────────────────────────────────── */
+.splitGrid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-5);
+}
+
+.glassPanel {
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-light-blur);
+  -webkit-backdrop-filter: var(--glass-light-blur);
+  box-shadow: var(--glass-light-shadow);
+  display: grid;
+  align-content: start;
+  gap: var(--s-4);
+}
+
+.panelHeading {
+  font-size: var(--t-lead);
+  font-weight: 500;
+  letter-spacing: var(--track-lead);
+}
+
+.panelBody {
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.codeBlock {
+  padding: var(--s-4);
+  border-radius: var(--r-bubble);
+  background: var(--ink);
+  color: var(--night-text);
+  font-family: var(--font-mono);
+  font-size: var(--t-caption);
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* ── Interactive Fee Calculator (/numbers) ─────────────────────────────────────── */
+.calcWrap {
+  grid-column: 1 / -1;
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-panel-blur);
+  -webkit-backdrop-filter: var(--glass-panel-blur);
+  box-shadow: var(--glass-panel-shadow);
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: var(--s-6);
+  align-items: center;
+}
+
+.calcControls {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.amountDisplay {
+  font-size: var(--t-display);
+  line-height: 1;
+  letter-spacing: var(--track-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.presetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.presetBtn {
+  height: 2.25rem;
+  padding-inline: var(--s-3);
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--t-caption);
+  transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
+}
+.presetBtn[data-active="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.rangeInput {
+  width: 100%;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.calcResults {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  border-radius: var(--r-bubble);
+  background: var(--paper);
+  border: var(--hairline) solid var(--rule);
+}
+
+.calcRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding-bottom: var(--s-2);
+  border-bottom: var(--hairline) solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+.calcRow:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.calcHighlight {
+  color: var(--settle);
+  font-weight: 600;
+}
+
+/* ── Specification Table ───────────────────────────────────────────────────────── */
+.tableWrap {
+  grid-column: 1 / -1;
+  overflow-x: auto;
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-light-blur);
+  -webkit-backdrop-filter: var(--glass-light-blur);
+  box-shadow: var(--glass-light-shadow);
+  padding: var(--s-5);
+}
+
+.specTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.specTable th,
+.specTable td {
+  padding: var(--s-3) var(--s-4);
+  border-bottom: var(--hairline) solid var(--rule);
+  font-size: var(--t-body);
+}
+
+.specTable th {
+  font-size: var(--t-caption);
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.specTable tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  .heroTitle,
+  .heroLead,
+  .sectionTitle,
+  .sectionSub {
+    grid-column: 1 / -1;
+  }
+  .stepItem {
+    grid-template-columns: 1fr;
+    gap: var(--s-3);
+    padding: var(--s-5);
+  }
+  .splitGrid,
+  .calcWrap {
+    grid-template-columns: 1fr;
+  }
+}

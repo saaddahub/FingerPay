@@ -51,8 +51,12 @@
   transition: color var(--d-fast) var(--ease-out);
 }
 .link:hover,
-.link:focus-visible {
+.link:focus-visible,
+.link[data-active="true"] {
   color: var(--fg);
+}
+.link[data-active="true"] {
+  font-weight: 600;
 }
 .authGroup {
   display: flex;

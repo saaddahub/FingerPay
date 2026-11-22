@@ -1,0 +1,487 @@
+/* Liquid-glass Cookie Panel, Review Popup Modal, Contact Modal, and Email Capture Bar */
+
+/* ── Cookie Panel (bottom-right floating glass card) ─────────────────────────────── */
+.cookieAside {
+  position: fixed;
+  right: var(--s-5);
+  bottom: var(--s-5);
+  z-index: 45;
+  width: min(25rem, calc(100vw - var(--s-6)));
+  padding: var(--s-5);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-panel-blur);
+  -webkit-backdrop-filter: var(--glass-panel-blur);
+  box-shadow: var(--glass-panel-shadow);
+  color: var(--ink);
+  display: grid;
+  gap: var(--s-3);
+  animation: floatUp var(--d-base) var(--ease-expo-out) both;
+}
+
+.cookieHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.cookieTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 600;
+  letter-spacing: var(--track-body);
+}
+
+.cookieCopy {
+  font-size: var(--t-caption);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.cookieTable {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-3);
+  border-radius: var(--r-bubble);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  font-size: var(--t-caption);
+}
+
+.cookieRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.cookieKey {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono-s);
+  color: var(--ink);
+}
+
+.cookieVal {
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.cookieActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding-top: var(--s-1);
+}
+
+.btnDark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--nav-h);
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: var(--cta-dark-shadow);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform var(--d-press) var(--ease-out), opacity var(--d-fast) var(--ease-out);
+}
+.btnDark:hover {
+  transform: translateY(-1px);
+}
+.btnDark:active {
+  transform: scale(0.98);
+}
+.btnDark:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btnGlass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: var(--nav-h);
+  padding-inline: var(--s-4);
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--d-fast) var(--ease-out), transform var(--d-press) var(--ease-out);
+}
+.btnGlass:hover {
+  background: var(--paper);
+}
+.btnGlass:active {
+  transform: scale(0.98);
+}
+
+.btnText {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--ink-2);
+  padding-inline: var(--s-2);
+  height: var(--nav-h);
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--d-fast) var(--ease-out);
+}
+.btnText:hover {
+  color: var(--ink);
+}
+
+/* ── Popup Overlay & Liquid-Glass Modal (Review & Contact) ──────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  background: var(--backdrop-scrim);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  animation: fadeIn var(--d-fast) var(--ease-out) both;
+}
+
+.modal {
+  position: relative;
+  width: min(32rem, 100%);
+  max-height: calc(100svh - var(--s-6));
+  overflow-y: auto;
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-panel-blur);
+  -webkit-backdrop-filter: var(--glass-panel-blur);
+  box-shadow: var(--glass-panel-shadow);
+  color: var(--ink);
+  display: grid;
+  gap: var(--s-4);
+  animation: modalPop var(--d-base) var(--ease-expo-out) both;
+}
+
+.modalTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.modalHeadingGroup {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.modalTitle {
+  font-size: var(--t-title);
+  line-height: 1.1;
+  letter-spacing: var(--track-title);
+  font-weight: 500;
+}
+
+.modalLead {
+  font-size: var(--t-caption);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 46ch;
+}
+
+.closeBtn {
+  display: grid;
+  place-items: center;
+  width: var(--nav-h);
+  height: var(--nav-h);
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink-2);
+  flex-shrink: 0;
+  transition: color var(--d-fast) var(--ease-out), background var(--d-fast) var(--ease-out);
+}
+.closeBtn:hover {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+/* ── Star Rating Row ───────────────────────────────────────────────────────────── */
+.ratingSection {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.starBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--r-bubble);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink-3);
+  transition: transform var(--d-press) var(--ease-out), background var(--d-fast) var(--ease-out),
+    color var(--d-fast) var(--ease-out), border-color var(--d-fast) var(--ease-out);
+}
+.starBtn:hover {
+  transform: translateY(-2px);
+  color: var(--ink);
+}
+.starBtn[data-active="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  box-shadow: var(--cta-dark-shadow);
+}
+.starBtn svg {
+  fill: currentColor;
+}
+
+.ratingCaption {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ── Form Inputs ───────────────────────────────────────────────────────────────── */
+.form {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.field {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.label {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  font: inherit;
+  font-size: var(--t-body);
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--hairline) solid var(--rule);
+  border-radius: var(--r-bubble);
+  padding: var(--s-3) var(--s-4);
+  transition: border-color var(--d-fast) var(--ease-out), box-shadow var(--d-fast) var(--ease-out);
+}
+.input {
+  height: var(--tap);
+}
+.textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--ink-3);
+}
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 var(--focus-ring) var(--rule);
+}
+
+.topicPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.topicPill {
+  height: 2.25rem;
+  padding-inline: var(--s-3);
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--rule);
+  color: var(--ink-2);
+  font-size: var(--t-caption);
+  font-weight: 500;
+  transition: background var(--d-fast) var(--ease-out), color var(--d-fast) var(--ease-out);
+}
+.topicPill[data-active="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding-top: var(--s-2);
+}
+
+.statusBox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-bubble);
+  background: var(--settle-tint);
+  border: var(--hairline) solid var(--settle);
+  color: var(--ink);
+}
+
+.statusIcon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-pill);
+  background: var(--settle);
+  color: var(--paper);
+  flex-shrink: 0;
+}
+
+.statusText {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--t-caption);
+  line-height: 1.45;
+}
+
+.errorNote {
+  font-size: var(--t-caption);
+  color: var(--ink);
+  background: var(--paper-2);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--r-bubble);
+  border: var(--hairline) solid var(--ink);
+}
+
+/* ── End-of-Website Inline Email Brief Capture Bar ─────────────────────────────── */
+.emailBar {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: var(--s-6);
+  padding: var(--s-6);
+  border-radius: var(--r-card);
+  background: var(--glass-panel-bg);
+  backdrop-filter: var(--glass-panel-blur);
+  -webkit-backdrop-filter: var(--glass-panel-blur);
+  box-shadow: var(--glass-panel-shadow);
+}
+
+.emailBarCopy {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.emailBarTitle {
+  font-size: var(--t-title);
+  line-height: 1.1;
+  letter-spacing: var(--track-title);
+  font-weight: 400;
+}
+
+.emailBarSub {
+  font-size: var(--t-caption);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+
+.emailBarForm {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+.emailBarInput {
+  flex: 1 1 14rem;
+  height: var(--tap);
+  padding-inline: var(--s-4);
+  border-radius: var(--r-pill);
+  border: var(--hairline) solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-body);
+}
+.emailBarInput::placeholder {
+  color: var(--ink-3);
+}
+.emailBarInput:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+@keyframes floatUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .cookieAside {
+    right: var(--s-4);
+    left: var(--s-4);
+    bottom: var(--s-4);
+    width: auto;
+  }
+  .modal {
+    padding: var(--s-5);
+  }
+  .emailBar {
+    grid-template-columns: 1fr;
+    padding: var(--s-5);
+    gap: var(--s-4);
+  }
+}

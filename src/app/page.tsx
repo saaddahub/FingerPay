@@ -8,6 +8,7 @@ import { Ledger } from "@/site/ledger/ledger.tsx";
 import { Close, Footer } from "@/site/close/close.tsx";
 import { SmoothScroll } from "@/site/scroll/smooth-scroll.tsx";
 import { InkField } from "@/site/ink/ink.tsx";
+import { SiteWidgets } from "@/site/widgets/site-widgets.tsx";
 
 // The landing page, v4 "Paper & Ink". Spec: DESIGN.md and docs/design/*.md. Hand-built, no Astryx on this
 // route (CLAUDE.md, "Marketing page exception").
@@ -28,6 +29,7 @@ export default async function Home() {
       <HonestyPill />
       <SmoothScroll />
       <InkField />
+      <SiteWidgets />
     </>
   );
 }
