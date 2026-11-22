@@ -1,0 +1,142 @@
+/* Proposed Partners chapter: stiff (sticky) left column with a strip of engraved coin seals,
+   paired with floating hairline rows on the right that carry the left punchline up when finished. */
+
+.partners {
+  min-height: 195svh;
+  padding-block: 24svh 30svh;
+  align-items: start;
+  border-top: var(--hairline) solid var(--rule);
+  background: var(--paper);
+}
+
+.intro {
+  grid-column: 1 / span 5;
+  position: sticky;
+  top: 26svh;
+  align-self: start;
+  display: grid;
+  gap: var(--s-5);
+  padding-bottom: var(--s-6);
+}
+
+.title {
+  max-width: 12ch;
+}
+
+.lead {
+  max-width: 38ch;
+}
+
+.sealStrip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding-top: var(--s-2);
+  color: var(--ink);
+}
+
+.miniSeal {
+  display: inline-block;
+  width: 2.25rem;
+  height: 2.25rem;
+  opacity: 0.82;
+  transition: transform var(--d-fast) var(--ease-out), opacity var(--d-fast) var(--ease-out);
+}
+.miniSeal:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+.miniSeal svg {
+  width: 100%;
+  height: 100%;
+}
+
+.rows {
+  grid-column: 7 / span 6;
+  display: grid;
+  padding-top: 4svh;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  gap: var(--s-4);
+  padding-block: var(--s-7);
+}
+
+.rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--hairline);
+  background: var(--rule);
+  transform-origin: left center;
+}
+
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  color: var(--ink);
+}
+.seal svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brandText {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.brandName {
+  font-size: var(--t-title);
+  line-height: 1.05;
+  letter-spacing: var(--track-title);
+  font-weight: 400;
+  font-variation-settings: "opsz" 32;
+  color: var(--ink);
+}
+
+.brandCode {
+  color: var(--ink-2);
+}
+
+.copyCol {
+  max-width: 50ch;
+}
+
+.rows[data-live] .row:not([data-shown]) .rule {
+  transform: scaleX(0);
+}
+.rows[data-live] .row:not([data-shown]) .lockup,
+.rows[data-live] .row:not([data-shown]) .copyCol {
+  opacity: 0;
+}
+
+@media (max-width: 767px) {
+  .partners {
+    min-height: 100svh;
+    padding-block: var(--s-10);
+    row-gap: var(--s-7);
+  }
+  .intro {
+    grid-column: 1 / -1;
+    position: static;
+  }
+  .rows {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+  .row {
+    padding-block: var(--s-6);
+  }
+}

@@ -5,6 +5,7 @@ import { Nav, HonestyPill } from "@/site/nav/nav.tsx";
 import { Stage } from "@/site/stage/stage.tsx";
 import { Sale } from "@/site/sale/sale.tsx";
 import { Ledger } from "@/site/ledger/ledger.tsx";
+import { Partners } from "@/site/partners/partners.tsx";
 import { Close, Footer } from "@/site/close/close.tsx";
 import { SmoothScroll } from "@/site/scroll/smooth-scroll.tsx";
 import { InkField } from "@/site/ink/ink.tsx";
@@ -23,6 +24,7 @@ export default async function Home() {
         <Stage />
         <Sale />
         <Ledger />
+        <Partners />
         <Close />
       </main>
       <Footer />

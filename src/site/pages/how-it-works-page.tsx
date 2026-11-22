@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Nav, HonestyPill } from "../nav/nav.tsx";
 import { Footer } from "../close/close.tsx";
 import { Sale } from "../sale/sale.tsx";
+import { Partners } from "../partners/partners.tsx";
 import { SmoothScroll } from "../scroll/smooth-scroll.tsx";
 import { InkField } from "../ink/ink.tsx";
 import { SiteWidgets, openContactModal } from "../widgets/site-widgets.tsx";
@@ -106,6 +107,7 @@ export function HowItWorksPage() {
         </section>
 
         <Sale />
+        <Partners />
 
         <section className={`${p.section} page-grid`} aria-labelledby="edge-title">
           <div className={p.leftSticky}>
