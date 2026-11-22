@@ -356,9 +356,9 @@
 .notice {
   margin: 0;
   padding: var(--s-3) var(--s-4);
-  border-left: 3px solid var(--ink);
+  border: 1px solid var(--rule);
   background: rgba(255, 255, 255, 0.85);
-  border-radius: var(--s-1);
+  border-radius: var(--s-2);
   overflow-wrap: anywhere;
   font-size: 0.875rem;
   animation: cardEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
