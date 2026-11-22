@@ -9,7 +9,12 @@ import { credentialsSchema } from "@/lib/fp/signup";
 export const dynamic = "force-dynamic";
 
 function checkOrigin(request: NextRequest) {
-  if (request.headers.get("origin") !== request.nextUrl.origin) throw new HttpError(403, "FP403", "Request origin is not allowed.");
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
+  const hostOrigin = host ? `${request.nextUrl.protocol}//${host}` : null;
+  if (!origin || (origin !== request.nextUrl.origin && origin !== hostOrigin)) {
+    throw new HttpError(403, "FP403", "Request origin is not allowed.");
+  }
 }
 
 export function POST(request: NextRequest) {

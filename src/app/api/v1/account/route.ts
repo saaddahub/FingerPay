@@ -37,7 +37,11 @@ export function POST(request: NextRequest) {
   return handle("account.create", async () => {
     const user = await accountUser(request);
     const origin = request.headers.get("origin");
-    if (origin && origin !== request.nextUrl.origin) throw new HttpError(403, "FP403", "Request origin is not allowed.");
+    const host = request.headers.get("host");
+    const hostOrigin = host ? `${request.nextUrl.protocol}//${host}` : null;
+    if (origin && origin !== request.nextUrl.origin && origin !== hostOrigin) {
+      throw new HttpError(403, "FP403", "Request origin is not allowed.");
+    }
     const body = await request.text();
     if (body.length > 8192) throw new HttpError(413, "BODY_TOO_LARGE", "Account details are too long.");
     let raw: unknown;
