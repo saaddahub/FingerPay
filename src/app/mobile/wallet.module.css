@@ -1,15 +1,8 @@
-@font-face {
-  font-family: "Space Grotesk";
-  src: url("./space-grotesk-latin.woff2") format("woff2");
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-}
-
 .stage, .sheet {
-  --wallet-font: "Space Grotesk", sans-serif;
+  --wallet-font: var(--font-sans, "Inter Variable", system-ui, sans-serif);
   --font-family-body: var(--wallet-font);
   --font-family-heading: var(--wallet-font);
+  --font-family-code: var(--font-mono, "Geist Mono Variable", ui-monospace, monospace);
   font-family: var(--wallet-font);
 }
 

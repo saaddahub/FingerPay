@@ -79,6 +79,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     val state: StateFlow<UiState> = _state
     private var terminalId: String? = null
     private var expiryJob: Job? = null
+    private var pendingPassword: String = ""
 
     init { viewModelScope.launch { boot() } }
 
@@ -120,14 +121,40 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun signIn(email: String, password: String) = launchSafely {
         _state.update { it.copy(busy = true, notice = null) }
-        api.signIn(email, password)
-        openAccount()
+        pendingPassword = password
+        if (api.signIn(email, password)) {
+            pendingPassword = ""
+            openAccount()
+        } else {
+            _state.update { it.copy(busy = false, verificationEmail = email, notice = null) }
+        }
     }
 
     fun signUp(email: String, password: String) = launchSafely {
         _state.update { it.copy(busy = true, notice = null) }
-        if (api.signUp(email, password)) openAccount()
-        else _state.update { it.copy(busy = false, verificationEmail = email) }
+        pendingPassword = password
+        if (api.signUp(email, password)) {
+            pendingPassword = ""
+            openAccount()
+        } else {
+            _state.update { it.copy(busy = false, verificationEmail = email, notice = null) }
+        }
+    }
+
+    fun verifyCode(code: String) = launchSafely {
+        val email = _state.value.verificationEmail ?: return@launchSafely
+        _state.update { it.copy(busy = true, notice = null) }
+        api.verifyEmailCode(email, pendingPassword, code)
+        pendingPassword = ""
+        _state.update { it.copy(verificationEmail = null) }
+        openAccount()
+    }
+
+    fun resendCode() = launchSafely {
+        val email = _state.value.verificationEmail ?: return@launchSafely
+        _state.update { it.copy(busy = true, notice = null) }
+        api.resendEmailCode(email, pendingPassword)
+        _state.update { it.copy(busy = false, notice = "Sent a fresh 6-digit verification code to $email.") }
     }
 
     private suspend fun openAccount() {

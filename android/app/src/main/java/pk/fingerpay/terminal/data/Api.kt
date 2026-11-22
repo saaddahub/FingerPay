@@ -37,20 +37,102 @@ class Api(private val store: SecureStore, private val keys: TerminalKeys) {
         return session != null
     }
 
-    suspend fun signIn(email: String, password: String) {
-        val body = buildJsonObject { put("email", email.trim()); put("password", password) }.toString()
-        saveSession(auth("password", body))
+    suspend fun signIn(email: String, password: String): Boolean {
+        val body = buildJsonObject {
+            put("action", "login")
+            put("email", email.trim())
+            put("password", password)
+        }.toString()
+        val (code, text) = send(
+            Request.Builder()
+                .url("${BuildConfig.API_BASE_URL}/api/v1/session")
+                .header("Origin", BuildConfig.API_BASE_URL)
+                .header("Accept", "application/json")
+                .post(body.toRequestBody(jsonType))
+                .build()
+        )
+        if (code !in 200..299) {
+            val err = runCatching { json.decodeFromString<ApiErrorBody>(text).error }.getOrNull()
+            throw ApiException(code, err?.code ?: "AUTH", err?.message ?: "Email or password is wrong.")
+        }
+        val resp = json.decodeFromString<SessionResponse>(text)
+        val s = resp.session
+        if (resp.signedIn && s != null) {
+            saveSession(s.copy(expiresAtMs = System.currentTimeMillis() + s.expiresIn * 1000))
+            return true
+        }
+        return false
     }
 
     suspend fun signUp(email: String, password: String): Boolean {
-        val body = buildJsonObject { put("email", email.trim()); put("password", password) }.toString()
-        val (code, text) = send(Request.Builder().url("${BuildConfig.SUPABASE_URL}/auth/v1/signup")
-            .header("apikey", BuildConfig.SUPABASE_ANON_KEY).post(body.toRequestBody(jsonType)).build())
-        if (code !in 200..299) throw ApiException(code, "AUTH", "Could not create your account. Try signing in if you already registered.")
-        if (!json.parseToJsonElement(text).jsonObject.containsKey("access_token")) return false
-        val s = json.decodeFromString<Session>(text)
+        val body = buildJsonObject {
+            put("action", "signup")
+            put("email", email.trim())
+            put("password", password)
+        }.toString()
+        val (code, text) = send(
+            Request.Builder()
+                .url("${BuildConfig.API_BASE_URL}/api/v1/session")
+                .header("Origin", BuildConfig.API_BASE_URL)
+                .header("Accept", "application/json")
+                .post(body.toRequestBody(jsonType))
+                .build()
+        )
+        if (code !in 200..299) {
+            val err = runCatching { json.decodeFromString<ApiErrorBody>(text).error }.getOrNull()
+            throw ApiException(code, err?.code ?: "AUTH", err?.message ?: "Could not create your account. Try signing in if you already registered.")
+        }
+        val resp = json.decodeFromString<SessionResponse>(text)
+        val s = resp.session
+        if (resp.signedIn && s != null) {
+            saveSession(s.copy(expiresAtMs = System.currentTimeMillis() + s.expiresIn * 1000))
+            return true
+        }
+        return false
+    }
+
+    suspend fun verifyEmailCode(email: String, password: String, otpCode: String) {
+        val body = buildJsonObject {
+            put("action", "verify")
+            put("email", email.trim())
+            put("password", password)
+            put("code", otpCode.trim())
+        }.toString()
+        val (code, text) = send(
+            Request.Builder()
+                .url("${BuildConfig.API_BASE_URL}/api/v1/session")
+                .header("Origin", BuildConfig.API_BASE_URL)
+                .header("Accept", "application/json")
+                .post(body.toRequestBody(jsonType))
+                .build()
+        )
+        if (code !in 200..299) {
+            val err = runCatching { json.decodeFromString<ApiErrorBody>(text).error }.getOrNull()
+            throw ApiException(code, err?.code ?: "INVALID_CODE", err?.message ?: "Invalid or expired 6-digit verification code.")
+        }
+        val resp = json.decodeFromString<SessionResponse>(text)
+        val s = resp.session ?: throw ApiException(400, "AUTH", "Verification succeeded, please sign in with your password.")
         saveSession(s.copy(expiresAtMs = System.currentTimeMillis() + s.expiresIn * 1000))
-        return true
+    }
+
+    suspend fun resendEmailCode(email: String, password: String) {
+        val body = buildJsonObject {
+            put("action", "resend")
+            put("email", email.trim())
+            put("password", password)
+        }.toString()
+        val (code, text) = send(
+            Request.Builder()
+                .url("${BuildConfig.API_BASE_URL}/api/v1/session")
+                .header("Origin", BuildConfig.API_BASE_URL)
+                .header("Accept", "application/json")
+                .post(body.toRequestBody(jsonType))
+                .build()
+        )
+        if (code !in 200..299) {
+            val err = runCatching { json.decodeFromString<ApiErrorBody>(text).error }.getOrNull()
+            throw ApiException(code, err?.code ?: "MAIL_FAILED", err?.message ?: "Could not resend verification code.")
+        }
     }
 
     suspend fun account(): AccountResponse = call("GET", "/api/v1/account")

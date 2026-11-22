@@ -12,6 +12,12 @@ import kotlinx.serialization.Serializable
     val expiresAtMs: Long = 0,
 )
 
+@Serializable data class SessionResponse(
+    val signedIn: Boolean = false,
+    val requiresCode: Boolean = false,
+    val session: Session? = null,
+)
+
 @Serializable data class Me(val role: String, val displayName: String, val storeName: String? = null) {
     val isOwner get() = role == "MERCHANT_OWNER"
     val canSell get() = role == "MERCHANT_OWNER" || role == "MERCHANT_CASHIER"

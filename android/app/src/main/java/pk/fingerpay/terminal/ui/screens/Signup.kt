@@ -173,33 +173,63 @@ fun AccountSignInScreen(
     state: UiState,
     onSignIn: (String, String) -> Unit,
     onSignUp: (String, String) -> Unit,
+    onVerifyCode: (String) -> Unit,
+    onResendCode: () -> Unit,
     clearNotice: () -> Unit,
 ) {
     var creating by rememberSaveable { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
+    var otpCode by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     val focus = LocalFocusManager.current
     val verification = state.verificationEmail
     if (verification != null) {
-        fun switchMode(signIn: Boolean) {
-            creating = !signIn
+        fun changeEmail() {
+            creating = true
             email = verification
-            password = ""
-            confirm = ""
+            otpCode = ""
             error = null
             clearNotice()
         }
         SignupLayout(
-            title = "Confirm your email",
-            description = "Open the confirmation link sent to $verification. Then come back and sign in to finish setup.",
+            title = "Enter 6-digit code",
+            description = "We sent a 6-digit verification code to $verification. Enter it below to confirm your email and unlock your PKR 200 demo credit.",
             step = 1,
-            action = "Go to sign in",
+            action = "Verify & continue",
+            busy = state.busy,
+            notice = error ?: state.notice,
             secondary = "Change email",
-            onSecondary = { switchMode(false) },
-            onAction = { switchMode(true) },
-        ) {}
+            onSecondary = { changeEmail() },
+            onAction = {
+                val trimmed = otpCode.trim()
+                if (trimmed.length != 6 || !trimmed.all(Char::isDigit)) {
+                    error = "Enter the 6-digit verification code from your email."
+                } else {
+                    error = null
+                    focus.clearFocus()
+                    onVerifyCode(trimmed)
+                }
+            },
+        ) {
+            SignupField(
+                label = "6-digit verification code",
+                value = otpCode,
+                onChange = { otpCode = it.filter(Char::isDigit).take(6); error = null },
+                type = KeyboardType.Number,
+                hint = "123456",
+                support = "Valid for 15 minutes · Sent via FingerPay Mail",
+                enabled = !state.busy,
+            )
+            TextButton(
+                onClick = { error = null; onResendCode() },
+                enabled = !state.busy,
+                modifier = Modifier.heightIn(min = 48.dp),
+            ) {
+                Text("Resend 6-digit code", style = Type.label, color = Fp.ink)
+            }
+        }
         return
     }
     val submit = {

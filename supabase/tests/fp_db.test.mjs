@@ -282,6 +282,14 @@ eq(await errOf('UPDATE fp.demo_signup_credits SET amount_paisa = 40000'), '42501
 eq(await errOf('TRUNCATE fp.demo_signup_credits'), '42501', 'signup credits cannot be truncated');
 eq((await one('SELECT sum(balance) total FROM fp.accounts')).total, beforeSignup.total, 'demo bonuses never change the bank ledger');
 
+console.log('# email OTP verification');
+const otpHash1 = h32(), otpHash2 = h32();
+const otpUser = (await asApp(() => one('SELECT fp.api_register_email_otp($1,$2,$3) u', ['OTP@FingerPay.test', 'ValidPass-123!', otpHash1]))).u;
+ok(otpUser, 'register_email_otp issues code and user id');
+eq((await asApp(() => one('SELECT fp.api_verify_email_otp($1,$2) v', ['otp@fingerpay.test', otpHash2]))).v, false, 'wrong OTP code is rejected');
+eq((await asApp(() => one('SELECT fp.api_verify_email_otp($1,$2) v', ['otp@fingerpay.test', otpHash1]))).v, true, 'correct OTP code verifies once');
+eq((await asApp(() => one('SELECT fp.api_verify_email_otp($1,$2) v', ['otp@fingerpay.test', otpHash1]))).v, false, 'OTP code cannot be replayed');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 await db.close();
 process.exit(fail ? 1 : 0);

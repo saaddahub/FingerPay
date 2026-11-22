@@ -79,7 +79,7 @@ class MainActivity : FragmentActivity() {
                 Box(Modifier.fillMaxSize().background(Fp.paper)) {
                     when (state.screen) {
                         Screen.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Coin(Modifier.size(56.dp), color = Fp.ink) }
-                        Screen.SignIn -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountSignInScreen(state, vm::signIn, vm::signUp, vm::dismissNotice) }
+                        Screen.SignIn -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountSignInScreen(state, vm::signIn, vm::signUp, vm::verifyCode, vm::resendCode, vm::dismissNotice) }
                         Screen.Profile -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountDetailsScreen(state, vm::completeAccount, vm::dismissNotice, { vm.signOut() }) }
                         Screen.Wallet -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { AccountWalletScreen(state, { vm.refreshAccount() }, { vm.signOut() }) }
                         Screen.Pair -> Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) { PairScreen(state, vm::pair, { vm.signOut() }) }

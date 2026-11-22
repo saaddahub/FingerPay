@@ -39,11 +39,15 @@ export type DemoWallet = {
 };
 
 export const credentialsSchema = z.strictObject({
-  action: z.enum(["signup", "login"]),
+  action: z.enum(["signup", "login", "verify", "resend"]),
   email: z.email().max(254),
   password: z.string().min(1).max(128),
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit verification code from your email.").optional(),
 }).superRefine((v, ctx) => {
-  if (v.action === "signup" && (v.password.length < 12 || !/[a-z]/.test(v.password) || !/[A-Z]/.test(v.password) || !/\d/.test(v.password) || !/[^A-Za-z0-9]/.test(v.password))) {
+  if ((v.action === "signup" || v.action === "resend" || v.action === "verify") && (v.password.length < 12 || !/[a-z]/.test(v.password) || !/[A-Z]/.test(v.password) || !/\d/.test(v.password) || !/[^A-Za-z0-9]/.test(v.password))) {
     ctx.addIssue({ code: "custom", path: ["password"], message: "Use at least 12 characters, including uppercase, lowercase, a number and a symbol." });
+  }
+  if (v.action === "verify" && !v.code) {
+    ctx.addIssue({ code: "custom", path: ["code"], message: "Enter the 6-digit verification code from your email." });
   }
 });
