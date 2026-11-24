@@ -1,6 +1,6 @@
-/* The Inside stage: hero + dive + three words + slit, one sticky frame (PAGE.md §3–5, MOTION.md §2, §5.3). */
+/* The Inside stage: hero + pay moment + three words + slit, one sticky frame (PAGE.md §3–5, MOTION.md §2, §5.3). */
 .stage {
-  --p-len: 520vh;
+  --p-len: 300vh;
   --q-len: 90svh;
   --phone-h: min(64svh, 37.5rem);
   --phone-w: calc(var(--phone-h) * var(--phone-ratio));
@@ -35,6 +35,7 @@
   overflow: hidden;
   background: var(--paper);
   isolation: isolate;
+  transition: background-color 0.45s var(--ease-out); /* paper → ink as the phone lifts away */
 }
 .frame[data-ground="ink"] {
   background: var(--ink);
@@ -120,10 +121,40 @@
   width: 100%;
   height: 100%;
 }
-.live .coinSlot {
-  visibility: hidden; /* the canvas draws it, from the first frame (MOTION.md §2.1) */
+.coinFace,
+.check {
+  position: absolute;
+  inset: 0;
 }
-.prompt {
+.coinFace {
+  display: block;
+}
+/* The pay moment: a scan line sweeps the coin, then the ridges give way to a drawn tick (MOTION.md §2.3). */
+.check {
+  opacity: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.check path {
+  stroke-width: 2.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.scan {
+  position: absolute;
+  inset-inline: -12%;
+  top: 0;
+  height: 2.4%;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  box-shadow: 0 0 1.2em 0.4em var(--scan-glow);
+  opacity: 0;
+}
+.prompt,
+.paid {
   position: absolute;
   top: 80cqh;
   inset-inline: 0;
@@ -131,19 +162,10 @@
   font-size: 4.4cqw;
   color: var(--ink-2);
 }
-
-/* Layer 2: the ridge camera */
-.canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  display: none;
-}
-.live .canvas {
-  display: block;
+.paid {
+  color: var(--ink);
+  font-weight: 600;
+  opacity: 0;
 }
 
 /* Layer 3: hero type */
@@ -568,7 +590,7 @@
 
 @media (max-width: 767px) {
   .stage {
-    --p-len: 400vh;
+    --p-len: 240vh;
     --phone-h: min(39svh, 19.5rem);
   }
   .plateLayer {
@@ -642,7 +664,7 @@
 
 @media (max-height: 500px) and (orientation: landscape) {
   .stage {
-    --p-len: 300vh;
+    --p-len: 200vh;
   }
 }
 
@@ -662,7 +684,6 @@
     position: relative;
     height: 100svh;
   }
-  .canvas,
   .hairlines,
   .slit,
   .slitLine,

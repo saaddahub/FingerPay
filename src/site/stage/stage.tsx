@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import { preload } from "react-dom";
 import { animate, scroll, stagger, cubicBezier } from "motion";
-import { camera, clamp01, segment, smoothstep, SEG } from "./camera.ts";
-import { AIM, CLIP_R, RING, RIDGES, ridgeBase, ridgeY } from "./ridges.ts";
+import { clamp01, segment, SEG } from "./segments.ts";
+import { AIM, ridgeBase, ridgeY } from "./ridges.ts";
 import { Coin } from "../coin.tsx";
 import { Letters } from "../letters.tsx";
 import { Words } from "./words.tsx";
@@ -12,10 +12,6 @@ import { ease, spring } from "../motion.ts";
 import { useReducedMotion } from "../use-reduced.ts";
 import { setStageScroll } from "../scroll/smooth-scroll.tsx";
 import s from "./stage.module.css";
-
-// Placeholder screen is light, so we fly into ridge 5's ink. A dark client screen switches this to "gap"
-// (MOTION.md §2.4, BUILD.md §5).
-const AIM_MODE: keyof typeof AIM = "ridge";
 
 const inOut = cubicBezier(...ease.inOut);
 
@@ -42,17 +38,23 @@ export function Stage() {
                 <div className={s.screenUi} data-screen-ui>
                   <p className={s.store}>Rasheed Kiryana Store</p>
                   <p className={s.amount}>PKR 180.00</p>
-                  <p className={s.prompt}>Place thumb on the reader</p>
+                  <p className={s.prompt} data-prompt>Place thumb on the reader</p>
+                  <p className={s.paid} data-paid>Paid · settled in 1.8 s</p>
                 </div>
                 <div className={s.coinSlot} data-coin>
-                  <Coin id="coin-screen" />
+                  <span className={s.coinFace} data-ridges>
+                    <Coin id="coin-screen" />
+                  </span>
+                  <svg className={s.check} data-check viewBox="-24 -24 48 48" aria-hidden="true" focusable="false">
+                    <circle r="22" />
+                    <path d="M-9 0.5 L-2.5 7 L10 -6" pathLength={1} />
+                  </svg>
+                  <span className={s.scan} data-scan />
                 </div>
               </div>
             </figure>
           </div>
         </div>
-
-        <canvas className={s.canvas} data-canvas aria-hidden="true" />
 
         <div className={s.heroLayer}>
           <h1 className={s.heroTitle}>
@@ -108,13 +110,14 @@ function runStage(root: HTMLElement): () => void {
   const q = <T extends Element = HTMLElement>(sel: string) => root.querySelector(sel) as T;
   const qa = <T extends Element = HTMLElement>(sel: string) => [...root.querySelectorAll(sel)] as T[];
   const frameEl = q("[data-frame]");
-  const canvas = q<HTMLCanvasElement>("[data-canvas]");
-  const ctx = canvas.getContext("2d");
   const plate = q("[data-plate]");
-  const plateWrap = q("[data-plate-wrap]");
   const coinEl = q("[data-coin]");
-  const phoneBody = q("[data-phone-body]");
-  const screenUi = q("[data-screen-ui]");
+  const ridgesEl = q("[data-ridges]");
+  const checkEl = q("[data-check]");
+  const checkPath = q("[data-check] path");
+  const scanEl = q("[data-scan]");
+  const promptEl = q("[data-prompt]");
+  const paidEl = q("[data-paid]");
   const heroSides = qa("[data-hero-side]");
   const heroFades = qa("[data-hero-fade]");
   const inside = q("[data-inside]");
@@ -132,111 +135,125 @@ function runStage(root: HTMLElement): () => void {
     lines: [...el.querySelectorAll<HTMLElement>("[data-line]")],
     state: "hidden",
   }));
-  const touched: HTMLElement[] = [plate, plateWrap, phoneBody, screenUi, ...heroSides, ...heroFades, insideContent, hairRelease, slit, slitLine];
-  if (!ctx) return () => {};
+  const touched: HTMLElement[] = [insideContent, hairRelease, slit, slitLine];
 
   root.classList.add(s.live);
-  const aim = AIM[AIM_MODE];
-  const ink = getComputedStyle(root).getPropertyValue("--ink").trim() || "#0a0a0b";
 
-  // Coin paths, built once in coin units (MOTION.md §10).
-  const ringPath = new Path2D();
-  ringPath.arc(0, 0, RING.r, 0, Math.PI * 2);
-  const clipPath = new Path2D();
-  clipPath.arc(0, 0, CLIP_R, 0, Math.PI * 2);
-  // Dense samples joined with quadratic curves through the midpoints: no visible facets even at ~500× zoom.
-  const ridgePath = new Path2D();
-  RIDGES.h.forEach((_, i) => {
-    const pts = Array.from({ length: 385 }, (_, j) => {
-      const x = -24 + (48 * j) / 384;
-      return [x, ridgeY(i, x)] as const;
-    });
-    ridgePath.moveTo(pts[0][0], pts[0][1]);
-    for (let j = 1; j < pts.length - 1; j++) {
-      ridgePath.quadraticCurveTo(pts[j][0], pts[j][1], (pts[j][0] + pts[j + 1][0]) / 2, (pts[j][1] + pts[j + 1][1]) / 2);
-    }
-    ridgePath.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
-  });
-
-  const geo = { w: 0, h: 0, dpr: 1, coinCentre: { x: 0, y: 0 }, coinD: 0, plateBox: { x: 0, y: 0 }, pLen: 1, qLen: 1 };
+  const geo = { h: 0, pLen: 1, qLen: 1 };
   let p = 0;
   let qv = 0;
-  let press = 1;
   let seg = -1;
-  let lastP = 0;
+  let paid = false; // the phone has paid and lifted away
+  let busy = false; // the pay moment (or its return) is playing; scroll waits for it
+  let started = false;
 
   const measure = () => {
-    plate.style.transform = "none";
-    const fr = frameEl.getBoundingClientRect();
-    const cr = coinEl.getBoundingClientRect();
-    const pr = plate.getBoundingClientRect();
-    geo.w = frameEl.clientWidth;
     geo.h = frameEl.clientHeight;
-    geo.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(geo.w * geo.dpr);
-    canvas.height = Math.round(geo.h * geo.dpr);
-    geo.coinCentre = { x: cr.left - fr.left + cr.width / 2, y: cr.top - fr.top + cr.height / 2 };
-    geo.coinD = cr.width;
-    geo.plateBox = { x: pr.left - fr.left, y: pr.top - fr.top };
     const total = Math.max(1, root.offsetHeight - geo.h);
     geo.qLen = 0.9 * geo.h;
     geo.pLen = Math.max(1, total - geo.qLen);
     render();
   };
 
-  const draw = (k: number, ox: number, oy: number) => {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (k <= 0) return;
-    const d = geo.dpr;
-    ctx.setTransform(d * k, 0, 0, d * k, d * ox, d * oy);
-    ctx.strokeStyle = ink;
-    ctx.lineJoin = "round";
-    ctx.lineWidth = RING.width;
-    ctx.stroke(ringPath);
-    ctx.save();
-    ctx.clip(clipPath);
-    ctx.lineWidth = RIDGES.width;
-    ctx.stroke(ridgePath);
-    ctx.restore();
+  const setNav = () => {
+    document.documentElement.dataset.nav = frameEl.dataset.ground === "ink" && qv < 0.5 ? "ink" : "paper";
+  };
+
+  // ── The pay moment (MOTION.md §2.3): scroll is the thumb. Press, scan, tick, "Paid", then the phone lifts away.
+  // Every step is a WAAPI animation with explicit from/to keyframes and `fill: both`, kept in `seq`. Nothing relies on
+  // reading a start value from the DOM, so steps can't desync, and cancelling `seq` is a complete reset.
+  const seq: Animation[] = [];
+  const cb = (c: readonly number[]) => `cubic-bezier(${c.join()})`;
+  const play = (el: Element, keyframes: Keyframe[], o: KeyframeAnimationOptions) => {
+    const a = el.animate(keyframes, { fill: "both", ...o });
+    seq.push(a);
+    return a;
+  };
+  const reset = () => {
+    seq.splice(0).forEach((a) => a.cancel());
+    frameEl.dataset.ground = "paper";
+  };
+
+  const pay = () => {
+    const heroAway = [...heroSides, ...heroFades].map((el) => {
+      const dx = Number(el.dataset.heroSide ?? 0) * 6;
+      const dy = el.dataset.heroSide ? 0 : 12;
+      return play(
+        el,
+        [
+          { transform: "translate3d(0,0,0)", opacity: 1 },
+          { transform: `translate3d(${dx}vw,${dy}px,0)`, opacity: 0 },
+        ],
+        { duration: el.dataset.heroSide ? 500 : 400, easing: cb(ease.out) },
+      );
+    });
+    play(coinEl, [{ transform: "scale(1)" }, { transform: "scale(0.92)", offset: 0.25 }, { transform: "scale(1)" }], { duration: 480, easing: cb(ease.out) });
+    // Position and opacity are separate so the sweep's easing doesn't warp the fade in/out.
+    play(scanEl, [{ top: "0%" }, { top: "100%" }], { duration: 600, delay: 200, easing: cb(ease.inOut) });
+    play(scanEl, [{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: 600, delay: 200, easing: "linear" });
+    // The screen swaps its idea of "waiting" for "paid": ridges + prompt out, tick + Paid in, all on explicit keyframes.
+    for (const el of [ridgesEl, promptEl]) play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: 750 });
+    play(checkEl, [{ opacity: 0 }, { opacity: 1 }], { duration: 150, delay: 750 });
+    play(checkPath, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 380, delay: 820, easing: cb(ease.out) });
+    play(paidEl, [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 400, delay: 950, easing: cb(ease.out) }); // after the prompt has fully faded (750 + 200)
+    // A beat on "Paid", then the phone leaves upward and the ground turns to ink for the words.
+    const lift = play(plate, [{ transform: "none" }, { transform: "translateY(-115vh) rotate(-4deg)" }], { duration: 650, delay: 1350, easing: cb(ease.in) });
+    return lift.finished.then(() => {
+      frameEl.dataset.ground = "ink";
+      return { lift, heroAway };
+    });
+  };
+
+  // Back to the hero: the screen resets off-screen (the phone is out of view), then the lift and the hero type
+  // rewind together, so the phone drops back in exactly along the path it left by.
+  let lifted: { lift: Animation; heroAway: Animation[] } | null = null;
+  const unpay = async () => {
+    frameEl.dataset.ground = "paper";
+    if (!lifted) return reset();
+    const back = [lifted.lift, ...lifted.heroAway];
+    seq.filter((a) => !back.includes(a)).forEach((a) => a.cancel());
+    back.forEach((a) => {
+      a.effect?.updateTiming({ delay: 0, endDelay: 0 });
+      a.updatePlaybackRate(-1.5);
+      a.play();
+    });
+    await Promise.all(back.map((a) => a.finished));
+    reset();
+    lifted = null;
+  };
+
+  const run = (job: () => Promise<unknown>, nowPaid: boolean) => {
+    busy = true;
+    job().then((res) => {
+      if (nowPaid) lifted = res as typeof lifted;
+      paid = nowPaid;
+      busy = false;
+      setNav();
+      sync();
+    });
+  };
+
+  // Words (MOTION.md §2.5–2.7) are time-based, triggered by thresholds; the pay moment plays in front of them.
+  const sync = () => {
+    if (busy) return;
+    const next = segment(p, seg);
+    if (next < 0 && paid) {
+      if (seg >= 0) transition(seg, -1, -1);
+      seg = -1;
+      run(unpay, false);
+    } else if (next >= 0 && !paid) {
+      const first = !started;
+      started = true;
+      run(pay, true);
+      if (first && p > SEG.thresholds[0] + 0.05) seq.forEach((a) => a.finish());
+    } else if (next !== seg) {
+      transition(seg, next, next > seg ? 1 : -1);
+      seg = next;
+    }
   };
 
   const render = () => {
-    // Settle (MOTION.md §2.3)
-    const st = inOut(clamp01(p / SEG.settleEnd));
-    heroSides.forEach((el) => {
-      el.style.transform = `translate3d(${Number(el.dataset.heroSide) * 6 * st}vw,0,0)`;
-      el.style.opacity = String(1 - st);
-    });
-    heroFades.forEach((el) => {
-      el.style.transform = `translate3d(0,${12 * st}px,0)`;
-      el.style.opacity = String(1 - st);
-    });
-
-    // The dive (MOTION.md §2.4)
-    const cam = camera(p, {
-      coinCentre: geo.coinCentre,
-      coinDiameter: geo.coinD,
-      aim,
-      bandUnits: aim.band,
-      curvature: aim.curvature,
-      viewport: { w: geo.w, h: geo.h },
-    });
-    plate.style.transformOrigin = `${cam.Q0.x - geo.plateBox.x}px ${cam.Q0.y - geo.plateBox.y}px`;
-    plate.style.transform = `translate3d(${cam.Q.x - cam.Q0.x}px,${cam.Q.y - cam.Q0.y}px,0) scale(${cam.z})`;
-    screenUi.style.opacity = String(1 - smoothstep(1.6, 2.6, cam.z));
-    phoneBody.style.opacity = String(1 - smoothstep(2.2, 3.2, cam.z));
-    plateWrap.style.visibility = cam.z > 3.4 ? "hidden" : "";
-    if (cam.done) draw(0, 0, 0);
-    else draw(cam.k * press, cam.origin.x, cam.origin.y);
-    frameEl.dataset.ground = cam.done ? "ink" : "paper";
-
-    // Words (MOTION.md §2.5–2.7): time-based, triggered by thresholds
-    const next = segment(p, seg);
-    if (next !== seg) {
-      transition(seg, next, p >= lastP ? 1 : -1);
-      seg = next;
-    }
+    sync();
 
     // Release, then the slit (MOTION.md §2.8, §5.3)
     const rel = clamp01((p - SEG.releaseStart) / (1 - SEG.releaseStart));
@@ -247,18 +264,9 @@ function runStage(root: HTMLElement): () => void {
     slit.style.visibility = qv > 0.15 ? "visible" : "hidden";
     slit.style.clipPath = `inset(calc(${(1 - open) * 50}% - 0.5px) 0)`;
 
-    const html = document.documentElement;
-    html.dataset.nav = cam.done && qv < 0.5 ? "ink" : "paper";
-    html.dataset.film = p > 0.01 && qv < 1 ? "on" : "off";
-    lastP = p;
+    setNav();
+    document.documentElement.dataset.film = p > 0.01 && qv < 1 ? "on" : "off";
   };
-
-  // Press: the visitor's scroll is the thumb (MOTION.md §2.3)
-  let pressed = false;
-  const pressCoin = () =>
-    animate(1, 0.94, { duration: 0.12, ease: ease.out, onUpdate: (v) => ((press = v), render()) }).then(() =>
-      animate(0.94, 1, { ...spring.release, onUpdate: (v) => ((press = v), render()) }),
-    );
 
   // ── Word choreography ──────────────────────────────────────────────────────────────────────────────
   const insideIn = () => {
@@ -402,11 +410,6 @@ function runStage(root: HTMLElement): () => void {
     const scrolled = P * (geo.pLen + geo.qLen);
     p = clamp01(scrolled / geo.pLen);
     qv = clamp01((scrolled - geo.pLen) / geo.qLen);
-    if (!pressed && p >= 0.02 && p >= lastP) {
-      pressed = true;
-      pressCoin();
-    }
-    if (p < 0.005) pressed = false;
     render();
   };
   const stopScroll = scroll(onProgress, { target: root, offset: ["start start", "end end"] });
@@ -422,12 +425,12 @@ function runStage(root: HTMLElement): () => void {
     ro.disconnect();
     setStageScroll(null);
     root.classList.remove(s.live);
+    reset();
     [...touched, ...panels.flatMap((pn) => [pn.el, ...pn.letters, ...pn.lines])].forEach((el) => el.removeAttribute("style"));
     panels.forEach((pn) => delete pn.el.dataset.on);
     delete inside.dataset.on;
     frameEl.dataset.ground = "paper";
     delete document.documentElement.dataset.nav;
     delete document.documentElement.dataset.film;
-    draw(0, 0, 0);
   };
 }

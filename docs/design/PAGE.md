@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | — | Nav (fixed) | Glass | — | — |
 | 1 | Hero: "Pay with nothing." | Paper | 100svh, then becomes the stage | — |
-| 2–4 | **The Inside stage**: the dive, then Instant / Private / Certain, then the slit | Paper → Ink → Paper | one sticky stage, 100svh + 520vh + 90svh | **Yes. The one signature moment.** |
+| 2–4 | **The Inside stage**: the pay moment, then Instant / Private / Certain, then the slit | Paper → Ink → Paper | one sticky stage, 100svh + 300vh + 90svh | **Yes. The one signature moment.** |
 | 5 | The sale (dialog) | Paper | ~220vh | — |
 | 6 | The fine print (ledger) | Paper | auto | — |
 | 7 | Close + footer | Paper | 100svh + footer | — |
@@ -98,7 +98,7 @@ A centred cluster, like adamperlis.com's, built in light glass (dark glass insid
 
 ## 4. The Inside stage (the signature moment)
 
-One sticky stage, `100svh + 520vh + 90svh` tall on desktop (the 520vh is 400vh on mobile). The visitor scrolls; the camera moves. Full choreography in **M§2**. What the visitor sees, in order:
+One sticky stage, `100svh + 300vh + 90svh` tall on desktop (the 300vh is 240vh on mobile). The visitor scrolls; the phone takes the payment and lifts away (the dive into the coin was replaced on 2026-11-24, see M§2). Full choreography in **M§2**. What the visitor sees, in order:
 
 1. **Settle** (first ~5 % of the stage): "Pay with" drifts left, "nothing." drifts right, both fade. The lead and scroll cue leave. The coin on the screen presses once (a small scale dip, like a thumb pushing it).
 2. **Approach:** the camera moves toward the coin. The phone grows past the edges of the viewport. The rest of the screen (store name, amount, prompt) fades so only the coin stays sharp.

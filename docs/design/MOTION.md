@@ -45,102 +45,59 @@ Staggers: letters in 30 ms, letters out 15 ms, words 60 ms, paragraph lines 70 m
 
 ---
 
-## 2. The Inside stage (the dive + the three words)
+## 2. The Inside stage (the pay moment + the three words)
 
-**The one signature moment.** One sticky stage: `section.stage` is `100svh + 520vh + 90svh` tall (the 520vh is 400vh on mobile and 300vh in phone landscape); its child frame is `position: sticky; top: 0; height: 100svh; overflow: hidden`. Motion's `scroll()` gives the stage's overall progress; the first 520vh of scroll becomes `p ∈ [0, 1]` (the dive and the words) and the last 90svh becomes `q` (the slit, §5.3), both in the same frame so the hairline never moves. Lenis smooths the scroll.
+**The one signature moment.** One sticky stage: `section.stage` is `100svh + 300vh + 90svh` tall (the 300vh is 240vh on mobile and 200vh in phone landscape); its child frame is `position: sticky; top: 0; height: 100svh; overflow: hidden`. Motion's `scroll()` gives the stage's overall progress; the first 300vh of scroll becomes `p ∈ [0, 1]` (the pay moment and the words) and the last 90svh becomes `q` (the slit, §5.3), both in the same frame so the hairline never moves. Lenis smooths the scroll.
+
+> **Changed 2026-11-24 (client):** the scroll-scrubbed dive into the coin (≈218vh of scrolling) felt slow, so it was replaced by the pay moment below: one short scroll triggers a ≈2 s timed sequence. The canvas camera and its maths (`camera.ts`, `endZoom`) are gone; the segment logic lives in `src/site/stage/segments.ts`.
 
 ### 2.1 Layers (bottom to top, all inside `stage__frame`)
 
 | z | Layer | What it is | Animated by |
 |---|---|---|---|
-| 0 | `ground` | Full-bleed `--paper`; switches to `--ink` at `p = 0.46` (invisible switch: the viewport is already ink) | `p` threshold |
-| 1 | `plate` | The app frame image + the live screen DOM (store name, amount, prompt). The screen's own coin is `visibility: hidden`: layer 2 draws it | CSS transform from the camera |
-| 2 | `ridges` | **Canvas 2D**, full viewport, DPR capped at 2. Draws the coin (ring + 6 ridges) every frame from the generator's geometry with the camera transform. Vector-crisp at any zoom | the camera |
-| 3 | `hairlines` | Crosshair + column guides (SVG, `--night-rule`) | time, after `p = 0.46` |
-| 4 | `hero-type` | "Pay with" / "nothing." / lead / scroll cue | `p` (settle) |
+| 0 | `ground` | Full-bleed `--paper`; cross-fades to `--ink` (450 ms `--ease-out`) as the phone finishes lifting away | the pay moment |
+| 1 | `plate` | The photoreal phone (`public/device/iphone.webp`) + the live screen DOM: store name, amount, the SVG coin, scan line, tick, prompt / "Paid" | the pay moment |
+| 3 | `hairlines` | Crosshair + column guides (SVG, `--night-rule`) | time, with Instant |
+| 4 | `hero-type` | "Pay with" / "nothing." / lead / scroll cue | the pay moment |
 | 5 | `words` | The three `h3` words, paragraphs, index, and each word's visual | time, on thresholds |
-
-The coin is **always** the canvas, even when the page is sitting still in the hero. That removes the most dangerous seam (raster coin → vector coin) entirely. The canvas positions the coin over the screen's hidden coin placeholder, measured with `getBoundingClientRect()` on load and on resize (never per frame).
 
 ### 2.2 Segment map
 
 | `p` | Segment | Duration (desktop scroll) | Driven by |
 |---|---|---|---|
-| 0.000 – 0.040 | **Settle** | ≈ 21vh | scrub |
-| 0.040 – 0.460 | **Dive** (one continuous camera move) | ≈ 218vh | scrub |
-| 0.460 – 0.500 | **Inside**: hairlines draw | ≈ 21vh (trigger at 0.46) | time |
-| 0.500 – 0.660 | **Instant.** | ≈ 83vh (trigger at 0.50) | time |
-| 0.660 – 0.830 | **Private.** | ≈ 88vh (trigger at 0.66) | time |
-| 0.830 – 0.970 | **Certain.** | ≈ 73vh (trigger at 0.83) | time |
-| 0.970 – 1.000 | **Release**: everything but the horizontal hairline fades | ≈ 16vh | scrub |
+| 0.000 – 0.030 | **Hero** | ≈ 9vh | — |
+| crosses 0.030 | **The pay moment** (§2.3), then inside + **Instant.** | ≈ 2 s | time |
+| 0.030 – 0.360 | **Instant.** | ≈ 99vh | time, on the trigger |
+| 0.360 – 0.680 | **Private.** | ≈ 96vh (trigger at 0.36) | time |
+| 0.680 – 0.940 | **Certain.** | ≈ 78vh (trigger at 0.68) | time |
+| 0.940 – 1.000 | **Release**: everything but the horizontal hairline fades | ≈ 18vh | scrub |
 
-Thresholds use ±0.008 hysteresis so a visitor hovering on a boundary doesn't make words flicker.
+Thresholds use ±0.008 hysteresis so a visitor hovering on a boundary doesn't make words flicker. Scroll that arrives while the pay moment (or its return) is playing waits for it to finish, then the page catches up to wherever `p` is.
 
-### 2.3 Settle (`p` 0 → 0.04)
+### 2.3 The pay moment (`p` crosses 0.03 going down)
 
-Let `s = p / 0.04`, eased with `--ease-in-out`.
-- "Pay with": `translateX(−6vw · s)`, `opacity: 1 − s`.
-- "nothing.": `translateX(+6vw · s)`, `opacity: 1 − s`. The sentence parts as if making way for the camera.
-- Lead and scroll cue: `opacity: 1 − s`, `translateY(12px · s)`.
-- **The press:** when `p` first crosses 0.02 going down, the coin presses once: scale 1 → 0.94 → 1 about its centre over 360 ms (down 120 ms `--ease-out`, up with `release` spring), drawn by the canvas as an extra scale factor. The visitor's scroll is the thumb. Doesn't fire going up.
+The visitor's scroll is the thumb: the phone on screen actually takes the payment, then gets out of the way. Times from the trigger:
 
-### 2.4 The dive (`p` 0.04 → 0.46)
-
-**The camera** is a 2D similarity transform: zoom `k` (pixels per coin unit) about an aim point.
-
-**The aim point** is a point in the coin's own coordinates (viewBox units, origin at the coin centre, `SYSTEM.md` §7):
-- **Default (ink coin on a light screen): the peak of ridge 5** (second from the top). Base y = −5.1, height 8.0, so the peak is at **(1.2, −13.1)**. Ridge 6's peak is clipped by the ring, which is why we use ridge 5. We fly into its ink, so the viewport ends black.
-- **If the client's screen is dark** (a light coin on a dark screen): aim at **the gap between ridges 4 and 5 at x = 1.2, point (1.2, −10.15)** (ridge 4 peaks at y −7.2, ridge 5 at −13.1, so the gap is 3.8 units of dark). We fly into the dark gap, so the viewport still ends black. `BUILD.md` §5 makes this a config value.
-
-**Formulas.** Let `u = clamp((p − 0.04) / 0.42, 0, 1)`.
-
-```
-e   = 0.5 − 0.5·cos(π·u)                  // ease-in-out-sine: soft start, soft landing,
-                                          // near-constant rate in the middle
-k0  = coinDiameterPx / 48                 // px per unit when sitting in the hero
-kEnd= endZoom(bandUnits, curvature, w, h)  // bandUnits = 2.1 (ridge stroke) or 3.8 (gap); see below
-k   = k0 · (kEnd / k0) ^ e                // LOG-SPACE zoom (rule 2)
-
-Q0  = aim point's screen position at p = 0 (from the measured coin rect)
-V   = viewport centre
-et  = easeInOutSine(clamp(u / 0.35, 0, 1))// centre the aim point in the first 35 % …
-Q   = Q0 + (V − Q0) · et                  // … then dive straight in
-
-canvas: ctx.setTransform(dpr·k, 0, 0, dpr·k, dpr·(Q.x − k·aim.x), dpr·(Q.y − k·aim.y))
-plate:  transform-origin = Q0 (in the plate's own box);
-        transform = translate(Q − Q0) scale(k / k0)
-```
-
-`kEnd` is the smallest zoom at which the band covers the viewport edge to edge even though the ridge curves away at the sides. The ridge's sag a distance `d` from the peak is at most `c·d²` with `c = h/σ² ≈ 0.0816` (ridge 5), so solve `(band/2)·k − c·(w/2k)²·k ≥ h/2` for `k` and add 10 %:
-
-```
-kEnd = 1.1 · (h/2 + √(h²/4 + band·c·w²/2)) / band
-```
-
-The flat estimate (`1.15 · h / band`) leaves the top corners uncovered on wide screens; the unit tests caught it (`camera.test.ts` checks 1440×900, 390×844, 844×390, 2560×1440 and 3440×1440 for both aim modes).
-
-Typical numbers at 1440 × 900 with a 64 px coin: `k0 = 1.33`, `kEnd ≈ 559`, a total zoom of about **420×**, which is why it must be canvas, not a scaled DOM node.
-
-**What the visitor sees, as `z = k / k0` grows:**
-
-| `z` | Event | Rule |
+| t | What happens | Curve |
 |---|---|---|
-| 1 → 1.6 | The phone grows; the camera starts sliding the aim point to centre | — |
-| 1.6 → 2.6 | The screen's other UI (store, amount, prompt) fades: `opacity = 1 − smoothstep(1.6, 2.6, z)` | isolation: only the coin stays sharp |
-| 2.2 → 3.2 | The frame image fades: `opacity = 1 − smoothstep(2.2, 3.2, z)` (it is mostly off-screen by now; fading it means its raster never visibly softens) | no visible raster blur, ever |
-| 3 → 12 | The ring sweeps out past the edges | — |
-| 12 → 120 | Ridges become wide bands sweeping outward: lower ones down and off, upper ones up and off. Paper shows only in the gaps | the "flying between ridges" moment |
-| 120 → 370 | Ridge 5's ink fills the viewport from the centre outward; the last paper gaps thin to slivers at the top and bottom edges and vanish | paper → ink, physically motivated |
+| 0 | "Pay with" / "nothing." part by ∓6vw and fade; lead and cue fade and drop 12px | 500 ms / 400 ms `--ease-out` |
+| 0 | **Press:** the coin scales 1 → 0.92 (120 ms `--ease-out`), back with the `release` spring | — |
+| 200 ms | **Scan:** a short ink bar with a soft blue glow (`--scan-glow`) sweeps the coin top → bottom | 600 ms `--ease-in-out`, fades in/out over the first/last 15 % |
+| 750 ms | Ridges and "Place thumb on the reader" fade out; the tick's ring fades in | 200 ms / 150 ms |
+| 820 ms | **Tick** draws (`stroke-dashoffset` 1 → 0 on a `pathLength=1` path) | 380 ms `--ease-out` |
+| 950 ms | "Paid · settled in 1.8 s" rises 6px into place (after the prompt has fully faded, so the two never overlap) | 400 ms `--ease-out` |
+| 1350 ms | **Lift:** the phone leaves upward, `translateY(−115vh) rotate(−4deg)` | 650 ms `--ease-in` |
+| 2000 ms | Ground cross-fades to ink; inside (§2.5) and Instant (§2.6) play | — |
 
-At `u = 1` the canvas stops drawing (it would draw a solid rectangle) and `ground` is already `--ink`.
+**Scrolling back above the hero threshold** (below 0.022): the words leave as usual, the ground fades back to paper, the screen resets to its unpaid state while the phone is off-screen, and the phone drops back in with the `sheet` spring (550 ms visual duration) while the hero type returns (500 ms `--ease-out`, 150 ms in).
 
-**Scrolling back up** replays the dive in reverse exactly (it's a pure function of `p`). Nothing is time-based in this segment.
+**Implementation rule:** every step is a WAAPI animation with explicit `from`/`to` keyframes and `fill: both`, collected in one list. Never animate to a bare end value and let the library read the start from the DOM: those steps desynced in testing (no tick, "Paid" drawn over the prompt). Going back rewinds the lift and the hero type (playback rate −1.5, delays dropped); cancelling the list is a complete reset.
 
-**Optional craft detail, only if it holds 60 fps:** a specular band across the phone glass (a 30° `linear-gradient` of `rgba(255,255,255,.18)`, 40 % of the frame wide) translating from −40 % to +40 % across the frame as `u` goes 0 → 0.25. It reads as light moving across the glass as the camera approaches. Drop it first if the dive drops frames.
+Reduced motion (§9) never runs this: the stage renders as static panels.
 
-### 2.5 Inside (`p` crosses 0.46)
+### 2.5 Inside (with Instant, after the pay moment)
 
-Time-based, plays once per entry, reverses when `p` goes back below 0.452:
+Time-based, plays once per entry, reverses when `p` goes back below 0.022:
 - **Horizontal hairline** at 50 % height: `scaleX 0 → 1` from the centre, 800 ms `--ease-out`.
 - **Vertical hairline** at the column-8/9 edge: `scaleY 0 → 1` from the crossing point, 800 ms `--ease-out`, 120 ms after the horizontal.
 - **Column guides** (the other 12-column edges): `opacity 0 → 1` (they are `--night-rule` at 50 % alpha, so 6 % white), 600 ms, starting 300 ms in.
@@ -187,7 +144,7 @@ No scrambling characters (banned, BRIEF §6). The idea is literal: the ridges be
 2. 150 ms later the green dot: `scale 0 → 1`, 300 ms `--ease-out`, then one ring pulse (a 1 px `--settle-night` ring around the dot, `scale 1 → 2.6`, `opacity 0.5 → 0`, 900 ms `--ease-out`). Once. Then "Settled" fades in, 200 ms.
 3. "PKR 180.00" and the store line fade in together, 300 ms, no counting (this is one sale's receipt; it should look already true).
 
-### 2.8 Release (`p` 0.97 → 1)
+### 2.8 Release (`p` 0.94 → 1)
 
 Scrubbed. Word, paragraph, visual, index, vertical hairline and column guides: `opacity → 0`. The horizontal hairline stays. It becomes the slit.
 

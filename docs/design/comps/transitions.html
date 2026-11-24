@@ -1,0 +1,162 @@
+<!doctype html>
+<!-- Throwaway motion comp: two replacements for the hero's slow phone→coin dive. Scroll (or press Play) to run,
+     scroll up to reverse. Not shipped; the chosen one gets built into src/site/stage. -->
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FingerPay hero transitions</title>
+<style>
+  :root { --ink: #0a0a0b; --ink-2: #5b5b61; --paper: #fff; --ratio: 0.4966; --ph: min(64svh, 37.5rem); --pw: calc(var(--ph) * var(--ratio)); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: "Inter", system-ui, sans-serif; color: var(--ink); }
+  body { background: radial-gradient(60% 70% at 72% 55%, #b9c6f3 0%, #dfe5fb 40%, var(--paper) 75%); transition: background-color .4s; }
+  body.ink { background: var(--ink); }
+
+  .bar { position: fixed; top: 16px; left: 50%; translate: -50% 0; z-index: 10; display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(255,255,255,.75); backdrop-filter: blur(16px); box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .bar button { font: 500 13px/1 inherit; padding: 9px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer; }
+  .bar button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .hint { position: fixed; bottom: 18px; right: 24px; font-size: 12px; color: var(--ink-2); z-index: 10; }
+
+  .stage { position: fixed; inset: 0; display: grid; place-items: center; }
+  .title { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr var(--pw) 1fr; align-items: center; column-gap: 3vw; pointer-events: none;
+           font-size: clamp(3rem, 9vw, 9rem); font-weight: 500; letter-spacing: -0.045em; line-height: 1; }
+  .title span:first-child { justify-self: end; } .title span:last-child { justify-self: start; }
+  .lead { position: absolute; left: 4vw; bottom: 9vh; max-width: 24rem; font-size: 1.25rem; line-height: 1.45; color: var(--ink-2); }
+  .lead strong { color: var(--ink); font-weight: 500; }
+
+  .phone { position: relative; width: var(--pw); height: var(--ph); will-change: transform; }
+  .phone::after { content: ""; position: absolute; inset: 0; background: url("/public/device/iphone.webp") center / 100% 100% no-repeat; pointer-events: none; }
+  .screen { position: absolute; inset: 1.82% 4.36% 2% 4.48%; border-radius: calc(var(--pw) * .124); background: var(--paper); container-type: size; overflow: hidden; }
+  .screen p { position: absolute; inset-inline: 0; text-align: center; }
+  .store { top: 12cqh; font-size: 4.6cqw; font-weight: 500; color: var(--ink-2); }
+  .amount { top: 19cqh; font-size: 12cqw; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .prompt, .paid { top: 82cqh; font-size: 4cqw; color: var(--ink-2); }
+  .paid { color: var(--ink); font-weight: 600; opacity: 0; }
+  .coin { position: absolute; left: 50%; top: 60cqh; width: 34cqw; aspect-ratio: 1; translate: -50% -50%; }
+  .coin img, .coin svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scan { position: absolute; left: -10%; right: -10%; top: 0; height: 3px; border-radius: 3px; background: var(--ink); box-shadow: 0 0 18px 6px rgba(80,110,240,.45); opacity: 0; }
+  .check { opacity: 0; }
+  .check path { stroke-dasharray: 40; stroke-dashoffset: 40; }
+  .inkFill { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
+
+  .word { position: absolute; left: 8vw; top: 50%; translate: 0 -50%; pointer-events: none; }
+  .word h2 { font-size: clamp(4rem, 14vw, 14rem); font-weight: 500; letter-spacing: -0.05em; line-height: 1; overflow: hidden; padding-bottom: .08em; }
+  .word h2 span { display: inline-block; transform: translateY(110%); }
+  .word p { margin-top: 1.5rem; max-width: 30rem; font-size: 1.25rem; line-height: 1.45; color: var(--ink-2); opacity: 0; }
+  body.ink .word h2 { color: var(--paper); } body.ink .word p { color: #a1a1a6; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 1ms !important; } }
+</style>
+
+<nav class="bar" aria-label="Comp controls">
+  <button data-mode="pay" aria-pressed="true">A · Pay, then lift</button>
+  <button data-mode="into" aria-pressed="false">B · Into the screen</button>
+  <button data-play>Play ↓</button>
+</nav>
+<p class="hint">Scroll down to run · scroll up to reverse</p>
+
+<main class="stage">
+  <h1 class="title" data-title><span data-side="-1">Pay with</span><span></span><span data-side="1">nothing.</span></h1>
+  <p class="lead" data-lead><strong>One thumb at the counter.</strong> No phone, no card, no cash. Settled in under three seconds.</p>
+
+  <figure class="phone" data-phone>
+    <div class="screen">
+      <div class="inkFill" data-inkfill></div>
+      <p class="store" data-ui>Rasheed Kiryana Store</p>
+      <p class="amount" data-ui>PKR 180.00</p>
+      <div class="coin" data-coin>
+        <img src="/public/brand/fingerpay-mark.svg" alt="" data-ridges />
+        <svg class="check" data-check viewBox="-24 -24 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle r="22" stroke-width="2.2" /><path d="M-9 0.5 L-2.5 7 L10 -6" />
+        </svg>
+        <span class="scan" data-scan></span>
+      </div>
+      <p class="prompt" data-ui data-prompt>Place thumb on the reader</p>
+      <p class="paid" data-paid>Paid · settled in 1.8 s</p>
+    </div>
+  </figure>
+
+  <div class="word" data-word>
+    <h2 aria-label="Instant."><span>I</span><span>n</span><span>s</span><span>t</span><span>a</span><span>n</span><span>t</span><span>.</span></h2>
+    <p>The cashier types the amount and the shopper rests a thumb. The money settles in under three seconds.</p>
+  </div>
+</main>
+
+<script>
+  const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
+  // Easing: expo-out for arrivals, a critically damped spring (as linear()) for the big camera move.
+  const out = "cubic-bezier(.16,1,.3,1)", inn = "cubic-bezier(.7,0,.84,0)", io = "cubic-bezier(.65,0,.35,1)";
+  const spring = "linear(0, .009, .035 2.1%, .141 4.4%, .723 12.9%, .938 16.7%, 1.017 20.4%, 1.042 24.2%, 1.038 28.3%, 1.004 37.3%, .996 41.4%, 1)";
+  let mode = "pay", anims = [], state = "hero", busy = false;
+
+  const a = (el, kf, o) => { const an = el.animate(kf, { fill: "both", ...o }); anims.push(an); return an; };
+
+  function heroOut(t = 0) {
+    $$("[data-side]").forEach((el) => a(el, [{ transform: "none", opacity: 1 }, { transform: `translateX(${el.dataset.side * 8}vw)`, opacity: 0 }], { duration: 550, easing: out, delay: t }));
+    a($("[data-lead]"), [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(12px)" }], { duration: 400, easing: out, delay: t });
+  }
+  function wordIn(t) {
+    $$("[data-word] h2 span").forEach((el, i) => a(el, [{ transform: "translateY(110%)" }, { transform: "translateY(0)" }], { duration: 900, easing: out, delay: t + i * 30 }));
+    a($("[data-word] p"), [{ opacity: 0, transform: "translateY(12px)", filter: "blur(6px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: 700, easing: out, delay: t + 300 });
+  }
+
+  // A: the product does its thing (press → scan → tick → Paid), then the phone lifts away and the word rises.
+  function pay() {
+    heroOut();
+    const coin = $("[data-coin]");
+    a(coin, [{ scale: 1 }, { scale: 0.9, offset: 0.25 }, { scale: 1 }], { duration: 520, easing: out, delay: 120 });
+    a($("[data-scan]"), [{ top: "0%", opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { top: "100%", opacity: 0 }], { duration: 650, easing: io, delay: 260 });
+    a($("[data-ridges]"), [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 860 });
+    a($("[data-check]"), [{ opacity: 0 }, { opacity: 1 }], { duration: 160, delay: 860 });
+    a($("[data-check] path"), [{ strokeDashoffset: 40 }, { strokeDashoffset: 0 }], { duration: 380, easing: out, delay: 940 });
+    a($("[data-prompt]"), [{ opacity: 1 }, { opacity: 0 }], { duration: 180, delay: 860 });
+    a($("[data-paid]"), [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: out, delay: 960 });
+    a($("[data-phone]"), [{ transform: "none", opacity: 1 }, { transform: "translateY(-115vh) rotate(-4deg)", opacity: 1 }], { duration: 750, easing: inn, delay: 1650 });
+    wordIn(1950);
+    return 2900;
+  }
+
+  // B: one fast camera move into the screen: it goes ink, the phone grows until the screen is the page.
+  function into() {
+    heroOut();
+    $$("[data-ui]").forEach((el) => a(el, [{ opacity: 1 }, { opacity: 0 }], { duration: 220, delay: 80 }));
+    a($("[data-coin]"), [{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.8 }], { duration: 260, easing: inn, delay: 80 });
+    a($("[data-inkfill]"), [{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: io, delay: 160 });
+    const scr = $(".screen").getBoundingClientRect();
+    const s = Math.max(innerWidth / scr.width, innerHeight / scr.height) * 1.08;
+    a($("[data-phone]"), [{ transform: "scale(1)" }, { transform: `scale(${s})` }], { duration: 950, easing: spring, delay: 300 });
+    setTimeout(() => state === "playing" && document.body.classList.add("ink"), 900);
+    wordIn(950);
+    return 1900;
+  }
+
+  function reset() {
+    anims.forEach((an) => an.cancel()); anims = [];
+    document.body.classList.remove("ink"); state = "hero"; busy = false;
+  }
+  function play() {
+    if (state !== "hero") return;
+    state = "playing"; busy = true;
+    const ms = (mode === "pay" ? pay : into)();
+    setTimeout(() => { busy = false; if (state === "playing") state = "done"; }, ms);
+  }
+  function rewind() {
+    if (state !== "done") return;
+    busy = true; state = "rewinding";
+    document.body.classList.remove("ink");
+    anims.forEach((an) => { an.playbackRate = -1.6; an.play(); });
+    Promise.all(anims.map((an) => an.finished)).then(reset);
+  }
+
+  addEventListener("wheel", (e) => { if (busy) return; e.deltaY > 0 ? play() : rewind(); }, { passive: true });
+  addEventListener("keydown", (e) => { if (["ArrowDown", "PageDown", " "].includes(e.key)) play(); if (["ArrowUp", "PageUp"].includes(e.key)) rewind(); });
+  let ty = 0;
+  addEventListener("touchstart", (e) => (ty = e.touches[0].clientY), { passive: true });
+  addEventListener("touchend", (e) => { const d = ty - e.changedTouches[0].clientY; if (Math.abs(d) > 30 && !busy) d > 0 ? play() : rewind(); });
+  $("[data-play]").onclick = () => (state === "hero" ? play() : (reset(), setTimeout(play, 50)));
+  $$("[data-mode]").forEach((b) => (b.onclick = () => {
+    mode = b.dataset.mode; reset();
+    $$("[data-mode]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+</script>
+</html>

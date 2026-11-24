@@ -54,8 +54,8 @@ src/site/
   stage/
     stage.tsx                       the hero + dive + three words, one sticky stage (P§3–4, M§2)
     stage.module.css
-    camera.ts                       pure functions: k(u), Q(u), segment mapping (unit-tested)
-    camera.test.ts                  node:test, see §8
+    segments.ts                     pure functions: segment mapping (unit-tested); the dive camera was removed 2026-11-24 (M§2)
+    segments.test.ts                node:test, see §8
     ridges.ts                       coin geometry: ring + ridge Path2D in coin units, from SYSTEM.md §7
     ridge-canvas.tsx                the Canvas 2D layer
     words.tsx                       the three words + paragraphs + index
