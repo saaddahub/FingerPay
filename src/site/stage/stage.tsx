@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { preload } from "react-dom";
 import { animate, scroll, stagger, cubicBezier } from "motion";
 import { camera, clamp01, segment, smoothstep, SEG } from "./camera.ts";
 import { AIM, CLIP_R, RING, RIDGES, ridgeBase, ridgeY } from "./ridges.ts";
@@ -21,6 +22,7 @@ const inOut = cubicBezier(...ease.inOut);
 export function Stage() {
   const rootRef = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
+  preload("/device/iphone.webp", { as: "image", fetchPriority: "high" });
 
   useEffect(() => {
     const root = rootRef.current;
@@ -35,9 +37,7 @@ export function Stage() {
         <div className={s.plateLayer} aria-hidden="true">
           <div className={s.plateWrap} data-plate-wrap>
             <figure className={s.plate} data-plate>
-              <div className={s.phoneBody} data-phone-body>
-                <span className={s.island} />
-              </div>
+              <div className={s.phoneBody} data-phone-body />
               <div className={s.screen}>
                 <div className={s.screenUi} data-screen-ui>
                   <p className={s.store}>Rasheed Kiryana Store</p>

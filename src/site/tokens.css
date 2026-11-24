@@ -90,7 +90,7 @@
   --settle-tint: rgba(10, 127, 75, 0.09);
 
   /* Phone placeholder (BUILD.md §5: 1290 × 2796 frame) */
-  --phone-ratio: 0.4614;
+  --phone-ratio: 0.4966; /* public/device/iphone.webp, 871×1754 */
 
   /* Motion (MOTION.md §1.1) */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
